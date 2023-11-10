@@ -11,8 +11,8 @@ async fn main() -> mongodb::error::Result<()> {
     let client = create_client(client_options)?;
 
     ping_mongodb(&client).await?;
-
-    let document = create_document();
+    let (name, age, occupation) = get_user_input();
+    let document = create_document(&name, age, &occupation);
 
     insert_document(&client, document).await?;
 
@@ -20,32 +20,42 @@ async fn main() -> mongodb::error::Result<()> {
 }
 
 /*
-The function gets the input from the user and  creates the document to insert to the database.
-Input: None.
+The function creates the document to insert to the database.
+Input: The name, age and occupation for the document.
 Output: The document to insert.
  */
-fn create_document() -> bson::Document {
-    // Getting the name to insert
-    println!("Enter the name to insert:");
-    let mut name = String::new();
-    stdin().read_line(&mut name).expect("Failed to read line");
-
-    // Getting the age to insert
-    println!("Enter the age to insert:");
-    let mut age_str = String::new();
-    stdin().read_line(&mut age_str).expect("Failed to read line");
-    let age: i32 = age_str.trim().parse().expect("Invalid age");
-
-    //Getting the occupation to insert
-    println!("Enter the occupation to insert:");
-    let mut occupation = String::new();
-    stdin().read_line(&mut occupation).expect("Failed to read line");
+fn create_document(name: &str, age: i32, occupation: &str) -> bson::Document {
 
     return doc! {
         "name": name,
         "age": age,
         "occupation": occupation.trim(),
     }
+}
+
+/*
+The function gets the input from the user to enter to the document.
+Input: None.
+Output: The user's input- the name, age and occupation for the document.
+ */
+fn get_user_input() -> (String, i32, String) {
+    println!("Enter the name:");
+    let mut name = String::new();
+    stdin().read_line(&mut name).expect("Failed to read line");
+
+    // Trim the newline character from the input
+    let name = name.trim().to_string();
+
+    println!("Enter the age:");
+    let mut age_str = String::new();
+    stdin().read_line(&mut age_str).expect("Failed to read line");
+    let age: i32 = age_str.trim().parse().expect("Invalid age");
+
+    println!("Enter the occupation:");
+    let mut occupation = String::new();
+    stdin().read_line(&mut occupation).expect("Failed to read line");
+
+    (name, age, occupation.trim().to_string())
 }
 
 /*
