@@ -61,7 +61,7 @@ fn get_user_input() -> (String, i32, String) {
 
 /*
 The function builds the string to connect with to the DB server.
-Input: The encoded password to the DB.
+Input: The encoded password to the DB and the username to connect.
 Output: The full link to the DB server.
  */
 async fn build_connection_string(encoded_pass: String, username: String) -> String {
