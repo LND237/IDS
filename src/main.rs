@@ -5,7 +5,8 @@ use std::io::stdin;
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
     let encoded_password = String::from(encode("zaq1@wsx"));
-    let link = build_connection_string(encoded_password).await;
+    let username = String::from("bsyl");
+    let link = build_connection_string(encoded_password, username).await;
 
     let client_options = build_client_options(&link).await?;
     let client = create_client(client_options)?;
@@ -63,10 +64,10 @@ The function builds the string to connect with to the DB server.
 Input: The encoded password to the DB.
 Output: The full link to the DB server.
  */
-async fn build_connection_string(encoded_pass: String) -> String {
-    let client_opt_part_1 = String::from("mongodb+srv://bsyl:");
+async fn build_connection_string(encoded_pass: String, username: String) -> String {
+    let client_opt_part_1 = String::from("mongodb+srv://");
     let client_opt_part_2 = String::from("@ideproject.jii1z04.mongodb.net/?retryWrites=true&w=majority");
-    let link = client_opt_part_1 + &encoded_pass + &client_opt_part_2;
+    let link = client_opt_part_1 +  &username + &String::from(":") + &encoded_pass + &client_opt_part_2;
     return link;
 }
 
