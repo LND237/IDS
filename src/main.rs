@@ -2,8 +2,15 @@ use urlencoding::encode;
 use mongodb::{bson::doc, options::{ClientOptions, ServerApi, ServerApiVersion}, Client, bson};
 use std::io::stdin;
 
+mod ip;
+use ip::IpTrait;
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
+    let the_ip = <ip::IP as IpTrait>::new(String::from("-1.0.0.1"));
+    match  the_ip{
+        Err(msg) => println!("{}", msg),
+        Ok(ip) => println!("Ip is valid")
+    }
     let encoded_password = String::from(encode("zaq1@wsx"));
     let username = String::from("bsyl");
     let link = build_connection_string(encoded_password, username).await;
