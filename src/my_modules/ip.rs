@@ -1,8 +1,11 @@
+pub const MAX_IP_VALUE: i32 = 255;
+
 
 pub trait IpTrait {
     fn new(address: String) -> Result<IP, String>;
     fn get_ip(&self) -> String;
     fn set_ip(&mut self, new_addr: String);
+    fn copy(&self) -> IP;
 }
 
 pub struct IP{
@@ -28,6 +31,10 @@ impl IpTrait for IP{
             false => ()
         }
 
+    }
+
+    fn copy(&self) -> IP {
+        return IP{address:self.get_ip()};
     }
 }
 
