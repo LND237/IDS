@@ -2,15 +2,33 @@ use urlencoding::encode;
 use mongodb::{bson::doc, options::{ClientOptions, ServerApi, ServerApiVersion}, Client, bson};
 use std::io::stdin;
 
-mod ip;
-use ip::IpTrait;
+mod my_modules;
+
+use my_modules::ip::IpTrait;
+use my_modules::ip::IP;
+
+use my_modules::sniffer::SnifferTrait;
+use my_modules::sniffer::Sniffer;
+
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    let the_ip = <ip::IP as IpTrait>::new(String::from("-1.0.0.1"));
-    match  the_ip{
-        Err(msg) => println!("{}", msg),
-        Ok(ip) => println!("Ip is valid")
-    }
+    const PORT_TO_SNIFF: u16 = 443;
+
+    let the_ip = match <IP as IpTrait>::new(String::from("127.0.0.1")){
+        Err(msg) => panic!("{}", msg),
+        Ok(ip) => {
+            println!("Ip {} is valid", <IP as IpTrait>::get_ip(&ip.copy()));
+            ip}
+    };
+    let mut the_sniffer = match <Sniffer as SnifferTrait>::new(the_ip, PORT_TO_SNIFF){
+        Err(msg) => panic!("{}", msg),
+        Ok(sniffer) => {println!("Sniffer was built successfully with port {}", sniffer.get_port());
+        sniffer}
+
+    };
+    <Sniffer as SnifferTrait>::sniff(&mut the_sniffer, 5);
+
+
     let encoded_password = String::from(encode("zaq1@wsx"));
     let username = String::from("bsyl");
     let link = build_connection_string(encoded_password, username).await;
