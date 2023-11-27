@@ -14,15 +14,14 @@ pub struct IP{
 
 impl IpTrait for IP{
     fn new(address: String) -> Result<IP, String> {
-        match check_ip(&address) {
-            true => return Ok(IP{address}),
-            false => return Err("Ip is not valid".to_string())
-
+        return match check_ip(&address) {
+            true => Ok(IP { address }),
+            false => Err("Ip is not valid".to_string())
         }
     }
 
     fn get_ip(&self) -> String {
-        return self.address.clone();
+        return self.address.to_string();
     }
 
     fn set_ip(&mut self, new_addr: String) {
@@ -39,11 +38,12 @@ impl IpTrait for IP{
 }
 
 fn check_ip(address: &String) -> bool {
-    let values_ip = address.split(".");
+    let binding = String::from(".");
+    let values_ip = address.split(&binding);
 
     for value in values_ip {
         let value_int: i32 = value.parse().unwrap();
-        if value_int.is_negative() || value_int > 255{
+        if value_int.is_negative() || value_int > MAX_IP_VALUE{
             return false;
         }
     }
