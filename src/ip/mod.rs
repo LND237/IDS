@@ -3,8 +3,14 @@ pub mod ip{
     pub struct IP{
         address: String
     }
-
+    //private function
+    ///The function checks if a string can be
+    /// an IP or not.
+    /// Input: A reference to string variable- the string
+    /// to check.
+    /// Output: a bool value - if it can be an IP or not.
     fn check_ip(address: &String) -> bool {
+        //Trying to split the "ip" to numbers
         let binding = String::from(".");
         let values_ip = address.split(&binding);
 
@@ -19,6 +25,8 @@ pub mod ip{
     }
 
     impl IP{
+        ///Constructor of struct IP.
+        /// Input: a String value- the ip.
         pub fn new(address: String) -> Result<IP, String> {
             return match check_ip(&address) {
                 true => Ok(IP { address }),
