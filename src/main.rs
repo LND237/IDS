@@ -11,7 +11,7 @@ use crate::sniffer::sniffer::{get_string_packet, Sniffer};
 async fn main() -> mongodb::error::Result<()> {
     let mut counter = 1;
 
-    let the_ip = match IP::new(String::from("192.168.1.139")){
+    let the_ip = match IP::new(String::from("192.168.197.151")){
         Err(msg) => panic!("{}", msg),
         Ok(ip) => {
             println!("Ip {} is valid", IP::get_ip(&ip.copy()));
@@ -25,12 +25,13 @@ async fn main() -> mongodb::error::Result<()> {
 
     };
 
-    let packets = Sniffer::sniff(&mut the_sniffer, get_amount_packet_input());
+    let packets = Sniffer::sniff(&mut the_sniffer, get_amount_packet_input(), get_sniffing_timeout());
     //Going over the packets
     for packet in packets{
         println!("Data packet no.{}: \n{}", counter, get_string_packet(&packet));
         counter += 1;
     }
+    println!("End of packets");
 
     //POC for MongoDB Atlas access
     let encoded_password = String::from(encode("zaq1@wsx"));
@@ -60,6 +61,19 @@ fn get_amount_packet_input() -> i32{
         amount = get_int_input();
     }
     return amount;
+}
+
+///The function gets the timout of the sniffing
+/// from the user.
+/// Input: None.
+/// Output: An i32 value - the input from the user.
+fn get_sniffing_timeout() -> i32{
+    let mut timeout: i32 = -1;
+    while timeout.is_negative(){
+        println!("Enter the total sniffing time: ");
+        timeout = get_int_input();
+    }
+    return timeout;
 }
 
 ///The function gets an integer input

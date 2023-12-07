@@ -1,15 +1,14 @@
 pub mod sniffer{
     use pnet::datalink::{self, Channel::Ethernet};
-    use pnet::packet;
-    use pnet::packet::{Packet,
+    use pnet::packet::{self, Packet,
                        ethernet::EthernetPacket,
                        ipv4::Ipv4Packet,
                        tcp::TcpPacket,
                        udp::UdpPacket};
-
+    use crate::ip::ip::IP;
+    use std::time::{Duration, Instant};
     type SinglePacket = Vec<u8>;
 
-    use crate::ip::ip::IP;
     pub const MAX_PORT: u16 = 65535;
 
     pub struct Sniffer{
@@ -25,13 +24,21 @@ pub mod sniffer{
         /// Output: An "object" of struct Sniffer.
         pub fn new(ip: IP, port: u16) -> Result<Sniffer, String> {
             return match true {
-                true => Ok(Sniffer { port, ip, packets: Vec::new() }),
+                true => Ok(Sniffer { port, ip: IP::copy(&ip), packets: Vec::new() }),
                 false => Err("Invalid port number!".to_string())
             }
         }
+
+        ///The function gets the ip from the structure.
+        /// Input: reference self(Sniffer)
+        /// Output: an IP structure- a copy of the IP of the Sniffer.
         pub fn get_ip(&self) -> IP {
             return IP::copy(&self.ip);
         }
+
+        ///The function gets the port of the Sniffer.
+        /// Input: reference self(Sniffer).
+        /// Output: an u16 value- the port of the Sniffer.
         pub fn get_port(&self) -> u16 {
             return self.port;
         }
@@ -40,7 +47,7 @@ pub mod sniffer{
         /// to the fields in the Sniffer struct.
         /// Input: self(Sniffer) and an i32 variable- the limit amount of packets to sniff.
         /// Output: A vector of SinglePacket- the packets which the sniffer sniffed.
-        pub fn sniff(&mut self, max_amount_packets: i32) -> Vec<SinglePacket>{
+        pub fn sniff(&mut self, max_amount_packets: i32, timeout_sniff: i32) -> Vec<SinglePacket>{
             //Getting the wifi interface to sniff
             let interfaces = datalink::interfaces();
             let interface = &interfaces[1]; //index wifi interface
@@ -49,14 +56,16 @@ pub mod sniffer{
 
             // Create a channel to receive packets
             let mut rx = match datalink::channel(&interface, Default::default()) {
-                Ok(Ethernet(tx, rx)) =>  rx,
+                Ok(Ethernet(_, rx)) =>  rx,
                 Ok(_) => panic!("Unknown channel type"),
                 Err(e) => panic!("Error opening network channel: {}", e),
             };
             println!("Listening for packets to IP address {} in port {}", IP::get_ip(&self.ip), self.port);
 
-            //Waiting until there are enough packets which the sniffer sniffed
-            while self.packets.len() < max_amount_packets as usize {
+            let start_time = Instant::now();
+
+            //Waiting until there are enough packets which the sniffer sniffed or there is a timeout
+            while self.packets.len() < max_amount_packets as usize && (Instant::now() - start_time) < Duration::new(timeout_sniff as u64, 0) {
                 let the_packet = rx.next(); //getting the next packet
                 match the_packet {
                     Ok(packet) => {
@@ -67,6 +76,7 @@ pub mod sniffer{
                     },
                     Err(e) => panic!("{}", e)
                 }
+
 
             }
             return self.packets.clone();

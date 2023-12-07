@@ -33,11 +33,17 @@ pub mod ip{
                 false => Err("Ip is not valid".to_string())
             }
         }
-
+        ///The function gets the ip from the IP structure.
+        /// Input: self reference(IP)
+        /// Output: a string value- the address of the ip.
         pub fn get_ip(&self) -> String {
             return self.address.to_string();
         }
 
+        ///The function sets the ip of the structure(if it is valid).
+        /// Input: mut reference self(IP) and a string variable-
+        /// the new address.
+        /// Output: None.
         pub fn set_ip(&mut self, new_addr: String) {
             match check_ip(&new_addr) {
                 true => self.address = new_addr.clone(),
@@ -46,6 +52,9 @@ pub mod ip{
 
         }
 
+        ///The function copies an IP structure.
+        ///Input: reference self(IP).
+        /// Output: an IP struct- a copy of the self struct.
         pub fn copy(&self) -> IP {
             return IP{address:self.get_ip()};
         }
