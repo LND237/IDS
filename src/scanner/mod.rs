@@ -7,6 +7,7 @@ pub mod scanner {
         //Public functions
         fn new(ip: IP) -> Self;
         fn scan() -> bool;
+        fn check_packets(packets: Vec<SinglePacket>) -> bool;
     }
     pub struct Scanner{
         ip: IP

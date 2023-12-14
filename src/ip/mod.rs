@@ -27,7 +27,7 @@ pub mod ip{
     impl IP{
         ///Constructor of struct IP.
         /// Input: a String value- the ip.
-        pub fn new(address: String) -> Result<IP, String> {
+        pub fn new(address: String) -> Result<Self, String> {
             return match check_ip(&address) {
                 true => Ok(IP { address }),
                 false => Err("Ip is not valid".to_string())
@@ -55,7 +55,7 @@ pub mod ip{
         ///The function copies an IP structure.
         ///Input: reference self(IP).
         /// Output: an IP struct- a copy of the self struct.
-        pub fn copy(&self) -> IP {
+        pub fn copy(&self) -> Self {
             return IP{address:self.get_ip()};
         }
 

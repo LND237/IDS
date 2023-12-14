@@ -22,7 +22,7 @@ pub mod sniffer{
         /// Input: An IP struct- the destination ip to sniff and an
         /// u16 variable- the source port to sniff.
         /// Output: An "object" of struct Sniffer.
-        pub fn new(ip: IP, port: u16) -> Result<Sniffer, String> {
+        pub fn new(ip: IP, port: u16) -> Result<Self, String> {
             return match true {
                 true => Ok(Sniffer { port, ip: IP::copy(&ip), packets: Vec::new() }),
                 false => Err("Invalid port number!".to_string())
@@ -42,12 +42,14 @@ pub mod sniffer{
         pub fn get_port(&self) -> u16 {
             return self.port;
         }
+        pub fn get_packets(&self) -> Vec<SinglePacket>{return self.packets.clone();}
 
         ///The function sniffs the network transport according
         /// to the fields in the Sniffer struct.
         /// Input: self(Sniffer) and an i32 variable- the limit amount of packets to sniff.
         /// Output: A vector of SinglePacket- the packets which the sniffer sniffed.
         pub fn sniff(&mut self, max_amount_packets: i32, timeout_sniff: i32) -> Vec<SinglePacket>{
+            self.packets.clear();
             //Getting the wifi interface to sniff
             let interfaces = datalink::interfaces();
             let interface = &interfaces[1]; //index wifi interface
