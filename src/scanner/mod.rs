@@ -6,8 +6,8 @@ pub mod scanner {
     pub trait ScannerFunctions{
         //Public functions
         fn new(ip: IP) -> Self;
-        fn scan() -> bool;
-        fn check_packets(packets: Vec<SinglePacket>) -> bool;
+        fn scan(&self) -> bool;
+        fn check_packets(&self, packets: Vec<SinglePacket>) -> bool;
     }
     pub struct Scanner{
         attack_name: String,

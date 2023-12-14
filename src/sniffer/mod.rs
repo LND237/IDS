@@ -10,6 +10,7 @@ pub mod sniffer{
     type SinglePacket = Vec<u8>;
 
     pub const MAX_PORT: u16 = 65535;
+    pub const ALL_PORTS: u16 = 0;
 
     pub struct Sniffer{
         port: u16,
@@ -149,7 +150,7 @@ pub mod sniffer{
                     if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Udp {
                         //Extracting the port from the UDP packet
                         if let Some(udp) = UdpPacket::new(ipv4.payload()) {
-                            if udp.get_source() == port{
+                            if udp.get_source() == port || port == ALL_PORTS{
                                 return true;
                             }
                         }
@@ -158,7 +159,7 @@ pub mod sniffer{
                     else if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Tcp {
                         //Extracting the port from the TCP packet
                         if let Some(tcp) = TcpPacket::new(ipv4.payload()) {
-                            if tcp.get_source() == port{
+                            if tcp.get_source() == port || port == ALL_PORTS{
                                 return true;
                             }
                         }
