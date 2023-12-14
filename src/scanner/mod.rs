@@ -14,6 +14,9 @@ pub mod scanner {
     }
 
     impl Scanner{
+        ///Default C'tor of struct Scanner
+        ///Input: an IP structure- the IP for the Scanner.
+        /// Output: The Scanner object Structure.
         pub fn new(ip: IP) -> Self{
             return Scanner{ip: IP::copy(ip)};
         }

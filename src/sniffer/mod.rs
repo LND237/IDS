@@ -42,6 +42,9 @@ pub mod sniffer{
         pub fn get_port(&self) -> u16 {
             return self.port;
         }
+        ///The function gets the packets of the last sniff.
+        /// Input: reference self(Sniffer).
+        /// Output: a vector of SinglePackets- the packets.
         pub fn get_packets(&self) -> Vec<SinglePacket>{return self.packets.clone();}
 
         ///The function sniffs the network transport according
