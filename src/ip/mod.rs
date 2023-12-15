@@ -1,5 +1,8 @@
 pub mod ip{
     pub const MAX_IP_VALUE: i32 = 255;
+    pub const BROADCAST_IP: &str = "255.255.255.255";
+    //automatically implementing common comparison and hashing functionalities.
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct IP{
         address: String
     }
@@ -33,6 +36,12 @@ pub mod ip{
                 false => Err("Ip is not valid".to_string())
             }
         }
+        ///Default Constructor of struct IP.
+        /// Input: None.
+        pub fn new_default() -> Self{
+            return IP{address: String::from(BROADCAST_IP)};
+        }
+
         ///The function gets the ip from the IP structure.
         /// Input: self reference(IP)
         /// Output: a string value- the address of the ip.

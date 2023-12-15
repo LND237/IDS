@@ -5,6 +5,9 @@ use std::io::stdin;
 mod ip;
 use crate::ip::ip::IP;
 mod sniffer;
+mod scanner;
+mod ddos_scanner;
+
 use crate::sniffer::sniffer::{get_string_packet, Sniffer};
 
 #[tokio::main]

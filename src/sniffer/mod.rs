@@ -7,8 +7,7 @@ pub mod sniffer{
                        udp::UdpPacket};
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
-    type SinglePacket = Vec<u8>;
-
+    pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;
     pub const ALL_PORTS: u16 = 0;
 
