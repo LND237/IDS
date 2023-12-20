@@ -3,7 +3,7 @@ pub mod ddos_scanner{
     use pnet::packet::{Packet, ethernet::EthernetPacket, ipv4::Ipv4Packet};
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket};
+    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket, extract_ip_src_from_packet};
 
     pub const ATTACK_NAME : &str = "DDOS";
     pub const DDOS_PORT: u16 = ALL_PORTS;
@@ -43,21 +43,14 @@ pub mod ddos_scanner{
 
             //Going over the packets
             for packet in packets{
-                if let Some(ethernet) = EthernetPacket::new(&packet) {
-                    // Extract the IPv4 packet
-                    if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
-
-                        //Adding another count to this ip
-                        let ip_src = IP::new(ipv4.get_source().to_string()).unwrap();
-                        let former_value;
-                        match  hash_map_ip.get(&ip_src){ //getting the last value
-                            None => former_value = 0,
-                            Some(value) => former_value = *value
-                        }
-                        let new_val = former_value + 1;
-                        hash_map_ip.insert(ip_src, new_val);
-                    }
+                let ip_src = extract_ip_src_from_packet(packet);
+                let former_value;
+                match  hash_map_ip.get(&ip_src){ //getting the last value
+                    None => former_value = 0,
+                    Some(value) => former_value = *value
                 }
+                let new_val = former_value + 1;
+                hash_map_ip.insert(ip_src, new_val);
             }
 
             //Going over the hashmap
