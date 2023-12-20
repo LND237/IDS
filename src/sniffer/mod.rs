@@ -7,9 +7,9 @@ pub mod sniffer{
                        udp::UdpPacket};
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
-    type SinglePacket = Vec<u8>;
-
+    pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;
+    pub const ALL_PORTS: u16 = 0;
 
     pub struct Sniffer{
         port: u16,
@@ -22,7 +22,7 @@ pub mod sniffer{
         /// Input: An IP struct- the destination ip to sniff and an
         /// u16 variable- the source port to sniff.
         /// Output: An "object" of struct Sniffer.
-        pub fn new(ip: IP, port: u16) -> Result<Sniffer, String> {
+        pub fn new(ip: IP, port: u16) -> Result<Self, String> {
             return match true {
                 true => Ok(Sniffer { port, ip: IP::copy(&ip), packets: Vec::new() }),
                 false => Err("Invalid port number!".to_string())
@@ -42,12 +42,17 @@ pub mod sniffer{
         pub fn get_port(&self) -> u16 {
             return self.port;
         }
+        ///The function gets the packets of the last sniff.
+        /// Input: reference self(Sniffer).
+        /// Output: a vector of SinglePackets- the packets.
+        pub fn get_packets(&self) -> Vec<SinglePacket>{return self.packets.clone();}
 
         ///The function sniffs the network transport according
         /// to the fields in the Sniffer struct.
         /// Input: self(Sniffer) and an i32 variable- the limit amount of packets to sniff.
         /// Output: A vector of SinglePacket- the packets which the sniffer sniffed.
         pub fn sniff(&mut self, max_amount_packets: i32, timeout_sniff: i32) -> Vec<SinglePacket>{
+            self.packets.clear();
             //Getting the wifi interface to sniff
             let interfaces = datalink::interfaces();
             let interface = &interfaces[1]; //index wifi interface
@@ -128,6 +133,22 @@ pub mod sniffer{
         return packet_str;
     }
 
+    ///The function extracts the source ip from a SinglePacket.
+    /// Input: a SinglePacket variable- the packet to extract the
+    /// ip from.
+    /// Output: An IP value- the source ip.
+    pub fn extract_ip_src_from_packet(packet: SinglePacket) -> IP{
+        //Extract the Ethernet packet
+        if let Some(ethernet) = EthernetPacket::new(&packet) {
+            // Extract the IPv4 packet
+            if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
+                return IP::new(ipv4.get_source().to_string()).unwrap();
+            }
+        }
+        return IP::new_default();
+    }
+
+
     //private function
     ///The function checks if the packet contains the right
     /// destination IP and source port.
@@ -144,7 +165,7 @@ pub mod sniffer{
                     if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Udp {
                         //Extracting the port from the UDP packet
                         if let Some(udp) = UdpPacket::new(ipv4.payload()) {
-                            if udp.get_source() == port{
+                            if udp.get_source() == port || port == ALL_PORTS{
                                 return true;
                             }
                         }
@@ -153,7 +174,7 @@ pub mod sniffer{
                     else if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Tcp {
                         //Extracting the port from the TCP packet
                         if let Some(tcp) = TcpPacket::new(ipv4.payload()) {
-                            if tcp.get_source() == port{
+                            if tcp.get_source() == port || port == ALL_PORTS{
                                 return true;
                             }
                         }

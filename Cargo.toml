@@ -13,5 +13,8 @@ serde = "1.0.188"
 futures = "0.3.28"
 pnet = "0.34.0"
 urlencoding = "2.1.3"
+trust-dns-client = "0.23.2"
+dns-parser = "0.8.0"
+trust-dns-resolver = "0.21.2"
 [dependencies.mongodb]
 features = ["tokio-runtime"]
