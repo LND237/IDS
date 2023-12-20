@@ -133,6 +133,22 @@ pub mod sniffer{
         return packet_str;
     }
 
+    ///The function extracts the source ip from a SinglePacket.
+    /// Input: a SinglePacket variable- the packet to extract the
+    /// ip from.
+    /// Output: An IP value- the source ip.
+    pub fn extract_ip_src_from_packet(packet: SinglePacket) -> IP{
+        //Extract the Ethernet packet
+        if let Some(ethernet) = EthernetPacket::new(&packet) {
+            // Extract the IPv4 packet
+            if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
+                return IP::new(ipv4.get_source().to_string()).unwrap();
+            }
+        }
+        return IP::new_default();
+    }
+
+
     //private function
     ///The function checks if the packet contains the right
     /// destination IP and source port.
