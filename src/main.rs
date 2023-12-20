@@ -7,6 +7,7 @@ use crate::ip::ip::IP;
 mod sniffer;
 mod scanner;
 mod ddos_scanner;
+mod dns_scanner;
 
 use crate::sniffer::sniffer::{get_string_packet, Sniffer};
 
