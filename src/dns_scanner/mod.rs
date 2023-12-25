@@ -1,13 +1,10 @@
 pub mod dns_scanner{
-    use std::future::Future;
     use trust_dns_resolver::{TokioAsyncResolver};
     use dns_parser::{Packet, QueryType, RData};
     use trust_dns_resolver::config::{ResolverConfig, ResolverOpts};
-    use trust_dns_resolver::error::ResolveError;
-    use trust_dns_resolver::lookup_ip::LookupIp;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet};
+    use crate::sniffer::sniffer::{Sniffer, SinglePacket};
 
     pub const ATTACK_NAME : &str = "DNS";
     pub const DNS_PORT: u16 = 53;
@@ -19,16 +16,28 @@ pub mod dns_scanner{
     }
 
     impl ScannerFunctions for DnsScanner{
+        ///Constructor of struct DnsScanner.
+        /// Input: an IP variable- the ip to scan from.
         fn new(ip: IP) -> Self {
             return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
         }
 
+        ///The function scans the network and checks if there is
+        /// a DNS HIJACKING Attack or not.
+        /// Input: self reference(DnsScanner)
+        /// Output: An IP Value- the IP of the fake site(if
+        /// the site is good -returning default IP Broadcast).
         fn scan(&self) -> IP {
             let mut sniffer = Sniffer::new(self.base.get_ip(), DNS_PORT).unwrap();
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             return DnsScanner::check_packets(packets);
         }
 
+        ///The function checks the packets which was sniffed before
+        /// and decides if there was a Dns Hijacking Attack or not.
+        /// Input: A vector of SinglePackets- the packets to check.
+        /// Output: An IP Value- the IP who did the attack(if
+        /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> IP {
             //Going over the packets of the dns
             for packet in packets{
@@ -42,29 +51,35 @@ pub mod dns_scanner{
                     }
                 };
 
+                //Extracting the domain to check from the dns response
                 let domain_to_check = match extract_domain_from_dns_response(&packet){
                     None => continue, //no domain to compare to
                     Some(domain) => domain
                 };
 
+                let records = send_lookup_request(domain_to_check.clone());
+
                 // Iterate over the answers in the DNS response
-                for ip_domain in parsed_packet.answers {
-                    let the_given_ip = match ip_domain.data{
+                for answer_ip in parsed_packet.answers {
+                    //Getting the current ip
+                    let the_current_ip = match answer_ip.data{
                         RData::A(ip_record) => {
                             // Handle the ip address
                             IP::new(ip_record.0.to_string()).unwrap()
                         }
                         _ => continue
                     };
-                    let records = send_lookup_request(domain_to_check.clone());
 
-                    for record in records{
-                        if record == domain_to_check{
+                    //Going over the given records from the DNSSEC
+                    for record in &records{
+                        //If the record ip is the given ip
+                        if record.get_ip() == the_current_ip.get_ip(){
                             continue;
                         }
                     }
                     if !records.is_empty(){ //this site exists but the ip is wrong
-                        return extract_ip_src_from_packet(packet);
+                        //getting the ip of the fake site to block
+                        return IP::copy(&the_current_ip);
                     }
 
                 }
@@ -72,30 +87,35 @@ pub mod dns_scanner{
             return IP::new_default();
         }
     }
-    fn send_lookup_request(domain_to_check: String) -> Vec<String>{
+
+    ///The function sends a lookup request to DNSSEC validation
+    ///for finding the ips of a certain domain.
+    ///Input: a String variable- the domain to check.
+    ///Output: A vector of IPs- the ips of the given domain.
+    fn send_lookup_request(domain_to_check: String) -> Vec<IP>{
         // Create a resolver with DNSSEC validation enabled
         let dns_resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default())
             .expect("Failed to create resolver");
-        let result_dns_resolver = match dns_resolver.lookup_ip(domain_to_check).await{
+        let result_dns_resolver = match futures::executor::block_on(dns_resolver.ipv4_lookup(domain_to_check)){
             Ok(result) => result,
-            (_) => return Vec::new()
+            _ => return Vec::new()
         };
 
-        let ptr_records: Vec<String> = result_dns_resolver
-            .iter()
-            .filter(|answer| answer.qtype == QueryType::PTR)
-            .filter_map(|answer| {
-                if let Some(domain) = answer.data.to_string().strip_suffix('.') {
-                    Some(domain.to_string())
-                } else {
-                    None
-                }
-            })
-            .collect();
+        //Going over the ips from the DNSLookup
+        let mut ptr_records = Vec::new();
+        for result in result_dns_resolver{
+            ptr_records.push(IP::new(result.to_string()).unwrap())
+        }
 
         return ptr_records;
     }
-    fn extract_domain_from_dns_response(response: &[u8]) -> Option<String> {
+
+    ///The function extracts the asked domain from
+    ///the dns response.
+    /// Input: a SinglePacket reference- the response to extract from.
+    /// Output: a Some(String) value - the requested domain(if there is
+    /// no domain- the function will return None.
+    fn extract_domain_from_dns_response(response: &SinglePacket) -> Option<String> {
         // Parse the DNS response
         let packet = match Packet::parse(response) {
             Ok(packet) => packet,
@@ -116,6 +136,6 @@ pub mod dns_scanner{
         // Extract the requested domain
         let domain = question.qname.to_string();
 
-        Some(domain)
+        return Some(domain);
     }
 }
