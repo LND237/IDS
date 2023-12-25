@@ -1,7 +1,6 @@
 pub mod dns_scanner{
-    use trust_dns_resolver::{TokioAsyncResolver};
     use dns_parser::{Packet, QueryType, RData};
-    use trust_dns_resolver::config::{ResolverConfig, ResolverOpts};
+    use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::sniffer::sniffer::{Sniffer, SinglePacket};
