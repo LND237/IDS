@@ -1,6 +1,5 @@
 pub mod ddos_scanner{
     use std::collections::HashMap;
-    use pnet::packet::Packet;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket, extract_ip_src_from_packet};
