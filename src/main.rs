@@ -1,41 +1,28 @@
 use urlencoding::encode;
 use mongodb::{bson::doc, options::{ClientOptions, ServerApi, ServerApiVersion}, Client, bson};
 use std::io::stdin;
+use chrono::Utc;
+use mongo_db::mongo_db::MongoDB;
+use crate::ip::ip::IP;
 
 mod ip;
-use crate::ip::ip::IP;
 mod sniffer;
 mod scanner;
 mod ddos_scanner;
 mod dns_scanner;
-
-use crate::sniffer::sniffer::{get_string_packet, Sniffer};
+mod mongo_db;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    let mut counter = 1;
+    const USERNAME: &str = "bysl";
+    const PASSWORD: &str = "zaq1@wsx";
+    const DATABASE_NAME: &str = "IDE_DB";
 
-    let the_ip = match IP::new(String::from("192.168.197.151")){
-        Err(msg) => panic!("{}", msg),
-        Ok(ip) => {
-            println!("Ip {} is valid", IP::get_ip(&ip.copy()));
-            ip}
-    };
+    let database = MongoDB::new(USERNAME.to_string(), PASSWORD.to_string(), DATABASE_NAME.to_string()).await?;
+    let ip = IP::new(String::from("127.0.0.1")).unwrap();
 
-    let mut the_sniffer = match Sniffer::new(the_ip, get_port_from_user()){
-        Err(msg) => panic!("{}", msg),
-        Ok(sniffer) => {println!("Sniffer was built successfully with port {}", sniffer.get_port());
-        sniffer}
-
-    };
-
-    let packets = Sniffer::sniff(&mut the_sniffer, get_amount_packet_input(), get_sniffing_timeout());
-    //Going over the packets
-    for packet in packets{
-        println!("Data packet no.{}: \n{}", counter, get_string_packet(&packet));
-        counter += 1;
-    }
-    println!("End of packets");
+    database.add_attack(ip.copy(), ip.copy(), dns_scanner::dns_scanner::ATTACK_NAME.to_string(), Utc::now()).await.expect("Enable to add Attack");
+    println!("Document added!");
 
     //POC for MongoDB Atlas access
     let encoded_password = String::from(encode("zaq1@wsx"));
@@ -152,9 +139,9 @@ fn get_user_input() -> (String, i32, String) {
 ///Input: The encoded password to the DB and the username to connect.
 ///Output: The full link to the DB server.
 async fn build_connection_string(encoded_pass: String, username: String) -> String {
-    let client_opt_part_1 = String::from("mongodb+srv://");
+    let client_opt_part_1 = String::from("mongodb+srv:// ");
     let client_opt_part_2 = String::from("@ideproject.jii1z04.mongodb.net/?retryWrites=true&w=majority");
-    let link = client_opt_part_1 +  &username + &String::from(":") + &encoded_pass + &client_opt_part_2;
+    let link = client_opt_part_1 +  &username + &String::from(": ") + &encoded_pass + &client_opt_part_2;
     return link;
 }
 
