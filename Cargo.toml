@@ -17,5 +17,6 @@ trust-dns-client = "0.23.2"
 dns-parser = "0.8.0"
 trust-dns-resolver = "0.21.2"
 chrono = "0.4.31"
+ipaddress = "0.1.3"
 [dependencies.mongodb]
 features = ["tokio-runtime"]
