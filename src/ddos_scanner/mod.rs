@@ -14,24 +14,13 @@ pub mod ddos_scanner{
         base: Scanner
     }
 
-    impl ScannerFunctions for DdosScanner{
+    impl DdosScanner{
         ///Constructor of DdosScanner struct.
         /// Input: an IP struct- the IP to check.
         /// Output: an struct of DdosScanner.
-        fn new(ip: IP) -> Self{
+        pub fn new(ip: IP) -> Self{
             return DdosScanner{base: Scanner::new(ip, String::from(ATTACK_NAME))};
         }
-        ///The function scans the network and checks if there is
-        /// a DDOS Attack or not.
-        /// Input: self reference(DdosScanner)
-        /// Output: An IP Value- the IP who did the attack(if
-        /// there is no attack-returning default IP Broadcast).
-        fn scan(&self) -> IP{
-            let mut sniffer = Sniffer::new(self.base.get_ip(), DDOS_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
-            return DdosScanner::check_packets(packets);
-        }
-
         ///The function checks the packets which was sniffed before
         /// and decides if there was a Ddos Attack or not.
         /// Input: A vector of SinglePackets- the packets to check.
@@ -61,7 +50,19 @@ pub mod ddos_scanner{
             }
             return IP::new_default();
         }
+    }
 
+    impl ScannerFunctions for DdosScanner{
+        ///The function scans the network and checks if there is
+        /// a DDOS Attack or not.
+        /// Input: self reference(DdosScanner)
+        /// Output: An IP Value- the IP who did the attack(if
+        /// there is no attack-returning default IP Broadcast).
+        fn scan(&self) -> IP{
+            let mut sniffer = Sniffer::new(self.base.get_ip(), DDOS_PORT).unwrap();
+            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
+            return DdosScanner::check_packets(packets);
+        }
     }
 
 }

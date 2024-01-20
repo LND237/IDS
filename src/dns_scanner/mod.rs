@@ -14,22 +14,11 @@ pub mod dns_scanner{
         base: Scanner
     }
 
-    impl ScannerFunctions for DnsScanner{
+    impl DnsScanner{
         ///Constructor of struct DnsScanner.
         /// Input: an IP variable- the ip to scan from.
-        fn new(ip: IP) -> Self {
+        pub fn new(ip: IP) -> Self {
             return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
-        }
-
-        ///The function scans the network and checks if there is
-        /// a DNS HIJACKING Attack or not.
-        /// Input: self reference(DnsScanner)
-        /// Output: An IP Value- the IP of the fake site(if
-        /// the site is good -returning default IP Broadcast).
-        fn scan(&self) -> IP {
-            let mut sniffer = Sniffer::new(self.base.get_ip(), DNS_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
-            return DnsScanner::check_packets(packets);
         }
 
         ///The function checks the packets which was sniffed before
@@ -84,6 +73,20 @@ pub mod dns_scanner{
                 }
             }
             return IP::new_default();
+        }
+    }
+
+    impl ScannerFunctions for DnsScanner{
+
+        ///The function scans the network and checks if there is
+        /// a DNS HIJACKING Attack or not.
+        /// Input: self reference(DnsScanner)
+        /// Output: An IP Value- the IP of the fake site(if
+        /// the site is good -returning default IP Broadcast).
+        fn scan(&self) -> IP {
+            let mut sniffer = Sniffer::new(self.base.get_ip(), DNS_PORT).unwrap();
+            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
+            return DnsScanner::check_packets(packets);
         }
     }
 
