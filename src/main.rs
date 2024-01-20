@@ -9,6 +9,7 @@ mod scanner;
 mod ddos_scanner;
 mod dns_scanner;
 mod mongo_db;
+mod spec_scanner;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
