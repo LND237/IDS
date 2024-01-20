@@ -1,13 +1,10 @@
 pub mod scanner {
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::SinglePacket;
 
     // Interface for scanners
     pub trait ScannerFunctions{
-        //Public functions
-        fn new(ip: IP) -> Self;
+        //Public function for all Scanners
         fn scan(&self) -> IP;
-        fn check_packets(packets: Vec<SinglePacket>) -> IP;
     }
     pub struct Scanner{
         attack_name: String,
