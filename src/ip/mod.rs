@@ -1,6 +1,5 @@
 pub mod ip{
     use ipaddress::IPAddress;
-    pub const MAX_IP_VALUE: i32 = 255;
     pub const BROADCAST_IP: &str = "255.255.255.255";
     //automatically implementing common comparison and hashing functionalities.
     #[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
