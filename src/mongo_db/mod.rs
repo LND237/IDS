@@ -50,7 +50,7 @@ pub mod mongo_db{
             return self.attack_name.clone();
         }
 
-        /// The function gets the time of teh attack.
+        /// The function gets the time of the attack.
         /// Input: None.
         /// Output: a dateTime<Utc> value- the time of the attack(as Utc).
         pub fn get_date(&self) -> DateTime<Utc>{
