@@ -1,6 +1,7 @@
 use std::io::stdin;
 use chrono::Utc;
-use mongo_db::mongo_db::{MongoDB, AttackData};
+use mongo_db::mongo_db::AttackData;
+use crate::communicator::communicator::Communicator;
 use crate::ip::ip::IP;
 
 mod ip;
@@ -10,14 +11,11 @@ mod ddos_scanner;
 mod dns_scanner;
 mod mongo_db;
 mod spec_scanner;
+mod communicator;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    const USERNAME: &str = "bsyl";
-    const PASSWORD: &str = "zaq1@wsx";
-
-    let database = MongoDB::new(USERNAME.to_string(), PASSWORD.to_string()).await?;
-
+    const PORT_NUM : u16 = 50001;
     //Getting the names of the collection and the attacker(their ips)
     println!("Please enter the ip of the client: ");
     let ip_client = get_ip_input();
@@ -25,23 +23,14 @@ async fn main() -> mongodb::error::Result<()> {
     println!("Please enter the ip of the attacker: ");
     let ip_attacker = get_ip_input();
 
-    //Example for data to insert to database
+    //Example for data to send
     let data = AttackData::new(ip_attacker.copy(),
                                ddos_scanner::ddos_scanner::ATTACK_NAME.to_string(),
                                Utc::now());
-    database.add_attack(ip_client.copy(), data).await.expect("Enable to add Attack");
-    println!("Document added!");
 
-    //Showing the list of the attackers from the collection of the client
-    let attackers = database.get_all_attackers(ip_client.copy()).await;
-    let mut count = 1;
+    let communicator = Communicator::new(ip_client, PORT_NUM).unwrap();
 
-    //Going over the attackers
-    println!("The list of the attackers of {}: ", ip_client.get_ip().to_string());
-    for attacker in attackers{
-        println!("Attacker no.{}: {}", count, attacker.get_ip());
-        count += 1;
-    }
+    communicator.notify_client(data).expect("Nothing");
 
     Ok(())
 }

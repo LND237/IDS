@@ -56,6 +56,15 @@ pub mod mongo_db{
         pub fn get_date(&self) -> DateTime<Utc>{
             return self.date;
         }
+
+        ///The function makes a string in json format
+        /// from an AttackData structure.
+        /// Input: None.
+        /// Output: a string value - the json string.
+        pub fn get_data_str_json(&self) -> String{
+            return format!("{{'ip': '{}', 'name': '{}', 'date': '{}'}}", self.ip_attacker.get_ip(),
+                           self.attack_name.clone(), self.date.to_string());
+        }
     }
 
     //MongoDB Functions
