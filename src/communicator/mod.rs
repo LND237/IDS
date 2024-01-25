@@ -18,7 +18,7 @@ pub mod communicator{
         /// Input: None.
         /// Output: a String value- the string to connect with.
         fn build_connection_str_tcp(&self) -> String{
-            return self.ip_dest.get_ip() + ":" + &self.port.to_string();
+            return build_connection_str_tcp(self.get_ip_dest(), self.get_port_num());
         }
 
         //Public Functions
@@ -63,7 +63,7 @@ pub mod communicator{
         }
 
     }
-    //Private Static Function
+    //Private Static Functions
     /// The function checks if a port is absolutely
     /// valid(above a certain number).
     /// Input: an u16 variable- the number of port to check.
@@ -71,4 +71,29 @@ pub mod communicator{
     fn is_port_valid(port: u16) -> bool{
         return port > MIN_PORT_NUM;
     }
+
+    ///The function makes the string to use for connecting to the
+    /// server in the client.
+    /// Input: an IP variable- the ip to connect to and an
+    /// u16 variable- the destination port to use.
+    /// Output: a String value- the string to connect with.
+    fn build_connection_str_tcp(ip_dest: IP, port: u16) -> String{
+        return ip_dest.get_ip() + ":" + &port.to_string();
+    }
+
+    ///The function connects to the client's server and sends
+    /// the data of the attack to it.
+    /// Input: an AttackData variable- the data to send ,
+    /// an IP variable- the ip to connect to and an
+    /// u16 variable- the destination port to us.
+    /// Output: a Result<(), String>- if the sending went well.
+    pub fn notify_client(ip_client: IP, port: u16, data: AttackData) -> Result<(), String> {
+        let mut stream = TcpStream::connect(build_connection_str_tcp(ip_client.copy(), port).clone()).expect("Failed to connect to server");
+        let data_to_send = data.get_data_str_json();
+
+        stream.write_all(data_to_send.as_bytes()).expect("Failed to send data!");
+
+        return Ok(());
+    }
+
 }

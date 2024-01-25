@@ -66,6 +66,9 @@ pub mod mongo_db{
                            self.attack_name.clone(), self.date.to_string());
         }
 
+        ///The function copies the AttackData struct.
+        /// Input: None.
+        /// Output: a value of AttackData- the copied data.
         pub fn copy(&self) -> Self{
             return Self{ip_attacker: self.ip_attacker.copy(), attack_name: self.attack_name.clone(), date: self.date.clone()};
         }
