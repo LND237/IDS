@@ -1,10 +1,8 @@
 pub mod xss_scanner{
-    use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket};
-    use httparse::{Request, Status, EMPTY_HEADER, Header};
-    use std::io::Cursor;
+    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet};
+    use httparse::Header;
     use pnet::packet::Packet;
 
 
@@ -12,6 +10,7 @@ pub mod xss_scanner{
     pub const DNS_PORT: u16 = 80;
     pub const AMOUNT_PACKETS_SNIFF: i32 = 1;
     pub const TIME_SNIFF: i32 = 5;
+    pub const CSP: &str = "Content-Security-Policy";
 
     pub struct XssScanner{
         base: Scanner
@@ -19,27 +18,33 @@ pub mod xss_scanner{
 
     impl XssScanner{
         ///Constructor of struct XssScanner.
-        /// Input: an IP variable- the ip to scan from.
+        /// Input: an IP variable-the ip to scan from.
         pub fn new(ip: IP) -> Self {
             return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
         }
 
-        ///The function checks the packets which was sniffed before
+        ///The function checks the packets which were sniffed before
         /// and decides if there was a Dns Hijacking Attack or not.
-        /// Input: A vector of SinglePackets- the packets to check.
-        /// Output: An IP Value- the IP who did the attack(if
+        /// Input: A vector of SinglePackets - the packets to check.
+        /// Output: An IP Value-the IP who did the attack (if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> IP {
+            let mut csp_found = false;
             //Going over the packets of the dns
-            for packet in packets{
+            for mut packet in packets{
                 // Parse the HTTP response packet
-                let headers = parse_http_headers(&packet);
+                let headers = parse_http_headers(&mut packet).unwrap();
                 for header in headers {
-                    if header.name().eq_ignore_ascii_case("Content-Security-Policy") {
-                        println!("CSP header found:");
+                    if header.name.eq_ignore_ascii_case(CSP){
                         // Process the CSP value as needed
+                        csp_found = true;
                         break; // Exit the loop if you only need to check for presence
                     }
+
+                }
+                if !csp_found
+                {
+                    return extract_ip_src_from_packet(packet);
                 }
             }
             return IP::new_default();
@@ -50,9 +55,9 @@ pub mod xss_scanner{
 
         ///The function scans the network and checks if there is
         /// a DNS HIJACKING Attack or not.
-        /// Input: self reference(XssScanner)
-        /// Output: An IP Value- the IP of the fake site(if
-        /// the site is good -returning default IP Broadcast).
+        /// Input: self-reference(XssScanner)
+        /// Output: An IP Value-the IP of the fake site (if
+        /// the site is good-returning default IP Broadcast).
         fn scan(&self) -> IP {
             let mut sniffer = Sniffer::new(self.base.get_ip(), DNS_PORT).unwrap();
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
@@ -60,60 +65,16 @@ pub mod xss_scanner{
         }
     }
 
-    ///The function sends a lookup request to DNSSEC validation
-    ///for finding the ips of a certain domain.
-    ///Input: a String variable- the domain to check.
-    ///Output: A vector of IPs- the ips of the given domain.
-    fn send_lookup_request(domain_to_check: String) -> Vec<IP>{
-        // Create a resolver with DNSSEC validation enabled
-        let dns_resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default())
-            .expect("Failed to create resolver");
-        let result_dns_resolver = match futures::executor::block_on(dns_resolver.ipv4_lookup(domain_to_check)){
-            Ok(result) => result,
-            _ => return Vec::new()
-        };
-
-        //Going over the ips from the DNSLookup
-        let mut ptr_records = Vec::new();
-        for result in result_dns_resolver{
-            ptr_records.push(IP::new(result.to_string()).unwrap())
-        }
-
-        return ptr_records;
-    }
 
     ///The function extracts the asked domain from
     ///the dns response.
-    /// Input: a SinglePacket reference- the response to extract from.
-    /// Output: a Some(String) value - the requested domain(if there is
-    /// no domain- the function will return None.
-    fn parse_http_headers(response: &SinglePacket) -> Option<[Header<'static>; 16]> {
-        let mut cursor =  match Cursor::new(&response) {
-            Ok(packet) => {
-                packet
-            }
-            Err(_) => {
-                return  None; //cursor problem
-            }
-        };
-        let mut headers = [EMPTY_HEADER; 16];
-        match httparse::parse_headers(&mut cursor, &mut headers) {  // Pass the headers slice
-            Ok(Status::Complete(headers_len)) => {
-                // Headers parsed successfully
-                let req = Request::new(&mut headers);  // Create the Request object now
-                println!("Headers:");
-                for header in req.headers {
-                    println!("  {}: {:?}", header.name, header.value);
-                }
-
-                // Extract request body (if present)
-                let body = &response[headers_len..];
-                // Process the body as needed
-                println!("{:?}",body.payload());
-            },
-            // Handle other parsing outcomes...
-            _ => { return  None}
-        }
-        return Some(headers)
+    /// Input: a SinglePacket reference-the response to extract from.
+    /// Output: a Some (String) value - the requested domain if there is
+    /// no domain-the function will return None.
+    fn parse_http_headers(response: &mut Vec<u8>) -> Option<Vec<Header>> {
+        let mut headers = [httparse::EMPTY_HEADER; 4];
+        let mut resp = httparse::Response::new(&mut headers);
+        let res = resp.parse(response).unwrap();
+        return Some(resp.headers.to_vec().clone());
     }
 }
