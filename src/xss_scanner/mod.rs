@@ -7,7 +7,7 @@ pub mod xss_scanner{
 
 
     pub const ATTACK_NAME : &str = "XSS";
-    pub const DNS_PORT: u16 = 80;
+    pub const HTTP_PORT: u16 = 80;
     pub const AMOUNT_PACKETS_SNIFF: i32 = 1;
     pub const TIME_SNIFF: i32 = 5;
     pub const CSP: &str = "Content-Security-Policy";
@@ -24,7 +24,7 @@ pub mod xss_scanner{
         }
 
         ///The function checks the packets which were sniffed before
-        /// and decides if there was a Dns Hijacking Attack or not.
+        /// and decides if there was a XSS Attack or not.
         /// Input: A vector of SinglePackets - the packets to check.
         /// Output: An IP Value-the IP who did the attack (if
         /// there is no attack-returning default IP Broadcast)
@@ -54,23 +54,21 @@ pub mod xss_scanner{
     impl ScannerFunctions for XssScanner{
 
         ///The function scans the network and checks if there is
-        /// a DNS HIJACKING Attack or not.
+        /// a XSS Attack or not.
         /// Input: self-reference(XssScanner)
         /// Output: An IP Value-the IP of the fake site (if
         /// the site is good-returning default IP Broadcast).
         fn scan(&self) -> IP {
-            let mut sniffer = Sniffer::new(self.base.get_ip(), DNS_PORT).unwrap();
+            let mut sniffer = Sniffer::new(self.base.get_ip(), HTTP_PORT).unwrap();
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             return XssScanner::check_packets(packets);
         }
     }
 
 
-    ///The function extracts the asked domain from
-    ///the dns response.
+    ///The function extracts the headers from a http packet, if it is not it will throw an error
     /// Input: a SinglePacket reference-the response to extract from.
-    /// Output: a Some (String) value - the requested domain if there is
-    /// no domain-the function will return None.
+    /// Output: a Some (String) value - the headers of the http packet, if it is not a http packet it will throw an error
     fn parse_http_headers(response: &mut Vec<u8>) -> Option<Vec<Header>> {
         let mut headers = [httparse::EMPTY_HEADER; 4];
         let mut resp = httparse::Response::new(&mut headers);
