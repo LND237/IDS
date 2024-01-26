@@ -19,5 +19,7 @@ trust-dns-resolver = "0.21.2"
 chrono = "0.4.31"
 ipaddress = "0.1.3"
 serde_json = "1.0.111"
+httparse = "1.8.0"
+hyper = { version = "1.1.0", features = [] }
 [dependencies.mongodb]
 features = ["tokio-runtime"]

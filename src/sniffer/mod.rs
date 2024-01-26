@@ -55,7 +55,7 @@ pub mod sniffer{
             self.packets.clear();
             //Getting the wifi interface to sniff
             let interfaces = datalink::interfaces();
-            let interface = &interfaces[1]; //index wifi interface
+            let interface = &interfaces[3]; //index wifi interface
 
             println!("Found interface with name {}", interface.name);
 
