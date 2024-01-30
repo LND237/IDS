@@ -13,6 +13,7 @@ mod mongo_db;
 mod spec_scanner;
 mod communicator;
 mod xss_scanner;
+mod download_scanner;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
