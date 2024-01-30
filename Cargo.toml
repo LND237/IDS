@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 rustls = { version = "0.22.2", features = [] }
-tokio = { version = "1.33.0", features = [] }
+tokio = { version = "1.33.0", features = ["full"] }
 
 serde = "1.0.188"
 futures = "0.3.28"
@@ -20,6 +20,7 @@ chrono = "0.4.31"
 ipaddress = "0.1.3"
 serde_json = "1.0.111"
 httparse = "1.8.0"
-hyper = { version = "1.1.0", features = [] }
+dns-lookup = "2.0.4"
+reqwest = { version = "0.11.23", features = ["blocking", "json"] }
 [dependencies.mongodb]
 features = ["tokio-runtime"]
