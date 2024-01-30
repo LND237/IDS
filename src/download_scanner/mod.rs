@@ -10,7 +10,7 @@ pub mod download_scanner{
     //Public Constants
     pub const ATTACK_NAME : &str = "Drive By Download";
     pub const DOWNLOAD_PORT_1 : u16 = HTTP_PORT;
-    pub const DOWNLOAD_PORT_2 : u16 = 443;
+    pub const HTTPS_PORT: u16 = 443;
 
     //Private Constants
     const AMOUNT_PACKETS_SNIFF: i32 = 50;
@@ -70,7 +70,7 @@ pub mod download_scanner{
         /// there is no attack-returning default IP Broadcast).
         fn scan(&self) -> IP {
             let mut sniffer_1 = Sniffer::new(self.base.get_ip(), DOWNLOAD_PORT_1).unwrap();
-            let mut sniffer_2 = Sniffer::new(self.base.get_ip(), DOWNLOAD_PORT_2).unwrap();
+            let mut sniffer_2 = Sniffer::new(self.base.get_ip(), HTTPS_PORT).unwrap();
             let mut packets = sniffer_1.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             packets.append(&mut sniffer_2.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF));
             return DownloadScanner::check_packets(packets);
