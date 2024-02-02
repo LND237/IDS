@@ -1,4 +1,5 @@
 pub mod download_scanner{
+    use std::collections::HashSet;
     use std::net::IpAddr;
     use dns_lookup::lookup_addr;
     use tokio::runtime::Runtime;
@@ -35,30 +36,31 @@ pub mod download_scanner{
         /// Input: A vector of SinglePackets- the packets to check.
         /// Output: An IP Value- the IP who might do the attack(if
         /// there is no attack-returning default IP Broadcast).
-        fn check_packets(packets : Vec<SinglePacket>) -> IP{
+        fn check_packets(packets : Vec<SinglePacket>) -> Option<IP>{
             const MALICIOUS_STR: &str = "malicious";
-            for packet in packets{
-                let ip_src = extract_ip_src_from_packet(packet);
 
+            let src_ips = get_all_src_ips(packets.clone());
+
+            for ip_src in src_ips{
                 //Extracting the source domain of the packet
                 let domain_src = match get_domain(ip_src.copy()){
                     Ok(domain) => {domain},
-                    Err(_) => {return IP::new_default()} //can not find the domain of src ip
+                    Err(_) => {return Some(IP::new_default())} //can not find the domain of src ip
                 };
 
                 //Sending the domain to VirusTotal
                 let result = match send_domain_to_virus_total(domain_src.clone()){
                     Ok(res) => {res}
-                    Err(_) => {return IP::new_default()} //can not send request to check
+                    Err(_) => {return Some(IP::new_default())} //can not send request to check
                 };
 
                 //Checking the amount of malicious results
                 if result.matches(MALICIOUS_STR).count() >= MAX_MALICIOUS_SCANS_AMOUNT as usize{
-                    return ip_src.copy();
+                    return Some(ip_src.copy());
                 }
             }
 
-            return IP::new_default();
+            return Some(IP::new_default());
         }
     }
 
@@ -68,7 +70,7 @@ pub mod download_scanner{
         /// Input: self reference(DownloadScanner)
         /// Output: An IP Value- the IP who might do the attack(if
         /// there is no attack-returning default IP Broadcast).
-        fn scan(&self) -> IP {
+        fn scan(&self) -> Option<IP> {
             let mut sniffer_1 = Sniffer::new(self.base.get_ip(), DOWNLOAD_PORT_1).unwrap();
             let mut sniffer_2 = Sniffer::new(self.base.get_ip(), HTTPS_PORT).unwrap();
             let mut packets = sniffer_1.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
@@ -133,5 +135,21 @@ pub mod download_scanner{
         } else {
             Err("Request to VirusTotal failed".to_string())
         }
+    }
+
+    ///The function extracts all the src ips from the
+    /// packets and remove duplicate ones.
+    /// Input: a Vector variable of SinglePackets- the
+    /// packets to go over.
+    /// Output: an HashSet of ips- the set with all the src ips
+    /// from the packets.
+    fn get_all_src_ips(packets: Vec<SinglePacket>) -> HashSet<IP>{
+        let mut set_ips = HashSet::new();
+
+        //Going over the packets
+        for packet in packets{
+            set_ips.insert(extract_ip_src_from_packet(packet));
+        }
+        return set_ips;
     }
 }

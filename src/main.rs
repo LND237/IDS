@@ -3,6 +3,7 @@ use chrono::Utc;
 use mongo_db::mongo_db::AttackData;
 use crate::communicator::communicator::Communicator;
 use crate::ip::ip::IP;
+use crate::sniffer::sniffer::{get_string_packet, Sniffer};
 
 mod ip;
 mod sniffer;
@@ -14,26 +15,17 @@ mod spec_scanner;
 mod communicator;
 mod xss_scanner;
 mod download_scanner;
+mod smurf_scanner;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    const PORT_NUM : u16 = 50001;
-    //Getting the names of the collection and the attacker(their ips)
-    println!("Please enter the ip of the client: ");
-    let ip_client = get_ip_input();
-
-    println!("Please enter the ip of the attacker: ");
-    let ip_attacker = get_ip_input();
-
-    //Example for data to send
-    let data = AttackData::new(ip_attacker.copy(),
-                               ddos_scanner::ddos_scanner::ATTACK_NAME.to_string(),
-                               Utc::now());
-
-    let communicator = Communicator::new(ip_client, PORT_NUM).unwrap();
-
-    communicator.notify_client(data).expect("Nothing");
-
+    let ip = IP::new("192.168.1.180".to_string()).unwrap();
+    let mut sniffer = Sniffer::new(ip.copy(), 443).unwrap();
+    let packets = sniffer.sniff(50, 10);
+    println!("Packets amount: {}", packets.len());
+    for packet in packets{
+        println!{"{}", get_string_packet(&packet)};
+    }
     Ok(())
 }
 

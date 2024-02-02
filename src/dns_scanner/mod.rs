@@ -26,7 +26,7 @@ pub mod dns_scanner{
         /// Input: A vector of SinglePackets- the packets to check.
         /// Output: An IP Value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
-        fn check_packets(packets: Vec<SinglePacket>) -> IP {
+        fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
             //Going over the packets of the dns
             for packet in packets{
                 // Parse the DNS response packet
@@ -67,12 +67,12 @@ pub mod dns_scanner{
                     }
                     if !records.is_empty(){ //this site exists but the ip is wrong
                         //getting the ip of the fake site to block
-                        return IP::copy(&the_current_ip);
+                        return Some(the_current_ip.copy());
                     }
 
                 }
             }
-            return IP::new_default();
+            return Some(IP::new_default());
         }
     }
 
@@ -83,7 +83,7 @@ pub mod dns_scanner{
         /// Input: self reference(DnsScanner)
         /// Output: An IP Value- the IP of the fake site(if
         /// the site is good -returning default IP Broadcast).
-        fn scan(&self) -> IP {
+        fn scan(&self) -> Option<IP> {
             let mut sniffer = Sniffer::new(self.base.get_ip(), DNS_PORT).unwrap();
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             return DnsScanner::check_packets(packets);

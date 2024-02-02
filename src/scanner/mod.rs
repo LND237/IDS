@@ -4,7 +4,7 @@ pub mod scanner {
     // Interface for scanners
     pub trait ScannerFunctions{
         //Public function for all Scanners
-        fn scan(&self) -> IP;
+        fn scan(&self) -> Option<IP>;
     }
     pub struct Scanner{
         attack_name: String,

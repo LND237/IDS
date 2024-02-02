@@ -34,16 +34,16 @@ pub mod spec_scanner{
         /// Input: A self reference(SpecScanner) and a vector of SinglePackets- the packets to check.
         /// Output: An IP Value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
-        fn check_packets(&self, packets: Vec<SinglePacket>) -> IP {
+        fn check_packets(&self, packets: Vec<SinglePacket>) -> Option<IP> {
             //Going over the packets
             for packet in packets{
                 let ip_src_packet = extract_ip_src_from_packet(packet);
                 //If the packet is from an attacker
                 if ip_src_packet.copy().get_ip() == self.get_spec_ip().get_ip(){
-                    return ip_src_packet.copy();
+                    return Some(ip_src_packet.copy());
                 }
             }
-            return IP::new_default();
+            return Some(IP::new_default());
         }
     }
 
@@ -53,7 +53,7 @@ pub mod spec_scanner{
         /// Input: self reference(SpecScanner)
         /// Output: An IP Value- the IP of the attacker(if
         /// there is no attack -returning default IP Broadcast).
-        fn scan(&self) -> IP {
+        fn scan(&self) -> Option<IP> {
             let mut sniffer = Sniffer::new(self.base.get_ip(), SPEC_ATTACK_PORT).unwrap();
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             return self.check_packets(packets);
