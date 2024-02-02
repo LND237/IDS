@@ -186,6 +186,11 @@ pub mod sniffer{
         return false;
     }
 
+    ///The function finds the right interface to use to
+    /// sniff the network traffic.
+    /// Input: None.
+    /// Output: a NetworkInterface value- the interface to sniff with
+    /// (if there is no interface- return None).
     fn find_interface_with_traffic() -> Option<NetworkInterface> {
 
         let the_local_ip = local_ip().unwrap();

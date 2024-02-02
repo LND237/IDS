@@ -28,7 +28,7 @@ pub mod xss_scanner{
         /// Input: A vector of SinglePackets - the packets to check.
         /// Output: An IP Value-the IP who did the attack (if
         /// there is no attack-returning default IP Broadcast)
-        fn check_packets(packets: Vec<SinglePacket>) -> IP {
+        fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
             let mut csp_found = false;
             //Going over the packets of the dns
             for mut packet in packets{
@@ -44,10 +44,10 @@ pub mod xss_scanner{
                 }
                 if !csp_found
                 {
-                    return extract_ip_src_from_packet(packet);
+                    return Some(extract_ip_src_from_packet(packet));
                 }
             }
-            return IP::new_default();
+            return Some(IP::new_default());
         }
     }
 
@@ -58,7 +58,7 @@ pub mod xss_scanner{
         /// Input: self-reference(XssScanner)
         /// Output: An IP Value-the IP of the fake site (if
         /// the site is good-returning default IP Broadcast).
-        fn scan(&self) -> IP {
+        fn scan(&self) -> Option<IP> {
             let mut sniffer = Sniffer::new(self.base.get_ip(), HTTP_PORT).unwrap();
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             return XssScanner::check_packets(packets);
