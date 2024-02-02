@@ -1,5 +1,5 @@
 pub mod ip{
-    pub const MAX_IP_VALUE: i32 = 255;
+    use ipaddress::IPAddress;
     pub const BROADCAST_IP: &str = "255.255.255.255";
     //automatically implementing common comparison and hashing functionalities.
     #[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -13,18 +13,10 @@ pub mod ip{
     /// to check.
     /// Output: a bool value - if it can be an IP or not.
     fn check_ip(address: &String) -> bool {
-        //Trying to split the "ip" to numbers
-        let binding = String::from(".");
-        let values_ip = address.split(&binding);
-
-        for value in values_ip {
-            let value_int: i32 = value.parse().unwrap();
-            if value_int.is_negative() || value_int > MAX_IP_VALUE{
-                return false;
-            }
+        return match IPAddress::parse(address.clone()){
+            Ok(_) => {true}
+            Err(_) => {false}
         }
-
-        return true;
     }
 
     impl IP{
@@ -46,7 +38,7 @@ pub mod ip{
         /// Input: self reference(IP)
         /// Output: a string value- the address of the ip.
         pub fn get_ip(&self) -> String {
-            return self.address.to_string();
+            return self.address.clone().to_string();
         }
 
         ///The function sets the ip of the structure(if it is valid).

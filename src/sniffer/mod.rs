@@ -1,5 +1,6 @@
 pub mod sniffer{
-    use pnet::datalink::{self, Channel::Ethernet};
+    use local_ip_address::local_ip;
+    use pnet::datalink::{self, Channel::Ethernet, DataLinkReceiver, NetworkInterface};
     use pnet::packet::{self, Packet,
                        ethernet::EthernetPacket,
                        ipv4::Ipv4Packet,
@@ -54,10 +55,11 @@ pub mod sniffer{
         pub fn sniff(&mut self, max_amount_packets: i32, timeout_sniff: i32) -> Vec<SinglePacket>{
             self.packets.clear();
             //Getting the wifi interface to sniff
-            let interfaces = datalink::interfaces();
-            let interface = &interfaces[1]; //index wifi interface
+            let interface = match find_interface_with_traffic(){
+                Some(interface) => interface,
+                None => panic!("No interface found")
+            };
 
-            println!("Found interface with name {}", interface.name);
 
             // Create a channel to receive packets
             let mut rx = match datalink::channel(&interface, Default::default()) {
@@ -65,7 +67,6 @@ pub mod sniffer{
                 Ok(_) => panic!("Unknown channel type"),
                 Err(e) => panic!("Error opening network channel: {}", e),
             };
-            println!("Listening for packets to IP address {} in port {}", IP::get_ip(&self.ip), self.port);
 
             let start_time = Instant::now();
 
@@ -183,5 +184,29 @@ pub mod sniffer{
             }
         }
         return false;
+    }
+
+    ///The function finds the right interface to use to
+    /// sniff the network traffic.
+    /// Input: None.
+    /// Output: a NetworkInterface value- the interface to sniff with
+    /// (if there is no interface- return None).
+    fn find_interface_with_traffic() -> Option<NetworkInterface> {
+
+        let the_local_ip = local_ip().unwrap();
+        // Get a list of available network interfaces
+        let interfaces = datalink::interfaces();
+
+        // Iterate over the interfaces and find the one with traffic
+        for interface in interfaces {
+            let interface_ips = interface.ips.clone();
+
+            for ip in interface_ips{
+                if ip.ip().to_string() == the_local_ip.to_string(){
+                    return Some(interface);
+                }
+            }
+        }
+        return None;
     }
 }
