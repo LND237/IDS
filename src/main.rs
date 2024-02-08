@@ -1,7 +1,4 @@
 use std::io::stdin;
-use chrono::Utc;
-use mongo_db::mongo_db::AttackData;
-use crate::communicator::communicator::Communicator;
 use crate::ip::ip::IP;
 use crate::sniffer::sniffer::{get_string_packet, Sniffer};
 
@@ -16,6 +13,7 @@ mod communicator;
 mod xss_scanner;
 mod download_scanner;
 mod smurf_scanner;
+mod server;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
