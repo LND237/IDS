@@ -25,6 +25,12 @@ pub mod mongo_db{
         date: DateTime<Utc>
     }
 
+    impl Clone for AttackData{
+        fn clone(&self) -> Self {
+            return self.copy();
+        }
+    }
+
     //AttackData function
     impl AttackData{
         //Public Functions
@@ -115,6 +121,13 @@ pub mod mongo_db{
         /// Output: A string value- the password for the database.
         pub fn get_password(&self) -> String{
             return self.password.clone();
+        }
+
+        ///The function copies the database structure.
+        /// Input: None.
+        /// Output: a Self structure(MongoDB)- a copy of the structure.
+        pub fn copy(&self) -> Self{
+            return Self{username: self.username.clone(), password: self.password.clone(), db: self.db.clone()};
         }
 
         ///The function adds an attack to the database according to its data and

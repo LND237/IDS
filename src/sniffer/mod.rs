@@ -1,6 +1,6 @@
 pub mod sniffer{
     use local_ip_address::local_ip;
-    use pnet::datalink::{self, Channel::Ethernet, DataLinkReceiver, NetworkInterface};
+    use pnet::datalink::{self, Channel::Ethernet, NetworkInterface};
     use pnet::packet::{self, Packet,
                        ethernet::EthernetPacket,
                        ipv4::Ipv4Packet,
