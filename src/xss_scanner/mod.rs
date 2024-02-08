@@ -3,8 +3,6 @@ pub mod xss_scanner{
     use crate::ip::ip::IP;
     use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet};
     use httparse::Header;
-    use pnet::packet::Packet;
-
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
@@ -62,6 +60,13 @@ pub mod xss_scanner{
             let mut sniffer = Sniffer::new(self.base.get_ip(), HTTP_PORT).unwrap();
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             return XssScanner::check_packets(packets);
+        }
+
+        ///The function gets the base data of it.
+        /// Input: None.
+        /// Output: a Scanner value- the base data.
+        fn get_base_data(&self) -> Scanner {
+            return self.base.copy();
         }
     }
 

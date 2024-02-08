@@ -88,6 +88,12 @@ pub mod dns_scanner{
             let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
             return DnsScanner::check_packets(packets);
         }
+        ///The function gets the base data of it.
+        /// Input: None.
+        /// Output: a Scanner value- the base data.
+        fn get_base_data(&self) -> Scanner {
+            return self.base.copy();
+        }
     }
 
     ///The function sends a lookup request to DNSSEC validation

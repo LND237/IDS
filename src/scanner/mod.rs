@@ -2,9 +2,11 @@ pub mod scanner {
     use crate::ip::ip::IP;
 
     // Interface for scanners
-    pub trait ScannerFunctions{
+    pub trait ScannerFunctions: Send + Sync {
         //Public function for all Scanners
         fn scan(&self) -> Option<IP>;
+        fn get_base_data(&self) -> Scanner;
+
     }
     pub struct Scanner{
         attack_name: String,
@@ -34,6 +36,13 @@ pub mod scanner {
         /// Output: The IP to scan.
         pub fn get_ip(&self) -> IP{
             return self.ip.copy();
+        }
+
+        ///The function copies the structure.
+        /// Input: None.
+        /// Output: a Self value(Scanner)- a copy.
+        pub fn copy(&self) -> Self{
+            return Self{attack_name: self.attack_name.clone(), ip: self.ip.copy()};
         }
     }
 }
