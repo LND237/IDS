@@ -33,15 +33,21 @@ pub mod server{
                 Err(msg) => {return Err(msg.to_string())}
             };
 
-            let clients = init_clients(ips.clone(), database.copy()).await;
+            let the_clients = init_clients(ips.clone(), database.copy()).await;
 
-            return Ok(Self{clients, db: database.copy()});
+            return Ok(Self{clients : the_clients, db: database.copy()});
         }
 
         pub async fn run(&mut self) {
             let shared_results = Arc::new(Mutex::new(Vec::new()));
             loop {
                 let mut tasks = Vec::new();
+
+                for ip in self.clients.keys(){
+                    let scanners = self.clients.get(&ip.copy()).unwrap();
+
+                }
+
                 for client in self.clients.iter().clone() {
                     let ip_client = client.0.clone();
                     let shared_data = Arc::clone(&shared_results);
@@ -82,7 +88,7 @@ pub mod server{
             let mut spec_scanners = make_spec_scanners(ip.copy(), attackers.clone());
             scanners.append(&mut spec_scanners);
 
-            clients.insert(ip.copy(), scanners);
+            clients.insert(ip.copy(), copy_scanners(scanners));
         }
 
         return clients;
@@ -155,6 +161,16 @@ pub mod server{
         }
 
         None // No attack detected
+    }
+
+    fn copy_scanners(scanners : Scanners) -> Scanners{
+        let mut new_scanners = Scanners::new();
+
+        //Going over the scanners
+        for scanner in scanners{
+            new_scanners.push(scanner.copy());
+        }
+        return new_scanners;
     }
 
 }

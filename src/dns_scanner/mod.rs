@@ -94,6 +94,12 @@ pub mod dns_scanner{
         fn get_base_data(&self) -> Scanner {
             return self.base.copy();
         }
+        ///The function copies the struct.
+        /// Input: None.
+        /// Output: a Self struct- a copy.
+        fn copy(&self) -> Self {
+            return Self{base: self.get_base_data()};
+        }
     }
 
     ///The function sends a lookup request to DNSSEC validation

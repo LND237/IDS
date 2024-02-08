@@ -7,6 +7,8 @@ pub mod scanner {
         fn scan(&self) -> Option<IP>;
         fn get_base_data(&self) -> Scanner;
 
+        fn copy(&self) -> Self;
+
     }
     pub struct Scanner{
         attack_name: String,
