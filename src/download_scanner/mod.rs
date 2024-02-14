@@ -18,6 +18,7 @@ pub mod download_scanner{
     const TIME_SNIFF: i32 = 3;
     const MAX_MALICIOUS_SCANS_AMOUNT: i32 = 6;
 
+    #[derive(Clone)]
     pub struct DownloadScanner{
         base: Scanner
     }
@@ -82,12 +83,6 @@ pub mod download_scanner{
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
             return self.base.copy();
-        }
-        ///The function copies the struct.
-        /// Input: None.
-        /// Output: a Self struct- a copy.
-        fn copy(&self) -> Self {
-            return Self{base: self.get_base_data()};
         }
     }
 

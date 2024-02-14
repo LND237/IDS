@@ -10,6 +10,7 @@ pub mod dns_scanner{
     pub const AMOUNT_PACKETS_SNIFF: i32 = 1;
     pub const TIME_SNIFF: i32 = 5;
 
+    #[derive(Clone)]
     pub struct DnsScanner{
         base: Scanner
     }
@@ -93,12 +94,6 @@ pub mod dns_scanner{
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
             return self.base.copy();
-        }
-        ///The function copies the struct.
-        /// Input: None.
-        /// Output: a Self struct- a copy.
-        fn copy(&self) -> Self {
-            return Self{base: self.get_base_data()};
         }
     }
 

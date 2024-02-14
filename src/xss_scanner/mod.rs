@@ -10,6 +10,7 @@ pub mod xss_scanner{
     pub const TIME_SNIFF: i32 = 5;
     pub const CSP: &str = "Content-Security-Policy";
 
+    #[derive(Clone)]
     pub struct XssScanner{
         base: Scanner
     }
@@ -68,13 +69,6 @@ pub mod xss_scanner{
         fn get_base_data(&self) -> Scanner {
             return self.base.copy();
         }
-
-        ///The function copies the struct.
-        /// Input: None.
-        /// Output: a Self struct- a copy.
-        fn copy(&self) -> Self {
-            return Self{base: self.get_base_data()};
-        }
     }
 
 
@@ -84,7 +78,7 @@ pub mod xss_scanner{
     fn parse_http_headers(response: &mut Vec<u8>) -> Option<Vec<Header>> {
         let mut headers = [httparse::EMPTY_HEADER; 4];
         let mut resp = httparse::Response::new(&mut headers);
-        let res = resp.parse(response).unwrap();
+        let _ = resp.parse(response).unwrap();
         return Some(resp.headers.to_vec().clone());
     }
 }

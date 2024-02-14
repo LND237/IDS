@@ -1,8 +1,5 @@
 pub mod server{
     use std::collections::HashMap;
-    use std::ops::DerefMut;
-    use std::sync::{Arc, Mutex};
-    use std::thread;
     use chrono::Utc;
     use crate::ddos_scanner::ddos_scanner::DdosScanner;
     use crate::dns_scanner::dns_scanner::DnsScanner;
@@ -15,13 +12,55 @@ pub mod server{
     use crate::xss_scanner::xss_scanner::XssScanner;
     use crate::communicator::communicator::notify_client;
 
-    pub type Scanners = Vec<Box<dyn ScannerFunctions>>;
-    pub type Client = (IP, Scanners);
+    pub type ScanResults = HashMap<String, Option<IP>>;
+    #[derive(Clone)]
+    pub struct MultiScanner{
+        spec_scanners: Vec<SpecScanner>,
+        ddos_scanner : DdosScanner,
+        dns_scanner : DnsScanner,
+        download_scanner : DownloadScanner,
+        smurf_scanner : SmurfScanner,
+        xss_scanner: XssScanner
+    }
 
-    const PORT_NUM : u16 = 50000;
+    impl MultiScanner{
+        pub fn new(ip_client: IP, ips_attackers: Vec<IP> ) -> Self{
+            let mut spec_scanners = Vec::new();
+
+            //Making the SpecScanners according to the list of the ips
+            for ip in ips_attackers{
+                spec_scanners.push(SpecScanner::new(ip_client.copy(), ip.copy()));
+            }
+
+            return Self{spec_scanners:spec_scanners.clone(),
+            ddos_scanner: DdosScanner::new(ip_client.copy()),
+            dns_scanner: DnsScanner::new(ip_client.copy()),
+            download_scanner: DownloadScanner::new(ip_client.copy()),
+            smurf_scanner: SmurfScanner::new(ip_client.copy()),
+            xss_scanner: XssScanner::new(ip_client.copy())};
+        }
+
+        pub fn scan_all(&self) -> ScanResults {
+            let mut results = ScanResults::new();
+
+            //Going over special scanners
+            results.insert(self.ddos_scanner.get_base_data().get_name(), self.ddos_scanner.scan());
+            results.insert(self.dns_scanner.get_base_data().get_name(), self.dns_scanner.scan());
+            results.insert(self.download_scanner.get_base_data().get_name(), self.download_scanner.scan());
+            results.insert(self.smurf_scanner.get_base_data().get_name(), self.smurf_scanner.scan());
+            results.insert(self.xss_scanner.get_base_data().get_name(), self.xss_scanner.scan());
+
+            //Going over specific scanners
+            for scanner in self.spec_scanners.clone(){
+                results.insert(scanner.get_base_data().get_name(), scanner.scan());
+            }
+
+            return results.clone();
+        }
+    }
 
     pub struct Server{
-        clients: HashMap<IP, Scanners>,
+        clients: HashMap<IP, MultiScanner>,
         db: MongoDB
     }
 
@@ -39,138 +78,48 @@ pub mod server{
         }
 
         pub async fn run(&mut self) {
-            let shared_results = Arc::new(Mutex::new(Vec::new()));
             loop {
-                let mut tasks = Vec::new();
+                for client in self.clients.clone(){
+                    let results = client.1.scan_all();
 
-                for ip in self.clients.keys(){
-                    let scanners = self.clients.get(&ip.copy()).unwrap();
-
-                }
-
-                for client in self.clients.iter().clone() {
-                    let ip_client = client.0.clone();
-                    let shared_data = Arc::clone(&shared_results);
-                    let scan_result = scan_client(client);
-                    let task = async move {
-                        let mut data = shared_data.lock().unwrap();
-                        data.push((scan_result, ip_client.clone()));
-                    };
-                    tasks.push(task);
-                }
-
-                futures::future::join_all(tasks).await;
-
-                let mut final_data = shared_results.lock().unwrap();
-                for result in final_data.iter() {
-                    let scan_result = result.clone().0;
-                    let ip_client = &result.1;
-                    match scan_result {
-                        Some(data) => {
-                            let database_res = self.db.add_attack(ip_client.clone(), data.clone()).await;
-                            let communicator_res = notify_client(ip_client.clone(), PORT_NUM, data.clone());
-                        },
-                        None => {}
+                    for result in results{
+                        self.handle_result(client.0.copy(), result.0.clone(), result.1).await;
                     }
                 }
-                final_data.clear();
+            }
+        }
+
+        async fn handle_result(&self, ip_client: IP, attack_name: String, result: Option<IP>){
+            const PORT_NUM : u16 = 50001;
+            let mut data_to_send = None;
+            match result {
+                None => {
+                    data_to_send = Some(AttackData::new(IP::new_default(), attack_name.clone(), Utc::now()));
+                },
+                Some(ip) => {
+                    //If an ip of attacker
+                    if ip.get_ip() != IP::new_default().get_ip(){
+                        data_to_send = Some(AttackData::new(ip.copy(), attack_name.clone(), Utc::now()));
+                    }
+                }
+            }
+            //If the variable was implemented
+            if let Some(the_data) = data_to_send{
+                let _ = self.db.add_attack(ip_client.copy(), the_data.copy()).await;
+                let _ = notify_client(ip_client.copy(), PORT_NUM, the_data.copy());
             }
         }
     }
-    async fn init_clients(clients_ips : Vec<IP>, database: MongoDB) -> HashMap<IP, Scanners>{
+    async fn init_clients(clients_ips : Vec<IP>, database: MongoDB) -> HashMap<IP, MultiScanner> {
         let mut clients = HashMap::new();
 
         //Going over the ips
         for ip in clients_ips{
-            //Making the scanners for each ip of the client
-            let mut scanners = make_basic_scanners(ip.copy());
-            let attackers = database.get_all_attackers(ip.copy()).await;
-            let mut spec_scanners = make_spec_scanners(ip.copy(), attackers.clone());
-            scanners.append(&mut spec_scanners);
-
-            clients.insert(ip.copy(), copy_scanners(scanners));
+            clients.insert(ip.copy(),
+                           MultiScanner::new(ip.copy(),
+                                             database.get_all_attackers(ip.copy()).await));
         }
 
         return clients;
     }
-    fn make_basic_scanners(ip : IP) -> Scanners{
-        let mut the_scanners = Scanners::new();
-
-        //Pushing all the basic scanners
-        the_scanners.push(Box::new(DdosScanner::new(ip.copy())));
-        the_scanners.push(Box::new(SmurfScanner::new(ip.copy())));
-        the_scanners.push(Box::new(XssScanner::new(ip.copy())));
-        the_scanners.push(Box::new(DnsScanner::new(ip.copy())));
-        the_scanners.push(Box::new(DownloadScanner::new(ip.copy())));
-
-        return the_scanners;
-    }
-
-    fn make_spec_scanners(ip_client : IP, attackers: Vec<IP>) -> Scanners{
-        let mut spec_scanners = Scanners::new();
-
-        //Going over the attackers
-        for ip_attacker in attackers{
-            spec_scanners.push(Box::new(SpecScanner::new(ip_client.copy(), ip_attacker.copy())));
-        }
-
-        return spec_scanners;
-    }
-    fn scan_client(client: (&IP, &Vec<Box<dyn ScannerFunctions>>)) -> Option<AttackData> {
-        let client_clone = client.clone();
-        let scanners = client_clone.1.clone();
-        let shared_results = Arc::new(Mutex::new(Vec::new()));
-
-        // Collecting the results of all the scanners
-        let mut threads = Vec::new();
-        for scanner in scanners {
-            let scanner = scanner.clone(); // Clone scanner to avoid move
-            let shared_results = Arc::clone(&shared_results); // Clone Arc for each thread
-            let thread = thread::spawn(move || {
-                let ip_result = scanner.scan();
-                let base_data_name = scanner.get_base_data().get_name().clone();
-                let mut results = shared_results.lock().unwrap();
-                results.push((ip_result, base_data_name));
-            });
-            threads.push(thread);
-        }
-
-        // Waiting for all threads to finish
-        for thread in threads {
-            thread.join().unwrap();
-        }
-
-        // Processing the final results
-        let final_results = shared_results.lock().unwrap();
-        for result in final_results.iter() {
-            let attack_name = result.1.clone();
-
-            // Handling the result
-            match &result.0 {
-                None => {
-                    // Unknown attacker
-                    return Some(AttackData::new(client.0.clone(), attack_name, Utc::now()));
-                }
-                Some(ip) => {
-                    // If there was an attacker
-                    if *ip != *client.0 {
-                        return Some(AttackData::new(ip.clone(), attack_name, Utc::now()));
-                    }
-                }
-            }
-        }
-
-        None // No attack detected
-    }
-
-    fn copy_scanners(scanners : Scanners) -> Scanners{
-        let mut new_scanners = Scanners::new();
-
-        //Going over the scanners
-        for scanner in scanners{
-            new_scanners.push(scanner.copy());
-        }
-        return new_scanners;
-    }
-
 }

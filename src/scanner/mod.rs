@@ -2,14 +2,13 @@ pub mod scanner {
     use crate::ip::ip::IP;
 
     // Interface for scanners
-    pub trait ScannerFunctions: Send + Sync {
+    pub trait ScannerFunctions: 'static {
         //Public function for all Scanners
         fn scan(&self) -> Option<IP>;
         fn get_base_data(&self) -> Scanner;
-
-        fn copy(&self) -> Self;
-
     }
+
+    #[derive(Clone)]
     pub struct Scanner{
         attack_name: String,
         ip: IP

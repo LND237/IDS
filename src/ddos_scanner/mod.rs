@@ -10,6 +10,7 @@ pub mod ddos_scanner{
     const TIME_SNIFF: i32 = 5;
     const RATE_LIMIT: i32 = 20000;
 
+    #[derive(Clone)]
     pub struct DdosScanner{
         base: Scanner
     }
@@ -68,13 +69,6 @@ pub mod ddos_scanner{
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
             return self.base.copy();
-        }
-
-        ///The function copies the struct.
-        /// Input: None.
-        /// Output: a Self struct- a copy.
-        fn copy(&self) -> Self {
-            return Self{base: self.get_base_data()};
         }
     }
 

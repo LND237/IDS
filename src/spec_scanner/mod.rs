@@ -8,6 +8,7 @@ pub mod spec_scanner{
     const AMOUNT_PACKETS_SNIFF: i32 = 50;
     const TIME_SNIFF: i32 = 10;
 
+    #[derive(Clone)]
     pub struct SpecScanner{
         base: Scanner,
         spec_ip: IP
@@ -64,13 +65,6 @@ pub mod spec_scanner{
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
             return self.base.copy();
-        }
-
-        ///The function copies the struct.
-        /// Input: None.
-        /// Output: a Self struct- a copy.
-        fn copy(&self) -> Self {
-            return Self{base: self.get_base_data(), spec_ip: self.spec_ip.copy()};
         }
     }
 
