@@ -1,7 +1,7 @@
 ﻿using System.Timers;
 using System.Windows;
 using MongoDB.Driver;
-
+using WpfApp1.Models.MongoDB;
 namespace WpfApp1
 {
     public partial class MainWindow : Window
@@ -11,6 +11,7 @@ namespace WpfApp1
 
         public MainWindow()
         {
+            
             InitializeComponent();
 
         }
