@@ -22,6 +22,7 @@ namespace WpfApp1
             timer.Start();
         }
 
+        /// the function connects to the databsase
         private async void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             try

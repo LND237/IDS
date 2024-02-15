@@ -28,6 +28,7 @@ namespace WpfApp1.Models
         /// </summary>
         /// <param name="connectionString"> the string for the connection</param>
         /// <param name="databaseName"> the name of the dataBase</param>
+        /// the
         public MongoDBAttackLogger(string connectionString, string databaseName)
         {
             var client = new MongoClient(connectionString);
@@ -37,7 +38,7 @@ namespace WpfApp1.Models
         /// <summary>
         /// gets all the attacks of the client
         /// </summary>
-        /// <returns></returns>
+        /// <returns>all the attacks of the client</returns>
         public async Task<List<AttackLog>> getAllAttacks()
         {
             var collection = _database.GetCollection<AttackLog>(this._clientIp);
@@ -93,6 +94,18 @@ namespace WpfApp1.Models
 
             var attackLogs = await collection.Find(filter).ToListAsync();
             return attackLogs;
+        }
+
+        
+        /// the function gets a list of all the attackers ip's (no duplicated values)
+        public async Task<List<string>> GetAllAttackerIpsAsync()
+        {
+            var collection = _database.GetCollection<AttackLog>(this._clientIp);
+
+            var attackerIps = await collection.Distinct<string>("AttackerIp", Builders<AttackLog>.Filter.Empty)
+                                              .ToListAsync();
+
+            return attackerIps;
         }
 
 
