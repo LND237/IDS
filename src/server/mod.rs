@@ -168,7 +168,8 @@ pub mod server{
                         for (name, result) in results {
                             let ip_clone = ip.copy();
                             let name_clone = name.clone();
-                            let _ = Server::handle_result(db_clone.copy(), ip_clone, name_clone, result, &mut multi_scanner);
+                            //let _ = Server::handle_result(db_clone.copy(), ip_clone, name_clone, result, &mut multi_scanner);
+                            println!("{}", name_clone);
                     }});
                     threads.push(thread_handle);
                 }

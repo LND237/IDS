@@ -1,7 +1,6 @@
 use std::io::stdin;
 use crate::ip::ip::IP;
-use crate::sniffer::sniffer::{get_string_packet, Sniffer};
-
+use crate::server::server::Server;
 mod ip;
 mod sniffer;
 mod scanner;
@@ -17,13 +16,22 @@ mod server;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    let ip = IP::new("192.168.1.180".to_string()).unwrap();
-    let mut sniffer = Sniffer::new(ip.copy(), 443).unwrap();
-    let packets = sniffer.sniff(50, 10);
-    println!("Packets amount: {}", packets.len());
-    for packet in packets{
-        println!{"{}", get_string_packet(&packet)};
-    }
+    let ip = IP::new("192.168.1.1".to_string()).unwrap();
+
+    const USERNAME: &str = "bsyl";
+    const PASSWORD: &str = "zaq1@wsx";
+
+
+    let ip_vector = vec![ip.copy()];
+
+    let mut server = match Server::new(ip_vector.clone(), USERNAME.to_string(), PASSWORD.to_string()).await{
+        Ok(server) => {server}
+        Err(msg) => {panic!("{}", msg.to_string())}
+    };
+    println!("Server started");
+    server.run().await;
+
+
     Ok(())
 }
 
