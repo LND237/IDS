@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace WpfApp1.Models
     {
         private readonly IMongoDatabase _database;
         private readonly string _clientIp;
+        private readonly string connectionString;
         public class AttackLog //attacks data  struct
         {
             [BsonId]
@@ -26,11 +28,13 @@ namespace WpfApp1.Models
         /// <summary>
         /// c'tor for the class.
         /// </summary>
-        /// <param name="connectionString"> the string for the connection</param>
-        /// <param name="databaseName"> the name of the dataBase</param>
+        /// <param name="username"> the username for the connection</param>
+        /// <param name="password"> the password for the connection</param>
+        /// <param name="databaseName"> the databaseName for the connection</param>
         /// the
-        public MongoDBAttackLogger(string connectionString, string databaseName)
+        public MongoDBAttackLogger(string username,string password,string databaseName)
         {
+            connectionString = "mongodb+srv://" + username + ":" + password + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
             var client = new MongoClient(connectionString);
             _database = client.GetDatabase(databaseName);
         }
@@ -104,7 +108,7 @@ namespace WpfApp1.Models
 
             var attackerIps = await collection.Distinct<string>("AttackerIp", Builders<AttackLog>.Filter.Empty)
                                               .ToListAsync();
-
+    
             return attackerIps;
         }
 

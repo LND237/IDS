@@ -13,28 +13,6 @@ namespace WpfApp1
         {
             InitializeComponent();
 
-            // Replace with your actual Atlas connection string
-            string connectionString = "mongodb+srv://<username>:<password>@<yourcluster>.mongodb.net/?retryWrites=true&w=majority";
-            client = new MongoClient(connectionString);
-
-            timer = new System.Timers.Timer(10000); // 10 seconds interval
-            timer.Elapsed += OnTimerElapsed;
-            timer.Start();
-        }
-
-        /// the function connects to the databsase
-        private async void OnTimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                // For basic connectivity check, try listing databases
-                var databases = await client.ListDatabasesAsync();
-                Console.WriteLine("Connection successful!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Connection failed: " + ex.Message);
-            }
         }
     }
 }
