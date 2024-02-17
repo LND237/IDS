@@ -35,7 +35,9 @@ namespace WpfApp1.Models.MongoDB
         /// the
         public MongoDBAttackLogger(string username,string password,string databaseName, string ip)
         {
-            connectionString = "mongodb+srv://" + username + ":" + password + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
+            string encodedPassword = Uri.EscapeDataString(password);//encode passowrd
+
+            connectionString = "mongodb+srv://" + username + ":" + encodedPassword + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
             var client = new MongoClient(connectionString);
             _database = client.GetDatabase(databaseName);
             this._clientIp = new IP(ip);
