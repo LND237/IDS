@@ -13,7 +13,7 @@ namespace WpfApp1
         {
             
             InitializeComponent();
-
+            MongoDBAttackLogger c =  new MongoDBAttackLogger("bsyl", "zaq!@wsx", "ideproject","127.0.0.1");
         }
     }
 }
