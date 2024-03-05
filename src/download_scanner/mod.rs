@@ -16,7 +16,7 @@ pub mod download_scanner{
     //Private Constants
     const AMOUNT_PACKETS_SNIFF: i32 = 50;
     const TIME_SNIFF: i32 = 3;
-    const MAX_MALICIOUS_SCANS_AMOUNT: i32 = 6;
+    const MAX_BAD_SCANS_AMOUNT: i32 = 1;
 
     #[derive(Clone)]
     pub struct DownloadScanner{
@@ -39,24 +39,30 @@ pub mod download_scanner{
         /// there is no attack-returning default IP Broadcast).
         fn check_packets(packets : Vec<SinglePacket>) -> Option<IP>{
             const MALICIOUS_STR: &str = "malicious";
+            const MALWARE_STR: &str = "malware";
 
             let src_ips = get_all_src_ips(packets.clone());
 
             for ip_src in src_ips{
+                println!("DBD: Current IP-{} ", ip_src.copy().get_ip());
                 //Extracting the source domain of the packet
                 let domain_src = match get_domain(ip_src.copy()){
                     Ok(domain) => {domain},
                     Err(_) => {return Some(IP::new_default())} //can not find the domain of src ip
                 };
-
+                println!("DBD: Current Domain- {} ", domain_src.clone());
                 //Sending the domain to VirusTotal
                 let result = match send_domain_to_virus_total(domain_src.clone()){
                     Ok(res) => {res}
                     Err(_) => {return Some(IP::new_default())} //can not send request to check
                 };
 
+                let total_bad_scans = result.matches(MALICIOUS_STR).count() +
+                    result.matches(MALWARE_STR).count();
                 //Checking the amount of malicious results
-                if result.matches(MALICIOUS_STR).count() >= MAX_MALICIOUS_SCANS_AMOUNT as usize{
+                if total_bad_scans >= MAX_BAD_SCANS_AMOUNT as usize
+                {
+                    println!("Bad site: {}", ip_src.copy().get_ip());
                     return Some(ip_src.copy());
                 }
             }
@@ -112,6 +118,8 @@ pub mod download_scanner{
         let rt = Runtime::new().unwrap();
 
         let url = BASE_URL.to_string() + &String::from(domain.clone().to_string());
+
+        println!("DBD: Full URL- {}", url.clone());
 
         //Sending the request
         let response = match rt.block_on(send_get_request(url.clone(), API_KEY.to_string())) {

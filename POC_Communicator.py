@@ -12,12 +12,15 @@ def main():
     server_addr = (IP_ADDR, PORT_NUM)
     listening_socket.bind(server_addr)
     listening_socket.listen(AMOUNT_CLIENTS_AT_SAME_TIME)
-
+    print("Waiting for a client")
+    client_sock, client_addr = listening_socket.accept()
+    print("Got client! ")
     while True:
-        print("Waiting for a client: ")
-        client_sock, client_addr = listening_socket.accept()
         msg = client_sock.recv(MAX_SIZE_BUFFER).decode()
-        print(msg)
+        print("Got a msg")
+        print(str(msg))
+        if msg == str(400):
+            break
 
 
 if __name__ == "__main__":

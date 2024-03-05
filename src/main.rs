@@ -1,6 +1,9 @@
 use std::io::stdin;
+use crate::ddos_scanner::ddos_scanner::{DDOS_PORT, DdosScanner};
 use crate::ip::ip::IP;
 use crate::server::server::Server;
+use crate::sniffer::sniffer::Sniffer;
+
 mod ip;
 mod sniffer;
 mod scanner;
@@ -16,7 +19,7 @@ mod server;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    let ip = IP::new("192.168.1.1".to_string()).unwrap();
+    let ip = IP::new("192.168.1.101".to_string()).unwrap();
 
     const USERNAME: &str = "bsyl";
     const PASSWORD: &str = "zaq1@wsx";

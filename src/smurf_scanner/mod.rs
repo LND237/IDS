@@ -6,9 +6,9 @@ pub mod smurf_scanner{
 
     pub const ATTACK_NAME : &str = "Smurf";
     pub const SMURF_PORT: u16 = ALL_PORTS;
-    const AMOUNT_PACKETS_SNIFF: i32 = 100000;
+    const AMOUNT_PACKETS_SNIFF: i32 = 1000;
     const TIME_SNIFF: i32 = 5;
-    const RATE_LIMIT: i32 = 20000;
+    const RATE_LIMIT: i32 = 150;
 
     #[derive(Clone)]
     pub struct SmurfScanner{
@@ -36,7 +36,7 @@ pub mod smurf_scanner{
                     amount_icmp_packets += 1;
                 }
             }
-
+            println!("Amount of ICMPs: {}", amount_icmp_packets);
             //Checking if it is over the RATE_LIMIT
             if amount_icmp_packets >= RATE_LIMIT{
                 return None;

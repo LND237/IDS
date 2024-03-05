@@ -3,6 +3,7 @@ pub mod server{
     use std::sync::{Arc, Mutex};
     use std::thread;
     use chrono::Utc;
+    use tokio::runtime::Runtime;
     use crate::ddos_scanner::ddos_scanner::DdosScanner;
     use crate::dns_scanner::dns_scanner::DnsScanner;
     use crate::download_scanner::download_scanner::DownloadScanner;
@@ -168,8 +169,9 @@ pub mod server{
                         for (name, result) in results {
                             let ip_clone = ip.copy();
                             let name_clone = name.clone();
-                            //let _ = Server::handle_result(db_clone.copy(), ip_clone, name_clone, result, &mut multi_scanner);
-                            println!("{}", name_clone);
+                            let rt = Runtime::new().unwrap();
+                            // Execute the async function within the runtime
+                            rt.block_on(Server::handle_result(db_clone.copy(), ip_clone, name_clone, result, &mut multi_scanner));
                     }});
                     threads.push(thread_handle);
                 }
@@ -190,6 +192,7 @@ pub mod server{
         /// to a MultiScanner variable- the scanner of the client.
         ///Output: None.
         async fn handle_result(database: MongoDB, ip_client: IP, attack_name: String, result: Option<IP>, client_scanner: &mut MultiScanner){
+            println!("Handling the result of the attack {}", attack_name.clone());
             const PORT_NUM : u16 = 50001;
             let mut data_to_send = None;
             match result {
@@ -206,6 +209,7 @@ pub mod server{
             }
             //If the variable was implemented
             if let Some(the_data) = data_to_send{
+                println!("{}", attack_name.clone());
                 let _ = database.add_attack(ip_client.copy(), the_data.copy()).await;
                 let _ = notify_client(ip_client.copy(), PORT_NUM, the_data.copy());
             }

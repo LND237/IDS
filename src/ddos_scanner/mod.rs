@@ -8,7 +8,7 @@ pub mod ddos_scanner{
     pub const DDOS_PORT: u16 = ALL_PORTS;
     const AMOUNT_PACKETS_SNIFF: i32 = 100000;
     const TIME_SNIFF: i32 = 5;
-    const RATE_LIMIT: i32 = 20000;
+    const RATE_LIMIT: i32 = 10;
 
     #[derive(Clone)]
     pub struct DdosScanner{
@@ -46,6 +46,7 @@ pub mod ddos_scanner{
             for (key, value) in hash_map_ip{
                 //If this IP did a DDos attack
                 if value > RATE_LIMIT{
+                    println!("{}: {}", key.copy().get_ip(), value);
                     return Some(key.copy());
                 }
             }
