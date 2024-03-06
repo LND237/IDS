@@ -19,7 +19,7 @@ mod server;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    let ip = IP::new("192.168.1.101".to_string()).unwrap();
+    let ip = IP::new("192.168.68.71".to_string()).unwrap();
 
     const USERNAME: &str = "bsyl";
     const PASSWORD: &str = "zaq1@wsx";
