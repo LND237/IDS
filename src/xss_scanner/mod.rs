@@ -32,7 +32,10 @@ pub mod xss_scanner{
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
-                let headers = parse_http_headers(&mut packet).unwrap();
+                let headers = match parse_http_headers(&mut packet){
+                    Ok(the_headers) => {the_headers},
+                    Err(e) => {return Some(IP::new_default())}
+                };
                 for header in headers {
                     if header.name.eq_ignore_ascii_case(CSP){
                         // Process the CSP value as needed
