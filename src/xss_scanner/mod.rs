@@ -32,7 +32,10 @@ pub mod xss_scanner{
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
-                let headers = parse_http_headers(&mut packet).unwrap();
+                let headers = match parse_http_headers(&mut packet){
+                    None => {return Some(IP::new_default());}
+                    Some(headers) => {headers}
+                };
                 for header in headers {
                     if header.name.eq_ignore_ascii_case(CSP){
                         // Process the CSP value as needed
@@ -72,13 +75,17 @@ pub mod xss_scanner{
     }
 
 
-    ///The function extracts the headers from a http packet, if it is not it will throw an error
+    ///The function extracts the headers from a HTTP packet, if it is not it will return None
     /// Input: a SinglePacket reference-the response to extract from.
-    /// Output: a Some (String) value - the headers of the http packet, if it is not a http packet it will throw an error
+    /// Output: an Option<Vec<Header>> value - the headers of the HTTP packet, or None if not an HTTP packet
     fn parse_http_headers(response: &mut Vec<u8>) -> Option<Vec<Header>> {
         let mut headers = [httparse::EMPTY_HEADER; 4];
         let mut resp = httparse::Response::new(&mut headers);
-        let _ = resp.parse(response).unwrap();
-        return Some(resp.headers.to_vec().clone());
+
+        match resp.parse(response) {
+            Ok(_) => Some(resp.headers.to_vec()), // Clone if you need a copy
+            Err(_) => None
+        }
     }
+
 }
