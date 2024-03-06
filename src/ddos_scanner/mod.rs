@@ -8,7 +8,7 @@ pub mod ddos_scanner{
     pub const DDOS_PORT: u16 = ALL_PORTS;
     const AMOUNT_PACKETS_SNIFF: i32 = 100000;
     const TIME_SNIFF: i32 = 5;
-    const RATE_LIMIT: i32 = 10;
+    const RATE_LIMIT: i32 = 2000;
 
     #[derive(Clone)]
     pub struct DdosScanner{

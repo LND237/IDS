@@ -1,5 +1,8 @@
+use virustotal3::{LastAnalysisStats, VtClient};
+
 pub mod download_scanner{
     use std::collections::HashSet;
+    use std::future::Future;
     use std::net::IpAddr;
     use dns_lookup::lookup_addr;
     use tokio::runtime::Runtime;
@@ -7,6 +10,8 @@ pub mod download_scanner{
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::sniffer::sniffer::{extract_ip_src_from_packet, SinglePacket, Sniffer};
     use crate::xss_scanner::xss_scanner::HTTP_PORT;
+    use virustotal3::{ip, domain, TotalVotes, LastAnalysisStats};
+    use virustotal3::VtClient;
 
     //Public Constants
     pub const ATTACK_NAME : &str = "Drive By Download";
@@ -17,6 +22,9 @@ pub mod download_scanner{
     const AMOUNT_PACKETS_SNIFF: i32 = 50;
     const TIME_SNIFF: i32 = 3;
     const MAX_BAD_SCANS_AMOUNT: i32 = 1;
+
+    const API_KEY : &str = "cb8ea921f68903f1f192f4db50926e4bef971e95939e10c19da7256ac4ae344b";
+
 
     #[derive(Clone)]
     pub struct DownloadScanner{
@@ -44,7 +52,11 @@ pub mod download_scanner{
             let src_ips = get_all_src_ips(packets.clone());
 
             for ip_src in src_ips{
-                println!("DBD: Current IP-{} ", ip_src.copy().get_ip());
+                println!("DBD: Current IP-{ }", ip_src.copy().get_ip());
+
+                //Sending the ip to the VirusTotal
+
+
                 //Extracting the source domain of the packet
                 let domain_src = match get_domain(ip_src.copy()){
                     Ok(domain) => {domain},
@@ -57,14 +69,14 @@ pub mod download_scanner{
                     Err(_) => {return Some(IP::new_default())} //can not send request to check
                 };
 
-                let total_bad_scans = result.matches(MALICIOUS_STR).count() +
+                /*let total_bad_scans = result.matches(MALICIOUS_STR).count() +
                     result.matches(MALWARE_STR).count();
                 //Checking the amount of malicious results
                 if total_bad_scans >= MAX_BAD_SCANS_AMOUNT as usize
                 {
                     println!("Bad site: {}", ip_src.copy().get_ip());
                     return Some(ip_src.copy());
-                }
+                }*/
             }
 
             return Some(IP::new_default());
@@ -97,11 +109,11 @@ pub mod download_scanner{
     /// Input: an IP variable- the ip to find its ip.
     /// Output: a String value- the domain(if there is an
     /// error- returning Err).
-    fn get_domain(ip : IP) -> Result<String, String>{
+    fn get_domain(ip : IP) -> Option<String>{
         let ip_address: IpAddr = ip.get_ip().parse().unwrap();
         return match lookup_addr(&ip_address) {
-            Ok(domain) => {Ok(domain)}
-            Err(_) => {Err("Can not locate sender!".to_string())}
+            Ok(domain) => { Some(domain) }
+            Err(_) => { None }
         };
     }
 
@@ -110,46 +122,15 @@ pub mod download_scanner{
     /// Input: a String variable- the domain to check.
     /// Output: a String value- the response of the site(if
     /// there is an error- returning Err).
-    fn send_domain_to_virus_total(domain: String) -> Result<String, String> {
+    fn send_domain_to_virus_total(domain: String) -> Result<LastAnalysisStats, String> {
         //Constants for Sending the request
-        const API_KEY : &str = "cb8ea921f68903f1f192f4db50926e4bef971e95939e10c19da7256ac4ae344b";
-        const BASE_URL: &str = "https://www.virustotal.com/api/v3/urls/";
-
         let rt = Runtime::new().unwrap();
 
-        let url = BASE_URL.to_string() + &String::from(domain.clone().to_string());
-
-        println!("DBD: Full URL- {}", url.clone());
-
         //Sending the request
-        let response = match rt.block_on(send_get_request(url.clone(), API_KEY.to_string())) {
-            Ok(response) => {response},
-            Err(_) => {return Err("Error sending request to virus total".to_string())}
+        return match rt.block_on(get_results_of_domain(domain.clone())) {
+            None => {Err("No analysis results".to_string())}
+            Some(result) => {Ok(result)}
         };
-
-        return Ok(response);
-    }
-
-    ///The function sends a get request with an apikey header.
-    /// Input: 2 String variables- the url to send the request
-    /// to and the apikey for the header.
-    /// Output: a String value- the response of the request(if
-    /// there is an error- returning Err).
-    async fn send_get_request(url : String, apikey: String) -> Result<String, String>{
-        let client = reqwest::Client::new();
-        let result = client
-            .get(&url)
-            .header("x-apikey", apikey.clone())
-            .send()
-            .await
-            .map_err(|err| err.to_string())?;
-
-        if result.status().is_success() {
-            let text = result.text().await.map_err(|err| err.to_string())?;
-            Ok(text)
-        } else {
-            Err("Request to VirusTotal failed".to_string())
-        }
     }
 
     ///The function extracts all the src ips from the
@@ -167,4 +148,29 @@ pub mod download_scanner{
         }
         return set_ips;
     }
+
+    ///The function sends the domain to virus total async and
+    /// gets its results.
+    /// Input: a String variable -the domain to check.
+    /// Output: an Option<LastAnalysisStats> value- the results(if
+    /// exist).
+    async fn get_results_of_domain(domain: String) -> Option<LastAnalysisStats> {
+
+        // Example source IP address
+        let source_domain: &str = domain.as_str();
+
+        // Create a VirusTotal client
+        let client = VtClient::new(API_KEY.clone());
+
+        // Request the IP report
+        let report =  match client.report_domain(source_domain.clone()).await{
+            Ok(result) => {result}
+            Err(_) => {
+                print!("None");
+                return None}
+        };
+
+        return report.data.attributes.last_analysis_stats;
+    }
 }
+

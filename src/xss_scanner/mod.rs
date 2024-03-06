@@ -6,7 +6,7 @@ pub mod xss_scanner{
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
-    pub const AMOUNT_PACKETS_SNIFF: i32 = 1;
+    pub const AMOUNT_PACKETS_SNIFF: i32 = 100;
     pub const TIME_SNIFF: i32 = 5;
     pub const CSP: &str = "Content-Security-Policy";
 
@@ -32,7 +32,10 @@ pub mod xss_scanner{
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
-                let headers = parse_http_headers(&mut packet).unwrap();
+                let headers = match parse_http_headers(&mut packet){
+                    None => {return Some(IP::new_default());}
+                    Some(headers) => {headers}
+                };
                 for header in headers {
                     if header.name.eq_ignore_ascii_case(CSP){
                         // Process the CSP value as needed
@@ -78,6 +81,12 @@ pub mod xss_scanner{
     fn parse_http_headers(response: &mut Vec<u8>) -> Option<Vec<Header>> {
         let mut headers = [httparse::EMPTY_HEADER; 4];
         let mut resp = httparse::Response::new(&mut headers);
+        let parse_result = match resp.parse(response){
+            Ok(_) => {}
+            Err(_) => {return None;}
+        };
+
+
         let _ = resp.parse(response).unwrap();
         return Some(resp.headers.to_vec().clone());
     }

@@ -1,4 +1,6 @@
 pub mod scanner {
+    use std::future::Future;
+    use async_std::task;
     use crate::ip::ip::IP;
 
     // Interface for scanners
@@ -45,5 +47,13 @@ pub mod scanner {
         pub fn copy(&self) -> Self{
             return Self{attack_name: self.attack_name.clone(), ip: self.ip.copy()};
         }
+    }
+
+    pub fn run_async_function<F, T>(async_func: F) -> T
+        where
+            F: Future<Output = T> + Send + 'static,
+            T: Send + 'static,
+    {
+        task::block_on(async_func)
     }
 }
