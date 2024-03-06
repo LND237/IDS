@@ -51,7 +51,7 @@ fn get_string_input() -> String{
 
 ///The function gets an ip input from the user
 /// Input: None.
-/// Output: an IP struct- the ip from the user
+/// Output: an IP struct - the ip from the user
 fn get_ip_input() -> IP{
     let mut ip = IP::new_default();
     let mut is_ip_valid = false;
