@@ -1,12 +1,12 @@
 pub mod xss_scanner{
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet};
-    use httparse::Header;
+    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet, get_string_packet};
+    use httparse::{EMPTY_HEADER, Response, Error, Header};
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
-    pub const AMOUNT_PACKETS_SNIFF: i32 = 1;
+    pub const AMOUNT_PACKETS_SNIFF: i32 = 100;
     pub const TIME_SNIFF: i32 = 5;
     pub const CSP: &str = "Content-Security-Policy";
 
@@ -78,13 +78,13 @@ pub mod xss_scanner{
     ///The function extracts the headers from a HTTP packet, if it is not it will return None
     /// Input: a SinglePacket reference-the response to extract from.
     /// Output: an Option<Vec<Header>> value - the headers of the HTTP packet, or None if not an HTTP packet
-    fn parse_http_headers(response: &mut Vec<u8>) -> Option<Vec<Header>> {
-        let mut headers = [httparse::EMPTY_HEADER; 4];
-        let mut resp = httparse::Response::new(&mut headers);
+    fn parse_http_headers(response: &mut Vec<u8>) -> Result<Vec<Header>, Error> {
+        let mut headers = Vec::new(); // Dynamic header storage
+        let mut resp = Response::new(&mut headers);
 
         match resp.parse(response) {
-            Ok(_) => Some(resp.headers.to_vec()), // Clone if you need a copy
-            Err(_) => None
+            Ok(_) => Ok(headers),  // Return headers directly
+            Err(e) => Err(e),      // Propagate httparse error
         }
     }
 
