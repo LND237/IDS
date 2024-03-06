@@ -33,8 +33,8 @@ pub mod xss_scanner{
             for mut packet in packets{
                 // Parse the HTTP response packet
                 let headers = match parse_http_headers(&mut packet){
-                    None => {return Some(IP::new_default());}
-                    Some(headers) => {headers}
+                    Ok(the_headers) => {the_headers},
+                    Err(e) => {return Some(IP::new_default())}
                 };
                 for header in headers {
                     if header.name.eq_ignore_ascii_case(CSP){
