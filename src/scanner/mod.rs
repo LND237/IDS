@@ -1,6 +1,7 @@
 pub mod scanner {
     use std::future::Future;
     use async_std::task;
+    use tokio::runtime::Runtime;
     use crate::ip::ip::IP;
 
     // Interface for scanners
@@ -48,12 +49,17 @@ pub mod scanner {
             return Self{attack_name: self.attack_name.clone(), ip: self.ip.copy()};
         }
     }
-
+    ///The function runs an async function as
+    /// a sync function.
+    /// Types: T- the type of the returned value and
+    /// F- the function to run.
+    /// Output- if the function has an output- F
     pub fn run_async_function<F, T>(async_func: F) -> T
         where
             F: Future<Output = T> + Send + 'static,
             T: Send + 'static,
     {
-        task::block_on(async_func)
+        let rt = Runtime::new().unwrap();
+        rt.block_on(async_func)
     }
 }
