@@ -1,8 +1,8 @@
 pub mod xss_scanner{
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet, get_string_packet};
-    use httparse::{EMPTY_HEADER, Response, Error, Header};
+    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet, get_string_packet, extract_http_payload};
+    use httparse::{Response, Error, Header};
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
@@ -32,9 +32,15 @@ pub mod xss_scanner{
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
-                let headers = match parse_http_headers(&mut packet){
+                let mut payload = match extract_http_payload(&mut packet){
+                    Some(the_payload) => {the_payload},
+                    None => {continue}
+                };
+                let headers = match parse_http_headers(&mut payload){
                     Ok(the_headers) => {the_headers},
-                    Err(e) => {return Some(IP::new_default())}
+                    Err(e) => {
+                        println!("Err http parse: {}", e.to_string());
+                        continue}
                 };
                 for header in headers {
                     if header.name.eq_ignore_ascii_case(CSP){
@@ -78,11 +84,12 @@ pub mod xss_scanner{
     ///The function extracts the headers from a HTTP packet, if it is not it will return None
     /// Input: a SinglePacket reference-the response to extract from.
     /// Output: an Option<Vec<Header>> value - the headers of the HTTP packet, or None if not an HTTP packet
-    fn parse_http_headers(response: &mut Vec<u8>) -> Result<Vec<Header>, Error> {
+    fn parse_http_headers(payload: &mut SinglePacket) -> Result<Vec<Header>, Error> {
         let mut headers = Vec::new(); // Dynamic header storage
         let mut resp = Response::new(&mut headers);
-
-        match resp.parse(response) {
+        // Before calling resp.parse(response) see the contebt
+        println!("Raw packet (first 32 bytes as hex): {:02X?}", &payload[..32]);
+        match resp.parse(payload) {
             Ok(_) => Ok(headers),  // Return headers directly
             Err(e) => Err(e),      // Propagate httparse error
         }

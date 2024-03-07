@@ -8,6 +8,8 @@ pub mod sniffer{
                        udp::UdpPacket};
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
+    use pnet::packet::ip::IpNextHeaderProtocols;
+
     pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;
     pub const ALL_PORTS: u16 = 0;
@@ -93,10 +95,10 @@ pub mod sniffer{
     ///The function extracts from the packet its header data.
     /// Input: a SinglePacket- the packet with the data.
     /// Output: a String value- the string with the data about the packet.
-    pub fn get_string_packet(the_packet: &SinglePacket) -> String{
+    pub fn get_string_packet(the_packet: SinglePacket) -> String{
         let mut packet_str = String::new();
         // Parse Ethernet header
-        if let Some(ethernet_packet) = EthernetPacket::new(the_packet) {
+        if let Some(ethernet_packet) = EthernetPacket::new(&the_packet) {
             //Source MAC address
             packet_str.push_str("Source MAC: ");
             packet_str.push_str(&ethernet_packet.get_source().to_string());
@@ -114,7 +116,7 @@ pub mod sniffer{
                 packet_str.push_str(&ipv4_packet.get_destination().to_string());
 
                 // Check if it's a TCP(/UDP) packet
-                if ipv4_packet.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Tcp {
+                if ipv4_packet.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
                     if let Some(tcp_packet) = TcpPacket::new(ipv4_packet.payload()) {
                         //Source port
                         packet_str.push_str("\nSource Port: ");
@@ -208,5 +210,14 @@ pub mod sniffer{
             }
         }
         return None;
+    }
+    pub fn extract_http_payload(packet: &[u8]) -> Option<SinglePacket> {
+        let ip_packet = Ipv4Packet::new(packet)?;
+        if ip_packet.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
+            let tcp_packet = TcpPacket::new(ip_packet.payload())?;
+            Some(tcp_packet.payload().to_vec())
+        } else {
+            None
+        }
     }
 }
