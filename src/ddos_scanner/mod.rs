@@ -2,13 +2,10 @@ pub mod ddos_scanner{
     use std::collections::HashMap;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket, extract_ip_src_from_packet, filter_packets};
+    use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet};
 
     pub const ATTACK_NAME : &str = "DDOS";
-    pub const DDOS_PORT: u16 = ALL_PORTS;
-    const AMOUNT_PACKETS_SNIFF: i32 = 100000;
-    const TIME_SNIFF: i32 = 5;
-    const RATE_LIMIT: i32 = 2000;
+    const RATE_LIMIT: i32 = 100;
 
     #[derive(Clone)]
     pub struct DdosScanner{

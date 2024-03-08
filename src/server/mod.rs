@@ -95,7 +95,8 @@ pub mod server{
         /// Output: None.
         fn spawn_scanner_threads(&self, results: &Arc<Mutex<ScanResults>>, threads: &mut Vec<thread::JoinHandle<()>>) {
             let mut sniffer = Sniffer::new_default_port(self.ddos_scanner.get_base_data().get_ip());
-            let packets = sniffer.sniff(10000, 2);
+            let packets = sniffer.sniff(1000, 3);
+            println!("Total amount: {}", packets.clone().len());
 
             self.spawn_thread_for_scanner(&self.ddos_scanner, results.clone(), threads, packets.clone());
             self.spawn_thread_for_scanner(&self.dns_scanner, results.clone(), threads, packets.clone());

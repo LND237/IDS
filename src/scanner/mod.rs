@@ -1,6 +1,5 @@
 pub mod scanner {
     use std::future::Future;
-    use async_std::task;
     use tokio::runtime::Runtime;
     use crate::ip::ip::IP;
     use crate::sniffer::sniffer::SinglePacket;

@@ -1,25 +1,17 @@
-use virustotal3::{LastAnalysisStats, VtClient};
-
 pub mod download_scanner{
     use std::collections::HashSet;
-    use std::future::Future;
     use std::net::IpAddr;
     use dns_lookup::lookup_addr;
-    use tokio::runtime::Runtime;
     use crate::ip::ip::IP;
     use crate::scanner::scanner::{run_async_function, Scanner, ScannerFunctions};
-    use crate::sniffer::sniffer::{extract_ip_src_from_packet, filter_packets, SinglePacket, Sniffer};
+    use crate::sniffer::sniffer::{extract_ip_src_from_packet, filter_packets, SinglePacket};
     use crate::xss_scanner::xss_scanner::HTTP_PORT;
-    use virustotal3::{ip, domain, TotalVotes, LastAnalysisStats};
+    use virustotal3::LastAnalysisStats;
     use virustotal3::VtClient;
 
     //Public Constants
     pub const ATTACK_NAME : &str = "Drive By Download";
     pub const HTTPS_PORT: u16 = 443;
-
-    //Private Constants
-    const AMOUNT_PACKETS_SNIFF: i32 = 50;
-    const TIME_SNIFF: i32 = 3;
     const MAX_BAD_SCANS_AMOUNT: i32 = 3;
 
     const API_KEY : &str = "cb8ea921f68903f1f192f4db50926e4bef971e95939e10c19da7256ac4ae344b";
@@ -48,7 +40,6 @@ pub mod download_scanner{
             let src_ips = get_all_src_ips(packets.clone());
 
             for ip_src in src_ips{
-                println!("DBD: Current IP-{ }", ip_src.copy().get_ip());
                 let mut total_bad_scans = 0;
 
                 //Sending the ip to the VirusTotal
@@ -56,7 +47,6 @@ pub mod download_scanner{
                     None => {}
                     Some(result) => {total_bad_scans += result.malicious + result.suspicious}
                 };
-                println!("Total bad scans IP: {}", total_bad_scans);
                 if total_bad_scans > MAX_BAD_SCANS_AMOUNT as u32 {
                     return Some(ip_src.copy());
                 }
@@ -66,7 +56,6 @@ pub mod download_scanner{
                     Some(domain) => {domain},
                     None => {continue} //can not find the domain of src ip
                 };
-                println!("DBD: Current Domain- {} ", domain_src.clone());
                 //Sending the domain to VirusTotal
                 let domain_result = match run_async_function(get_results_of_domain(domain_src.clone())){
                     Some(res) => {res},
@@ -74,7 +63,6 @@ pub mod download_scanner{
                 };
 
                 total_bad_scans = domain_result.suspicious + domain_result.malicious;
-                println!("Total bad scans IP: {}", total_bad_scans);
 
                 if total_bad_scans > MAX_BAD_SCANS_AMOUNT as u32{
                     return Some(ip_src.copy());
@@ -94,7 +82,9 @@ pub mod download_scanner{
         fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
             let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);
             the_packets.append(&mut filter_packets(packets.clone(), HTTPS_PORT));
-            return DownloadScanner::check_packets(the_packets);
+
+            println!("DBD Amount Packets: {}", the_packets.clone().len());
+            return DownloadScanner::check_packets(the_packets.clone());
         }
         ///The function gets the base data of it.
         /// Input: None.

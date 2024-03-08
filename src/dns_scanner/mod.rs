@@ -7,8 +7,6 @@ pub mod dns_scanner{
 
     pub const ATTACK_NAME : &str = "DNS";
     pub const DNS_PORT: u16 = 53;
-    pub const AMOUNT_PACKETS_SNIFF: i32 = 10000;
-    pub const TIME_SNIFF: i32 = 5;
 
     #[derive(Clone)]
     pub struct DnsScanner{

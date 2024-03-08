@@ -1,8 +1,6 @@
 use std::io::stdin;
-use crate::ddos_scanner::ddos_scanner::{DDOS_PORT, DdosScanner};
 use crate::ip::ip::IP;
 use crate::server::server::Server;
-use crate::sniffer::sniffer::{filter_packets, get_string_packet, Sniffer};
 
 mod ip;
 mod sniffer;
@@ -19,9 +17,9 @@ mod server;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    let ip = IP::new("192.168.1.103".to_string()).unwrap();
+    let ip = IP::new("192.168.1.138".to_string()).unwrap();
 
-    /*const USERNAME: &str = "bsyl";
+    const USERNAME: &str = "bsyl";
     const PASSWORD: &str = "zaq1@wsx";
 
 
@@ -32,22 +30,7 @@ async fn main() -> mongodb::error::Result<()> {
         Err(msg) => {panic!("{}", msg.to_string())}
     };
     println!("Server started");
-    server.run().await;*/
-
-    let mut sniffer = Sniffer::new_default_port(ip.copy());
-    let packets = sniffer.sniff(1000, 2);
-    let filtered = filter_packets(packets, 443);
-    let mut count = 1;
-    println!("Amount packets: {}", filtered.len());
-    for pack in filtered{
-        println!("The packet  no.{} content", count);
-        println!("{}", get_string_packet(pack));
-        count += 1;
-    }
-
-
-
-
+    server.run().await;
     Ok(())
 }
 

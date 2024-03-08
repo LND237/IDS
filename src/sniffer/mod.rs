@@ -1,7 +1,7 @@
 pub mod sniffer{
     use local_ip_address::local_ip;
     use pnet::datalink::{self, Channel::Ethernet, NetworkInterface};
-    use pnet::packet::{self, Packet,
+    use pnet::packet::{Packet,
                        ethernet::EthernetPacket,
                        ipv4::Ipv4Packet,
                        tcp::TcpPacket,
@@ -9,7 +9,6 @@ pub mod sniffer{
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
     use pnet::packet::ip::IpNextHeaderProtocols;
-    use trust_dns_resolver::config::Protocol::Tcp;
 
     pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;
@@ -167,7 +166,7 @@ pub mod sniffer{
                 // Check if the packet is destined for the target IP address
                 if ipv4.get_destination().to_string() == IP::get_ip(&ip).to_string() {
                     // Check if the packet is a UDP packet
-                    if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Udp {
+                    if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Udp {
                         //Extracting the port from the UDP packet
                         if let Some(udp) = UdpPacket::new(ipv4.payload()) {
                             if udp.get_source() == port || port == ALL_PORTS{
@@ -176,7 +175,7 @@ pub mod sniffer{
                         }
                     }
                     // Check if the packet is a TCP packet
-                    else if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Tcp {
+                    else if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
                         //Extracting the port from the TCP packet
                         if let Some(tcp) = TcpPacket::new(ipv4.payload()) {
                             if tcp.get_source() == port || port == ALL_PORTS{

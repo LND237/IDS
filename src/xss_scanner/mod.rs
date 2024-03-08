@@ -1,13 +1,11 @@
 pub mod xss_scanner{
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet, get_string_packet, extract_http_payload, filter_packets};
+    use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet, extract_http_payload, filter_packets};
     use httparse::{Response, Error, Header};
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
-    pub const AMOUNT_PACKETS_SNIFF: i32 = 100;
-    pub const TIME_SNIFF: i32 = 5;
     pub const CSP: &str = "Content-Security-Policy";
 
     #[derive(Clone)]

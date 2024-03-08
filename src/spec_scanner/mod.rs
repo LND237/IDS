@@ -1,12 +1,9 @@
 pub mod spec_scanner{
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket, extract_ip_src_from_packet};
+    use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet};
 
-    const SPEC_ATTACK_PORT: u16 = ALL_PORTS;
     const SPEC_ATTACK_NAME: &str = "REPEAT_ATTACK";
-    const AMOUNT_PACKETS_SNIFF: i32 = 50;
-    const TIME_SNIFF: i32 = 10;
 
     #[derive(Clone)]
     pub struct SpecScanner{
