@@ -17,6 +17,9 @@ pub mod server{
     use crate::sniffer::sniffer::{SinglePacket, Sniffer};
 
     pub type ScanResults = HashMap<String, Option<IP>>;
+
+    const MAX_AMOUNT_OF_PACKETS : i32 = 1000;
+    const SNIFF_TIME: i32 = 3;
     #[derive(Clone)]
     pub struct MultiScanner{
         spec_scanners: Vec<SpecScanner>,
@@ -95,7 +98,7 @@ pub mod server{
         /// Output: None.
         fn spawn_scanner_threads(&self, results: &Arc<Mutex<ScanResults>>, threads: &mut Vec<thread::JoinHandle<()>>) {
             let mut sniffer = Sniffer::new_default_port(self.ddos_scanner.get_base_data().get_ip());
-            let packets = sniffer.sniff(1000, 3);
+            let packets = sniffer.sniff(MAX_AMOUNT_OF_PACKETS, SNIFF_TIME);
             println!("Total amount: {}", packets.clone().len());
 
             self.spawn_thread_for_scanner(&self.ddos_scanner, results.clone(), threads, packets.clone());
