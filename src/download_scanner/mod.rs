@@ -8,7 +8,7 @@ pub mod download_scanner{
     use tokio::runtime::Runtime;
     use crate::ip::ip::IP;
     use crate::scanner::scanner::{run_async_function, Scanner, ScannerFunctions};
-    use crate::sniffer::sniffer::{extract_ip_src_from_packet, SinglePacket, Sniffer};
+    use crate::sniffer::sniffer::{extract_ip_src_from_packet, filter_packets, SinglePacket, Sniffer};
     use crate::xss_scanner::xss_scanner::HTTP_PORT;
     use virustotal3::{ip, domain, TotalVotes, LastAnalysisStats};
     use virustotal3::VtClient;
@@ -91,12 +91,10 @@ pub mod download_scanner{
         /// Input: self reference(DownloadScanner)
         /// Output: An IP value- the IP who might do the attack(if
         /// there is no attack-returning default IP Broadcast).
-        fn scan(&self) -> Option<IP> {
-            let mut sniffer_1 = Sniffer::new(self.base.get_ip(), HTTP_PORT).unwrap();
-            let mut sniffer_2 = Sniffer::new(self.base.get_ip(), HTTPS_PORT).unwrap();
-            let mut packets = sniffer_1.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
-            packets.append(&mut sniffer_2.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF));
-            return DownloadScanner::check_packets(packets);
+        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
+            let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);
+            the_packets.append(&mut filter_packets(packets.clone(), HTTPS_PORT));
+            return DownloadScanner::check_packets(the_packets);
         }
         ///The function gets the base data of it.
         /// Input: None.

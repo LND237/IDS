@@ -9,6 +9,7 @@ pub mod sniffer{
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
     use pnet::packet::ip::IpNextHeaderProtocols;
+    use trust_dns_resolver::config::Protocol::Tcp;
 
     pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;
@@ -25,11 +26,12 @@ pub mod sniffer{
         /// Input: An IP struct- the destination ip to sniff and an
         /// u16 variable- the source port to sniff.
         /// Output: An "object" of struct Sniffer.
-        pub fn new(ip: IP, port: u16) -> Result<Self, String> {
-            return match true {
-                true => Ok(Sniffer { port, ip: IP::copy(&ip), packets: Vec::new() }),
-                false => Err("Invalid port number!".to_string())
-            }
+        pub fn new(ip: IP, port: u16) -> Self {
+            return Self { port, ip: IP::copy(&ip), packets: Vec::new() };
+        }
+
+        pub fn new_default_port(ip: IP) -> Self{
+            return Self { port: ALL_PORTS, ip: IP::copy(&ip), packets: Vec::new() }
         }
 
         ///The function gets the ip from the structure.
@@ -219,5 +221,29 @@ pub mod sniffer{
         } else {
             None
         }
+    }
+
+    pub fn filter_packets(packets: Vec<SinglePacket>, port: u16) -> Vec<SinglePacket>{
+        let mut filtered_packets = Vec::new();
+
+        for packet in packets{
+            if let Some(ethernet) = EthernetPacket::new(&packet) {
+                // Extract the IPv4 packet
+                if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
+                    if let Some(transport) =  UdpPacket::new(ipv4.payload()){
+                        if port == transport.get_source(){
+                            filtered_packets.push(packet.clone());
+                        }
+                    }
+                    else if let Some(transport) =  TcpPacket::new(ipv4.payload()){
+                        if port == transport.get_source(){
+                            filtered_packets.push(packet.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return filtered_packets;
     }
 }

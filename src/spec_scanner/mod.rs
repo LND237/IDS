@@ -54,9 +54,7 @@ pub mod spec_scanner{
         /// Input: self reference(SpecScanner)
         /// Output: An IP Value- the IP of the attacker(if
         /// there is no attack -returning default IP Broadcast).
-        fn scan(&self) -> Option<IP> {
-            let mut sniffer = Sniffer::new(self.base.get_ip(), SPEC_ATTACK_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
+        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
             return self.check_packets(packets);
         }
 

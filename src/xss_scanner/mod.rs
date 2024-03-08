@@ -1,7 +1,7 @@
 pub mod xss_scanner{
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet, get_string_packet, extract_http_payload};
+    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet, get_string_packet, extract_http_payload, filter_packets};
     use httparse::{Response, Error, Header};
 
     pub const ATTACK_NAME : &str = "XSS";
@@ -66,10 +66,8 @@ pub mod xss_scanner{
         /// Input: self-reference(XssScanner)
         /// Output: An IP Value-the IP of the fake site (if
         /// the site is good-returning default IP Broadcast).
-        fn scan(&self) -> Option<IP> {
-            let mut sniffer = Sniffer::new(self.base.get_ip(), HTTP_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
-            return XssScanner::check_packets(packets);
+        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
+            return XssScanner::check_packets(filter_packets(packets, HTTP_PORT));
         }
 
         ///The function gets the base data of it.

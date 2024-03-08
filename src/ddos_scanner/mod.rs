@@ -2,7 +2,7 @@ pub mod ddos_scanner{
     use std::collections::HashMap;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket, extract_ip_src_from_packet};
+    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket, extract_ip_src_from_packet, filter_packets};
 
     pub const ATTACK_NAME : &str = "DDOS";
     pub const DDOS_PORT: u16 = ALL_PORTS;
@@ -55,14 +55,13 @@ pub mod ddos_scanner{
     }
 
     impl ScannerFunctions for DdosScanner{
-        ///The function scans the network and checks if there is
+        ///The function scans and checks if there is
         /// a DDOS Attack or not.
-        /// Input: self reference(DdosScanner)
+        /// Input: self reference(DdosScanner) and a Vec<SinglePacket>
+        /// variable- the packets to check.
         /// Output: An IP Value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast).
-        fn scan(&self) -> Option<IP>{
-            let mut sniffer = Sniffer::new(self.base.get_ip(), DDOS_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
+        fn scan(&self, packets : Vec<SinglePacket>) -> Option<IP>{
             return DdosScanner::check_packets(packets);
         }
         ///The function gets the base data of it.
