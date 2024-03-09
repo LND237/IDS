@@ -1,13 +1,13 @@
 pub mod scanner {
     use std::future::Future;
-    use async_std::task;
     use tokio::runtime::Runtime;
     use crate::ip::ip::IP;
+    use crate::sniffer::sniffer::SinglePacket;
 
     // Interface for scanners
     pub trait ScannerFunctions: 'static {
         //Public function for all Scanners
-        fn scan(&self) -> Option<IP>;
+        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP>;
         fn get_base_data(&self) -> Scanner;
     }
 

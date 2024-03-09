@@ -2,12 +2,9 @@ pub mod smurf_scanner{
     use pnet::packet::icmp::IcmpPacket;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket};
+    use crate::sniffer::sniffer::{SinglePacket};
 
     pub const ATTACK_NAME : &str = "Smurf";
-    pub const SMURF_PORT: u16 = ALL_PORTS;
-    const AMOUNT_PACKETS_SNIFF: i32 = 1000;
-    const TIME_SNIFF: i32 = 5;
     const RATE_LIMIT: i32 = 150;
 
     #[derive(Clone)]
@@ -51,9 +48,7 @@ pub mod smurf_scanner{
         /// Input: self reference(DdosScanner)
         /// Output: An IP Value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast).
-        fn scan(&self) -> Option<IP>{
-            let mut sniffer = Sniffer::new(self.base.get_ip(), SMURF_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
+        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP>{
             return SmurfScanner::check_packets(packets);
         }
         ///The function gets the base data of it.

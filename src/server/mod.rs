@@ -14,8 +14,12 @@ pub mod server{
     use crate::spec_scanner::spec_scanner::SpecScanner;
     use crate::xss_scanner::xss_scanner::XssScanner;
     use crate::communicator::communicator::notify_client;
+    use crate::sniffer::sniffer::{SinglePacket, Sniffer};
 
     pub type ScanResults = HashMap<String, Option<IP>>;
+
+    const MAX_AMOUNT_OF_PACKETS : i32 = 1000;
+    const SNIFF_TIME: i32 = 3;
     #[derive(Clone)]
     pub struct MultiScanner{
         spec_scanners: Vec<SpecScanner>,
@@ -93,15 +97,19 @@ pub mod server{
         /// insert the results to and a Vec<thread> variable- the place to insert the thread to.
         /// Output: None.
         fn spawn_scanner_threads(&self, results: &Arc<Mutex<ScanResults>>, threads: &mut Vec<thread::JoinHandle<()>>) {
-            self.spawn_thread_for_scanner(&self.ddos_scanner, results.clone(), threads);
-            self.spawn_thread_for_scanner(&self.dns_scanner, results.clone(), threads);
-            self.spawn_thread_for_scanner(&self.download_scanner, results.clone(), threads);
-            self.spawn_thread_for_scanner(&self.smurf_scanner, results.clone(), threads);
-            self.spawn_thread_for_scanner(&self.xss_scanner, results.clone(), threads);
+            let mut sniffer = Sniffer::new_default_port(self.ddos_scanner.get_base_data().get_ip());
+            let packets = sniffer.sniff(MAX_AMOUNT_OF_PACKETS, SNIFF_TIME);
+            println!("Total amount: {}", packets.clone().len());
+
+            self.spawn_thread_for_scanner(&self.ddos_scanner, results.clone(), threads, packets.clone());
+            self.spawn_thread_for_scanner(&self.dns_scanner, results.clone(), threads, packets.clone());
+            self.spawn_thread_for_scanner(&self.download_scanner, results.clone(), threads, packets.clone());
+            self.spawn_thread_for_scanner(&self.smurf_scanner, results.clone(), threads, packets.clone());
+            self.spawn_thread_for_scanner(&self.xss_scanner, results.clone(), threads,packets.clone());
 
             //Going over the specific scanners
             for scanner in &self.spec_scanners {
-                self.spawn_thread_for_scanner(scanner, results.clone(), threads);
+                self.spawn_thread_for_scanner(scanner, results.clone(), threads, packets.clone());
             }
         }
 
@@ -111,7 +119,7 @@ pub mod server{
         /// insert the results to and a Vec<thread> variable- the place to insert the
         /// thread to.
         /// Output: None.
-        fn spawn_thread_for_scanner<S>(&self, scanner: &S, results: Arc<Mutex<ScanResults>>, threads: &mut Vec<thread::JoinHandle<()>>)
+        fn spawn_thread_for_scanner<S>(&self, scanner: &S, results: Arc<Mutex<ScanResults>>, threads: &mut Vec<thread::JoinHandle<()>>, packets: Vec<SinglePacket>)
             where
                 S: ScannerFunctions + Clone + Send + 'static,
         {
@@ -120,7 +128,7 @@ pub mod server{
 
             let thread_handle = thread::spawn(move || {
                 let mut scan_results = results_clone.lock().expect("Failed to acquire results mutex");
-                let result = scanner_clone.scan();
+                let result = scanner_clone.scan(packets);
                 scan_results.insert(scanner_clone.get_base_data().get_name(), result);
             });
 

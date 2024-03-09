@@ -1,7 +1,7 @@
 pub mod sniffer{
     use local_ip_address::local_ip;
     use pnet::datalink::{self, Channel::Ethernet, NetworkInterface};
-    use pnet::packet::{self, Packet,
+    use pnet::packet::{Packet,
                        ethernet::EthernetPacket,
                        ipv4::Ipv4Packet,
                        tcp::TcpPacket,
@@ -25,11 +25,12 @@ pub mod sniffer{
         /// Input: An IP struct- the destination ip to sniff and an
         /// u16 variable- the source port to sniff.
         /// Output: An "object" of struct Sniffer.
-        pub fn new(ip: IP, port: u16) -> Result<Self, String> {
-            return match true {
-                true => Ok(Sniffer { port, ip: IP::copy(&ip), packets: Vec::new() }),
-                false => Err("Invalid port number!".to_string())
-            }
+        pub fn new(ip: IP, port: u16) -> Self {
+            return Self { port, ip: IP::copy(&ip), packets: Vec::new() };
+        }
+
+        pub fn new_default_port(ip: IP) -> Self{
+            return Self { port: ALL_PORTS, ip: IP::copy(&ip), packets: Vec::new() }
         }
 
         ///The function gets the ip from the structure.
@@ -165,7 +166,7 @@ pub mod sniffer{
                 // Check if the packet is destined for the target IP address
                 if ipv4.get_destination().to_string() == IP::get_ip(&ip).to_string() {
                     // Check if the packet is a UDP packet
-                    if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Udp {
+                    if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Udp {
                         //Extracting the port from the UDP packet
                         if let Some(udp) = UdpPacket::new(ipv4.payload()) {
                             if udp.get_source() == port || port == ALL_PORTS{
@@ -174,7 +175,7 @@ pub mod sniffer{
                         }
                     }
                     // Check if the packet is a TCP packet
-                    else if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Tcp {
+                    else if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
                         //Extracting the port from the TCP packet
                         if let Some(tcp) = TcpPacket::new(ipv4.payload()) {
                             if tcp.get_source() == port || port == ALL_PORTS{
@@ -219,5 +220,29 @@ pub mod sniffer{
         } else {
             None
         }
+    }
+
+    pub fn filter_packets(packets: Vec<SinglePacket>, port: u16) -> Vec<SinglePacket>{
+        let mut filtered_packets = Vec::new();
+
+        for packet in packets{
+            if let Some(ethernet) = EthernetPacket::new(&packet) {
+                // Extract the IPv4 packet
+                if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
+                    if let Some(transport) =  UdpPacket::new(ipv4.payload()){
+                        if port == transport.get_source(){
+                            filtered_packets.push(packet.clone());
+                        }
+                    }
+                    else if let Some(transport) =  TcpPacket::new(ipv4.payload()){
+                        if port == transport.get_source(){
+                            filtered_packets.push(packet.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return filtered_packets;
     }
 }

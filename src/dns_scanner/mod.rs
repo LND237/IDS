@@ -3,12 +3,10 @@ pub mod dns_scanner{
     use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket};
+    use crate::sniffer::sniffer::{SinglePacket, filter_packets};
 
     pub const ATTACK_NAME : &str = "DNS";
     pub const DNS_PORT: u16 = 53;
-    pub const AMOUNT_PACKETS_SNIFF: i32 = 10000;
-    pub const TIME_SNIFF: i32 = 5;
 
     #[derive(Clone)]
     pub struct DnsScanner{
@@ -86,10 +84,8 @@ pub mod dns_scanner{
         /// Input: self reference(DnsScanner)
         /// Output: An IP Value- the IP of the fake site(if
         /// the site is good -returning default IP Broadcast).
-        fn scan(&self) -> Option<IP> {
-            let mut sniffer = Sniffer::new(self.base.get_ip(), DNS_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
-            return DnsScanner::check_packets(packets);
+        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
+            return DnsScanner::check_packets(filter_packets(packets.clone(), DNS_PORT));
         }
         ///The function gets the base data of it.
         /// Input: None.
