@@ -14,9 +14,6 @@ pub mod download_scanner{
     pub const HTTPS_PORT: u16 = 443;
     const MAX_BAD_SCANS_AMOUNT: i32 = 3;
 
-    const API_KEY : &str = "cb8ea921f68903f1f192f4db50926e4bef971e95939e10c19da7256ac4ae344b";
-
-
     #[derive(Clone)]
     pub struct DownloadScanner{
         base: Scanner
@@ -132,9 +129,10 @@ pub mod download_scanner{
 
         // Example source IP address
         let the_domain: &str = domain.as_str();
+        let api_key = &get_api_key().unwrap().to_string();
 
         // Create a VirusTotal client
-        let client = VtClient::new(API_KEY.clone());
+        let client = VtClient::new(api_key);
 
         // Request the domain report
         let report =  match client.report_domain(the_domain.clone()).await{
@@ -154,9 +152,10 @@ pub mod download_scanner{
 
         let ip_str = ip.copy().get_ip();
         let the_ip: &str = ip_str.as_str();
+        let api_key = &get_api_key().unwrap().to_string();
 
         // Create a VirusTotal client
-        let client = VtClient::new(API_KEY.clone());
+        let client = VtClient::new(api_key);
 
         // Request the domain report
         let report =  match client.report_ip_address(the_ip.clone()).await{
@@ -165,6 +164,17 @@ pub mod download_scanner{
         };
 
         return report.data.attributes.last_analysis_stats;
+    }
+
+    ///The function gets the api key for virus total from the env file.
+    /// Input: None.
+    /// Output: a Result<String, String> value- the api key
+    /// for the virus total api.
+    fn get_api_key() -> Result<String, String>{
+        return match dotenv::from_path("./env_files/variables.env"){
+            Ok(_) => {Ok(dotenv::var("API_KEY_VT").unwrap())}
+            Err(err) => {Err(err.to_string())}
+        };
     }
 }
 
