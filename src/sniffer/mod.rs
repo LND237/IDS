@@ -9,6 +9,7 @@ pub mod sniffer{
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
     use pnet::packet::ip::IpNextHeaderProtocols;
+    use crate::dns_scanner::dns_scanner::DNS_PORT;
 
     pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;
@@ -132,6 +133,22 @@ pub mod sniffer{
                         packet_str.push_str(&String::from_utf8_lossy(tcp_packet.payload()));
                     }
                 }
+                // Check if it's a TCP(/UDP) packet
+                else if ipv4_packet.get_next_level_protocol() == IpNextHeaderProtocols::Udp {
+                    if let Some(udp_packet) = UdpPacket::new(ipv4_packet.payload()) {
+                        //Source port
+                        packet_str.push_str("\nSource Port: ");
+                        packet_str.push_str(&udp_packet.get_source().to_string());
+
+                        //Destination port
+                        packet_str.push_str("\nDestination Port: ");
+                        packet_str.push_str(&udp_packet.get_destination().to_string());
+
+                        //Payload
+                        packet_str.push_str("\nPayload: ");
+                        packet_str.push_str(&String::from_utf8_lossy(udp_packet.payload()));
+                    }
+                }
             }
         }
         return packet_str;
@@ -196,7 +213,7 @@ pub mod sniffer{
     /// (if there is no interface- return None).
     fn find_interface_with_traffic() -> Option<NetworkInterface> {
 
-        let the_local_ip = local_ip().unwrap();
+            let the_local_ip = local_ip().unwrap();
         // Get a list of available network interfaces
         let interfaces = datalink::interfaces();
 
@@ -213,7 +230,8 @@ pub mod sniffer{
         return None;
     }
     pub fn extract_http_payload(packet: &[u8]) -> Option<SinglePacket> {
-        let ip_packet = Ipv4Packet::new(packet)?;
+        let ethernet_packet = EthernetPacket::new(packet)?;
+        let ip_packet = Ipv4Packet::new(ethernet_packet.payload())?;
         if ip_packet.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
             let tcp_packet = TcpPacket::new(ip_packet.payload())?;
             Some(tcp_packet.payload().to_vec())

@@ -1,4 +1,5 @@
 pub mod xss_scanner{
+    use std::ops::Add;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet, extract_http_payload, filter_packets};
@@ -26,6 +27,7 @@ pub mod xss_scanner{
         /// Output: An IP Value-the IP who did the attack (if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
+            println!("Amount XSS Packets: {}", packets.clone().len());
             let mut csp_found = false;
             //Going over the packets of the dns
             for mut packet in packets{
@@ -34,22 +36,14 @@ pub mod xss_scanner{
                     Some(the_payload) => {the_payload},
                     None => {continue}
                 };
+                println!("I got the payload!");
                 let headers = match parse_http_headers(&mut payload){
                     Ok(the_headers) => {the_headers},
                     Err(e) => {
                         println!("Err http parse: {}", e.to_string());
                         continue}
                 };
-                for header in headers {
-                    if header.name.eq_ignore_ascii_case(CSP){
-                        // Process the CSP value as needed
-                        csp_found = true;
-                        break; // Exit the loop if you only need to check for presence
-                    }
-
-                }
-                if !csp_found
-                {
+                if let None = headers.find(CSP){
                     return Some(extract_ip_src_from_packet(packet));
                 }
             }
@@ -77,18 +71,19 @@ pub mod xss_scanner{
     }
 
 
-    ///The function extracts the headers from a HTTP packet, if it is not it will return None
+    ///The function extracts the headers from a HTTP packet, if it is not it will return Err
     /// Input: a SinglePacket reference-the response to extract from.
-    /// Output: an Option<Vec<Header>> value - the headers of the HTTP packet, or None if not an HTTP packet
-    fn parse_http_headers(payload: &mut SinglePacket) -> Result<Vec<Header>, Error> {
-        let mut headers = Vec::new(); // Dynamic header storage
-        let mut resp = Response::new(&mut headers);
-        // Before calling resp.parse(response) see the contebt
-        println!("Raw packet (first 32 bytes as hex): {:02X?}", &payload[..32]);
-        match resp.parse(payload) {
-            Ok(_) => Ok(headers),  // Return headers directly
-            Err(e) => Err(e),      // Propagate httparse error
+    /// Output: an Option<Vec<Header>> value - the headers of the HTTP packet, or Err if not an HTTP packet
+    fn parse_http_headers(payload: &mut SinglePacket) -> Result<String, String> {
+        // Assuming the payload is valid UTF-8
+        let payload_str = std::str::from_utf8(payload).unwrap_or("Can not show payload");
+        // Find the empty line separating headers and body
+        if let Some(header_end_index) = payload_str.find("\r\n\r\n") {
+            let headers_str = &payload_str[..header_end_index + 4]; // Include the empty line
+            return Ok(headers_str.to_string());
         }
+        return Err("could not find end headers".to_string());
+
     }
 
 }
