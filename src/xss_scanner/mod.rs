@@ -1,9 +1,7 @@
 pub mod xss_scanner{
-    use std::ops::Add;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet, extract_http_payload, filter_packets};
-    use httparse::{Response, Error, Header};
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
@@ -28,7 +26,6 @@ pub mod xss_scanner{
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
             println!("Amount XSS Packets: {}", packets.clone().len());
-            let mut csp_found = false;
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
@@ -36,7 +33,6 @@ pub mod xss_scanner{
                     Some(the_payload) => {the_payload},
                     None => {continue}
                 };
-                println!("I got the payload!");
                 let headers = match parse_http_headers(&mut payload){
                     Ok(the_headers) => {the_headers},
                     Err(e) => {
@@ -82,6 +78,7 @@ pub mod xss_scanner{
             let headers_str = &payload_str[..header_end_index + 4]; // Include the empty line
             return Ok(headers_str.to_string());
         }
+        println!("Payloud str: {}", payload_str);
         return Err("could not find end headers".to_string());
 
     }

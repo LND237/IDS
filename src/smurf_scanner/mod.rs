@@ -1,5 +1,7 @@
 pub mod smurf_scanner{
+    use pnet::packet::ethernet::EthernetPacket;
     use pnet::packet::icmp::IcmpPacket;
+    use pnet::packet::Packet;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::sniffer::sniffer::{SinglePacket};
@@ -64,8 +66,15 @@ pub mod smurf_scanner{
     /// Input: a SinglePacket variable- the packet to check.
     /// Output: a bool value- if is is ICMP or not.
     fn is_icmp_packet(packet: SinglePacket) -> bool{
-        if let Some(_) = IcmpPacket::new(&packet) {
-            return true;
+        let ethernet_packet = match EthernetPacket::new(&packet){
+            None => {return false}
+            Some(packet) => {packet}
+        };
+        if let Some(icmp_packet) = IcmpPacket::new(&ethernet_packet.payload()) {
+            if icmp_packet.get_icmp_code().0 != 32{
+                return true;
+            }
+
         }
         return false;
     }
