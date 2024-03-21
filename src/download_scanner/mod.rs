@@ -14,6 +14,8 @@ pub mod download_scanner{
     pub const HTTPS_PORT: u16 = 443;
     const MAX_BAD_SCANS_AMOUNT: i32 = 3;
 
+    static mut CLEAN_IPS: Vec<IP> = Vec::new();
+
     #[derive(Clone)]
     pub struct DownloadScanner{
         base: Scanner
@@ -38,7 +40,11 @@ pub mod download_scanner{
 
             for ip_src in src_ips{
                 let mut total_bad_scans = 0;
-
+                unsafe {
+                    if CLEAN_IPS.contains(&ip_src){
+                        continue;
+                    }
+                }
                 //Sending the ip to the VirusTotal
                 match run_async_function(get_results_of_ip(ip_src.copy())){
                     None => {}
@@ -64,6 +70,11 @@ pub mod download_scanner{
                 if total_bad_scans > MAX_BAD_SCANS_AMOUNT as u32{
                     return Some(ip_src.copy());
                 }
+                else{
+                    unsafe{
+                        CLEAN_IPS.push(ip_src.copy());
+                    }
+                }
             }
 
             return Some(IP::new_default());
@@ -80,7 +91,6 @@ pub mod download_scanner{
             let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);
             the_packets.append(&mut filter_packets(packets.clone(), HTTPS_PORT));
 
-            println!("DBD Amount Packets: {}", the_packets.clone().len());
             return DownloadScanner::check_packets(the_packets.clone());
         }
         ///The function gets the base data of it.
