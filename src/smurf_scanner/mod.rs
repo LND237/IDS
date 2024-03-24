@@ -8,6 +8,7 @@ pub mod smurf_scanner{
 
     pub const ATTACK_NAME : &str = "Smurf";
     const RATE_LIMIT: i32 = 150;
+    const REPLAY_ICMP_CODE : i32 = 0;
 
     #[derive(Clone)]
     pub struct SmurfScanner{
@@ -31,7 +32,7 @@ pub mod smurf_scanner{
             let mut amount_icmp_packets = 0;
             //Going over the packets
             for packet in packets{
-                if is_icmp_packet(packet.clone()){
+                if is_icmp_replay_packet(packet.clone()){
                     amount_icmp_packets += 1;
                 }
             }
@@ -65,13 +66,13 @@ pub mod smurf_scanner{
     /// or not.
     /// Input: a SinglePacket variable- the packet to check.
     /// Output: a bool value- if is is ICMP or not.
-    fn is_icmp_packet(packet: SinglePacket) -> bool{
+    fn is_icmp_replay_packet(packet: SinglePacket) -> bool{
         let ethernet_packet = match EthernetPacket::new(&packet){
             None => {return false}
             Some(packet) => {packet}
         };
         if let Some(icmp_packet) = IcmpPacket::new(&ethernet_packet.payload()) {
-            if icmp_packet.get_icmp_code().0 != 32{
+            if REPLAY_ICMP_CODE == icmp_packet.get_icmp_code().0{
                 return true;
             }
 

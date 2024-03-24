@@ -9,7 +9,6 @@ pub mod sniffer{
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
     use pnet::packet::ip::IpNextHeaderProtocols;
-    use crate::dns_scanner::dns_scanner::DNS_PORT;
 
     pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;

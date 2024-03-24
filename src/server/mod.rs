@@ -218,11 +218,11 @@ pub mod server{
             //If the variable was implemented
             if let Some(the_data) = data_to_send{
                 println!("{}", attack_name.clone());
-                // let _ = database.add_attack(ip_client.copy(), the_data.copy()).await;
-                /*let _ = match notify_client(ip_client.copy(), PORT_NUM, the_data.copy()){
+                let _ = database.add_attack(ip_client.copy(), the_data.copy()).await;
+                let _ = match notify_client(ip_client.copy(), PORT_NUM, the_data.copy()){
                     Ok(_) => {println!("Data sent to client successfully!")}
                     Err(msg) => {println!("Err client: {}", msg.to_string())}
-                };*/
+                };
             }
         }
     }

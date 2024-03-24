@@ -7,8 +7,6 @@ pub mod dns_scanner{
     use pnet::packet::udp::UdpPacket;
     use tokio::runtime::Runtime;
     use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
-    use trust_dns_resolver::error::ResolveError;
-    use trust_dns_resolver::lookup::Ipv4Lookup;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::{BROADCAST_IP, IP};
     use crate::sniffer::sniffer::{SinglePacket, filter_packets, get_string_packet};

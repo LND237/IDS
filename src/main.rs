@@ -1,7 +1,6 @@
 use std::io::stdin;
 use crate::ip::ip::IP;
 use crate::server::server::Server;
-use dotenv::dotenv;
 use local_ip_address::local_ip;
 
 mod ip;
