@@ -1,6 +1,8 @@
 pub mod spec_scanner{
+    use tokio::runtime::Runtime;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
+    use crate::server::server::{Server};
     use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet};
 
     const SPEC_ATTACK_NAME: &str = "REPEAT_ATTACK";
@@ -30,7 +32,7 @@ pub mod spec_scanner{
         /// and decides if there was an attack from the specific
         /// attacker or not.
         /// Input: A self reference(SpecScanner) and a vector of SinglePackets- the packets to check.
-        /// Output: An IP Value- the IP who did the attack(if
+        /// Output: An IP value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(&self, packets: Vec<SinglePacket>) -> Option<IP> {
             //Going over the packets
@@ -47,12 +49,14 @@ pub mod spec_scanner{
 
     impl ScannerFunctions for SpecScanner{
         ///The function scans the network and checks if there is
-        /// a Specific Attack or not.
-        /// Input: self reference(SpecScanner)
-        /// Output: An IP Value- the IP of the attacker(if
-        /// there is no attack -returning default IP Broadcast).
-        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
-            return self.check_packets(packets);
+        /// a Specific Attack or not and handles the result.
+        /// Input: self reference(SpecScanner) and a Vec<SinglePacket>- the
+        /// packets to check.
+        /// Output: None.
+        fn scan(&self, packets: Vec<SinglePacket>){
+            let result = self.check_packets(packets);
+            let rt = Runtime::new().unwrap();
+            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }
 
         ///The function gets the base data of it.
