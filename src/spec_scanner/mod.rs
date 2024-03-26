@@ -1,13 +1,13 @@
 pub mod spec_scanner{
+    use tokio::runtime::Runtime;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, ALL_PORTS, SinglePacket, extract_ip_src_from_packet};
+    use crate::server::server::{Server};
+    use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet};
 
-    const SPEC_ATTACK_PORT: u16 = ALL_PORTS;
     const SPEC_ATTACK_NAME: &str = "REPEAT_ATTACK";
-    const AMOUNT_PACKETS_SNIFF: i32 = 50;
-    const TIME_SNIFF: i32 = 10;
 
+    #[derive(Clone)]
     pub struct SpecScanner{
         base: Scanner,
         spec_ip: IP
@@ -32,7 +32,7 @@ pub mod spec_scanner{
         /// and decides if there was an attack from the specific
         /// attacker or not.
         /// Input: A self reference(SpecScanner) and a vector of SinglePackets- the packets to check.
-        /// Output: An IP Value- the IP who did the attack(if
+        /// Output: An IP value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(&self, packets: Vec<SinglePacket>) -> Option<IP> {
             //Going over the packets
@@ -49,14 +49,23 @@ pub mod spec_scanner{
 
     impl ScannerFunctions for SpecScanner{
         ///The function scans the network and checks if there is
-        /// a Specific Attack or not.
-        /// Input: self reference(SpecScanner)
-        /// Output: An IP Value- the IP of the attacker(if
-        /// there is no attack -returning default IP Broadcast).
-        fn scan(&self) -> Option<IP> {
-            let mut sniffer = Sniffer::new(self.base.get_ip(), SPEC_ATTACK_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
-            return self.check_packets(packets);
+        /// a Specific Attack or not and handles the result.
+        /// Input: self reference(SpecScanner) and a Vec<SinglePacket>- the
+        /// packets to check.
+        /// Output: None.
+        fn scan(&self, packets: Vec<SinglePacket>){
+            let result = self.check_packets(packets);
+
+            //Running the async function of handling the result
+            let rt = Runtime::new().unwrap();
+            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+        }
+
+        ///The function gets the base data of it.
+        /// Input: None.
+        /// Output: a Scanner value- the base data.
+        fn get_base_data(&self) -> Scanner {
+            return self.base.copy();
         }
     }
 

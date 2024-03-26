@@ -1,9 +1,7 @@
 use std::io::stdin;
-use chrono::Utc;
-use mongo_db::mongo_db::AttackData;
-use crate::communicator::communicator::Communicator;
 use crate::ip::ip::IP;
-use crate::sniffer::sniffer::{get_string_packet, Sniffer};
+use crate::server::server::Server;
+use local_ip_address::local_ip;
 
 mod ip;
 mod sniffer;
@@ -16,16 +14,26 @@ mod communicator;
 mod xss_scanner;
 mod download_scanner;
 mod smurf_scanner;
+mod server;
+mod env_file;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    let ip = IP::new("192.168.1.180".to_string()).unwrap();
-    let mut sniffer = Sniffer::new(ip.copy(), 443).unwrap();
-    let packets = sniffer.sniff(50, 10);
-    println!("Packets amount: {}", packets.len());
-    for packet in packets{
-        println!{"{}", get_string_packet(&packet)};
-    }
+    dotenv::from_path("./env_files/variables.env").expect("Enable to open env file");
+    let ip = IP::new(local_ip().unwrap().to_string()).unwrap();
+    println!("IP: {}", ip.copy().get_ip());
+
+    let username: &str = &dotenv::var("USERNAME_DB").unwrap();
+    let password: &str = &dotenv::var("PASSWORD_DB").unwrap();
+
+    let ip_vector = vec![ip.copy()];
+
+    let mut server = match Server::new(ip_vector.clone(), username.to_string(), password.to_string()).await{
+        Ok(server) => {server}
+        Err(msg) => {panic!("{}", msg.to_string())}
+    };
+    println!("Server started");
+    server.run().await;
     Ok(())
 }
 
@@ -42,7 +50,7 @@ fn get_string_input() -> String{
 
 ///The function gets an ip input from the user
 /// Input: None.
-/// Output: an IP struct- the ip from the user
+/// Output: an IP struct - the ip from the user
 fn get_ip_input() -> IP{
     let mut ip = IP::new_default();
     let mut is_ip_valid = false;

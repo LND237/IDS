@@ -1,13 +1,15 @@
 pub mod sniffer{
     use local_ip_address::local_ip;
-    use pnet::datalink::{self, Channel::Ethernet, DataLinkReceiver, NetworkInterface};
-    use pnet::packet::{self, Packet,
+    use pnet::datalink::{self, Channel::Ethernet, NetworkInterface};
+    use pnet::packet::{Packet,
                        ethernet::EthernetPacket,
                        ipv4::Ipv4Packet,
                        tcp::TcpPacket,
                        udp::UdpPacket};
     use crate::ip::ip::IP;
     use std::time::{Duration, Instant};
+    use pnet::packet::ip::IpNextHeaderProtocols;
+
     pub type SinglePacket = Vec<u8>;
     pub const MAX_PORT: u16 = 65535;
     pub const ALL_PORTS: u16 = 0;
@@ -23,11 +25,15 @@ pub mod sniffer{
         /// Input: An IP struct- the destination ip to sniff and an
         /// u16 variable- the source port to sniff.
         /// Output: An "object" of struct Sniffer.
-        pub fn new(ip: IP, port: u16) -> Result<Self, String> {
-            return match true {
-                true => Ok(Sniffer { port, ip: IP::copy(&ip), packets: Vec::new() }),
-                false => Err("Invalid port number!".to_string())
-            }
+        pub fn new(ip: IP, port: u16) -> Self {
+            return Self { port, ip: IP::copy(&ip), packets: Vec::new() };
+        }
+
+        /// Default Constructor of class Sniffer.
+        /// Input: An IP variable- the ip of the destination to sniff.
+        /// Output: a Self value.
+        pub fn new_default_port(ip: IP) -> Self{
+            return Self { port: ALL_PORTS, ip: IP::copy(&ip), packets: Vec::new() }
         }
 
         ///The function gets the ip from the structure.
@@ -93,10 +99,10 @@ pub mod sniffer{
     ///The function extracts from the packet its header data.
     /// Input: a SinglePacket- the packet with the data.
     /// Output: a String value- the string with the data about the packet.
-    pub fn get_string_packet(the_packet: &SinglePacket) -> String{
+    pub fn get_string_packet(the_packet: SinglePacket) -> String{
         let mut packet_str = String::new();
         // Parse Ethernet header
-        if let Some(ethernet_packet) = EthernetPacket::new(the_packet) {
+        if let Some(ethernet_packet) = EthernetPacket::new(&the_packet) {
             //Source MAC address
             packet_str.push_str("Source MAC: ");
             packet_str.push_str(&ethernet_packet.get_source().to_string());
@@ -114,7 +120,7 @@ pub mod sniffer{
                 packet_str.push_str(&ipv4_packet.get_destination().to_string());
 
                 // Check if it's a TCP(/UDP) packet
-                if ipv4_packet.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Tcp {
+                if ipv4_packet.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
                     if let Some(tcp_packet) = TcpPacket::new(ipv4_packet.payload()) {
                         //Source port
                         packet_str.push_str("\nSource Port: ");
@@ -127,6 +133,22 @@ pub mod sniffer{
                         //Payload
                         packet_str.push_str("\nPayload: ");
                         packet_str.push_str(&String::from_utf8_lossy(tcp_packet.payload()));
+                    }
+                }
+                // Check if it's a TCP(/UDP) packet
+                else if ipv4_packet.get_next_level_protocol() == IpNextHeaderProtocols::Udp {
+                    if let Some(udp_packet) = UdpPacket::new(ipv4_packet.payload()) {
+                        //Source port
+                        packet_str.push_str("\nSource Port: ");
+                        packet_str.push_str(&udp_packet.get_source().to_string());
+
+                        //Destination port
+                        packet_str.push_str("\nDestination Port: ");
+                        packet_str.push_str(&udp_packet.get_destination().to_string());
+
+                        //Payload
+                        packet_str.push_str("\nPayload: ");
+                        packet_str.push_str(&String::from_utf8_lossy(udp_packet.payload()));
                     }
                 }
             }
@@ -163,7 +185,7 @@ pub mod sniffer{
                 // Check if the packet is destined for the target IP address
                 if ipv4.get_destination().to_string() == IP::get_ip(&ip).to_string() {
                     // Check if the packet is a UDP packet
-                    if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Udp {
+                    if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Udp {
                         //Extracting the port from the UDP packet
                         if let Some(udp) = UdpPacket::new(ipv4.payload()) {
                             if udp.get_source() == port || port == ALL_PORTS{
@@ -172,7 +194,7 @@ pub mod sniffer{
                         }
                     }
                     // Check if the packet is a TCP packet
-                    else if ipv4.get_next_level_protocol() == packet::ip::IpNextHeaderProtocols::Tcp {
+                    else if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
                         //Extracting the port from the TCP packet
                         if let Some(tcp) = TcpPacket::new(ipv4.payload()) {
                             if tcp.get_source() == port || port == ALL_PORTS{
@@ -192,8 +214,10 @@ pub mod sniffer{
     /// Output: a NetworkInterface value- the interface to sniff with
     /// (if there is no interface- return None).
     fn find_interface_with_traffic() -> Option<NetworkInterface> {
-
-        let the_local_ip = local_ip().unwrap();
+        let the_local_ip = match local_ip(){
+            Ok(ip) => {ip}
+            Err(_) => {return None;}
+        };
         // Get a list of available network interfaces
         let interfaces = datalink::interfaces();
 
@@ -208,5 +232,37 @@ pub mod sniffer{
             }
         }
         return None;
+    }
+
+    ///The function filters the packets according to their destination
+    /// port.
+    /// Input: a Vec<SinglePacket> variable- the packets to filter and
+    /// an u16 variable- the number of the destination port.
+    /// Output: a Vec<SinglePacket> value- the packet with
+    /// the specific destination port only.
+    pub fn filter_packets(packets: Vec<SinglePacket>, port: u16) -> Vec<SinglePacket>{
+        let mut filtered_packets = Vec::new();
+
+        //Going over the packets
+        for packet in packets{
+            if let Some(ethernet) = EthernetPacket::new(&packet) {
+                // Extract the IPv4 packet
+                if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
+                    //If it is an Udp packet
+                    if let Some(transport) =  UdpPacket::new(ipv4.payload()){
+                        if port == transport.get_source(){
+                            filtered_packets.push(packet.clone());
+                        }
+                    }
+                    else if let Some(transport) =  TcpPacket::new(ipv4.payload()){
+                        if port == transport.get_source(){
+                            filtered_packets.push(packet.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return filtered_packets;
     }
 }

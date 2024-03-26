@@ -2,7 +2,7 @@ pub mod ip{
     use ipaddress::IPAddress;
     pub const BROADCAST_IP: &str = "255.255.255.255";
     //automatically implementing common comparison and hashing functionalities.
-    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Debug)]
     pub struct IP{
         address: String
     }
