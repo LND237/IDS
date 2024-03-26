@@ -1,9 +1,6 @@
 pub mod xss_scanner{
-    use pnet::packet::{ethernet::EthernetPacket,
-                       ip::IpNextHeaderProtocols,
-                       ipv4::Ipv4Packet,
-                       Packet,
-                       tcp::TcpPacket};
+    use pnet::packet::{ethernet::EthernetPacket, ip::IpNextHeaderProtocols,
+                       ipv4::Ipv4Packet, Packet, tcp::TcpPacket};
     use tokio::runtime::Runtime;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
