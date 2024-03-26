@@ -1,17 +1,17 @@
 pub mod xss_scanner{
+    use pnet::packet::{ethernet::EthernetPacket, ip::IpNextHeaderProtocols,
+                       ipv4::Ipv4Packet, Packet, tcp::TcpPacket};
+    use tokio::runtime::Runtime;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{Sniffer, SinglePacket, extract_ip_src_from_packet};
-    use httparse::Header;
-    use pnet::packet::Packet;
-
+    use crate::server::server::{Server};
+    use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet, filter_packets};
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
-    pub const AMOUNT_PACKETS_SNIFF: i32 = 1;
-    pub const TIME_SNIFF: i32 = 5;
     pub const CSP: &str = "Content-Security-Policy";
 
+    #[derive(Clone)]
     pub struct XssScanner{
         base: Scanner
     }
@@ -29,21 +29,20 @@ pub mod xss_scanner{
         /// Output: An IP Value-the IP who did the attack (if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
-            let mut csp_found = false;
+            println!("Amount XSS Packets: {}", packets.clone().len());
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
-                let headers = parse_http_headers(&mut packet).unwrap();
-                for header in headers {
-                    if header.name.eq_ignore_ascii_case(CSP){
-                        // Process the CSP value as needed
-                        csp_found = true;
-                        break; // Exit the loop if you only need to check for presence
-                    }
-
-                }
-                if !csp_found
-                {
+                let mut payload = match extract_http_payload(&mut packet){
+                    Some(the_payload) => {the_payload},
+                    None => {continue}
+                };
+                //Extracting the http headers of the packet
+                let headers = match parse_http_headers(&mut payload){
+                    Ok(the_headers) => {the_headers},
+                    Err(_) => {continue}
+                };
+                if let None = headers.find(CSP){
                     return Some(extract_ip_src_from_packet(packet));
                 }
             }
@@ -54,25 +53,56 @@ pub mod xss_scanner{
     impl ScannerFunctions for XssScanner{
 
         ///The function scans the network and checks if there is
-        /// a XSS Attack or not.
-        /// Input: self-reference(XssScanner)
-        /// Output: An IP Value-the IP of the fake site (if
-        /// the site is good-returning default IP Broadcast).
-        fn scan(&self) -> Option<IP> {
-            let mut sniffer = Sniffer::new(self.base.get_ip(), HTTP_PORT).unwrap();
-            let packets = sniffer.sniff(AMOUNT_PACKETS_SNIFF, TIME_SNIFF);
-            return XssScanner::check_packets(packets);
+        /// a XSS Attack or not and handles the result.
+        /// Input: self-reference(XssScanner) and a Vec<SinglePacket>
+        /// variable- the packets to check.
+        /// Output: None.
+        fn scan(&self, packets: Vec<SinglePacket>) {
+            let result = XssScanner::check_packets(filter_packets(packets.clone(), HTTP_PORT));
+
+            //Running the async function of handling the result
+            let rt = Runtime::new().unwrap();
+            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+        }
+
+        ///The function gets the base data of it.
+        /// Input: None.
+        /// Output: a Scanner value- the base data.
+        fn get_base_data(&self) -> Scanner {
+            return self.base.copy();
         }
     }
 
 
-    ///The function extracts the headers from a http packet, if it is not it will throw an error
+    ///The function extracts the headers from an HTTP packet, if it is not it will return Err
     /// Input: a SinglePacket reference-the response to extract from.
-    /// Output: a Some (String) value - the headers of the http packet, if it is not a http packet it will throw an error
-    fn parse_http_headers(response: &mut Vec<u8>) -> Option<Vec<Header>> {
-        let mut headers = [httparse::EMPTY_HEADER; 4];
-        let mut resp = httparse::Response::new(&mut headers);
-        let res = resp.parse(response).unwrap();
-        return Some(resp.headers.to_vec().clone());
+    /// Output: a Result<String, String> value - the headers of the HTTP packet, or Err if fails.
+    fn parse_http_headers(payload: &mut SinglePacket) -> Result<String, String> {
+        // Assuming the payload is valid UTF-8
+        let payload_str = std::str::from_utf8(payload).unwrap_or("Can not show payload");
+        // Find the empty line separating headers and body
+        if let Some(header_end_index) = payload_str.find("\r\n\r\n") {
+            let headers_str = &payload_str[..header_end_index + 4]; // Include the empty line
+            return Ok(headers_str.to_string());
+        }
+        return Err("could not find end headers".to_string());
     }
+
+    ///The function extracts the http payload from
+    /// the packet.
+    /// Input: a reference to a SinglePacket variable-
+    /// the packet to extract the http payload from.
+    /// Output: an Option<SinglePacket> value- the payload
+    /// if exists.
+    pub fn extract_http_payload(packet: &SinglePacket) -> Option<SinglePacket> {
+        let ethernet_packet = EthernetPacket::new(packet)?;
+        let ip_packet = Ipv4Packet::new(ethernet_packet.payload())?;
+        if ip_packet.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
+            let tcp_packet = TcpPacket::new(ip_packet.payload())?;
+            Some(tcp_packet.payload().to_vec())
+        } else {
+            None
+        }
+    }
+
 }

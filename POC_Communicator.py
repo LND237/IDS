@@ -1,24 +1,13 @@
 import socket
 
-PORT_NUM = 50001
-IP_ADDR = "127.0.0.1"
-AMOUNT_CLIENTS_AT_SAME_TIME = 1
-MAX_SIZE_BUFFER = 1024
+def get_domain_from_ip(ip_address):
+    try:
+        domain = socket.gethostbyaddr(ip_address)
+        return domain[0]
+    except socket.herror:
+        return "Domain not found"
 
-
-def main():
-    # Building the server
-    listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_addr = (IP_ADDR, PORT_NUM)
-    listening_socket.bind(server_addr)
-    listening_socket.listen(AMOUNT_CLIENTS_AT_SAME_TIME)
-
-    while True:
-        print("Waiting for a client: ")
-        client_sock, client_addr = listening_socket.accept()
-        msg = client_sock.recv(MAX_SIZE_BUFFER).decode()
-        print(msg)
-
-
-if __name__ == "__main__":
-    main()
+# Example usage
+ip_address = "8.8.8.8"  # Replace this with the IP address you have
+domain = get_domain_from_ip(ip_address)
+print("Domain:", domain)
