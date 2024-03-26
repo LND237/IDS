@@ -2,12 +2,15 @@ pub mod download_scanner{
     use std::collections::HashSet;
     use std::net::IpAddr;
     use dns_lookup::lookup_addr;
+    use tokio::runtime::Runtime;
     use crate::ip::ip::IP;
+    use crate::env_file::env_file::get_api_key;
     use crate::scanner::scanner::{run_async_function, Scanner, ScannerFunctions};
     use crate::sniffer::sniffer::{extract_ip_src_from_packet, filter_packets, SinglePacket};
     use crate::xss_scanner::xss_scanner::HTTP_PORT;
     use virustotal3::LastAnalysisStats;
     use virustotal3::VtClient;
+    use crate::server::server::{Server};
 
     //Public Constants
     pub const ATTACK_NAME : &str = "Drive By Download";
@@ -25,7 +28,7 @@ pub mod download_scanner{
         //Public function
         ///Constructor of DownloadScanner struct.
         /// Input: an IP struct- the IP to check.
-        /// Output: an struct of DownloadScanner.
+        /// Output: a struct of DownloadScanner.
         pub fn new(ip: IP) -> Self{
             return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
         }
@@ -33,7 +36,7 @@ pub mod download_scanner{
         ///The function checks the packets which was sniffed before
         /// and decides if there is a risk for a Drive By Download or not.
         /// Input: A vector of SinglePackets- the packets to check.
-        /// Output: An IP Value- the IP who might do the attack(if
+        /// Output: An IP value- the IP who might do the attack(if
         /// there is no attack-returning default IP Broadcast).
         fn check_packets(packets : Vec<SinglePacket>) -> Option<IP>{
             let src_ips = get_all_src_ips(packets.clone());
@@ -41,10 +44,11 @@ pub mod download_scanner{
             for ip_src in src_ips{
                 let mut total_bad_scans = 0;
                 unsafe {
-                    if CLEAN_IPS.contains(&ip_src){
+                    if CLEAN_IPS.contains(&ip_src){ //this ip was already checked
                         continue;
                     }
                 }
+
                 //Sending the ip to the VirusTotal
                 match run_async_function(get_results_of_ip(ip_src.copy())){
                     None => {}
@@ -59,6 +63,7 @@ pub mod download_scanner{
                     Some(domain) => {domain},
                     None => {continue} //can not find the domain of src ip
                 };
+
                 //Sending the domain to VirusTotal
                 let domain_result = match run_async_function(get_results_of_domain(domain_src.clone())){
                     Some(res) => {res},
@@ -72,7 +77,7 @@ pub mod download_scanner{
                 }
                 else{
                     unsafe{
-                        CLEAN_IPS.push(ip_src.copy());
+                        CLEAN_IPS.push(ip_src.copy()); //this ip was checked and clean
                     }
                 }
             }
@@ -82,16 +87,19 @@ pub mod download_scanner{
     }
 
     impl ScannerFunctions for DownloadScanner{
-        ///The function scans the network and checks if there is
-        /// a Drive By Download Attack or not.
-        /// Input: self reference(DownloadScanner)
-        /// Output: An IP value- the IP who might do the attack(if
-        /// there is no attack-returning default IP Broadcast).
-        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
+        /// The function scans the network and checks if there is
+        /// a Drive By Download Attack or not and handles the result.
+        /// Input: self reference(DownloadScanner) and a Vec<SinglePacket> value-
+        /// the packets to check.
+        /// Output: None.
+        fn scan(&self, packets: Vec<SinglePacket>) {
             let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);
             the_packets.append(&mut filter_packets(packets.clone(), HTTPS_PORT));
-
-            return DownloadScanner::check_packets(the_packets.clone());
+            let result = DownloadScanner::check_packets(the_packets.clone());
+            
+            //Running the async function of handling the result
+            let rt = Runtime::new().unwrap();
+            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
@@ -105,7 +113,7 @@ pub mod download_scanner{
     ///The function find the domain of the given ip.
     /// Input: an IP variable- the ip to find its ip.
     /// Output: a String value- the domain(if there is an
-    /// error- returning Err).
+    /// error- returning None).
     fn get_domain(ip : IP) -> Option<String>{
         let ip_address: IpAddr = ip.get_ip().parse().unwrap();
         return match lookup_addr(&ip_address) {
@@ -114,7 +122,7 @@ pub mod download_scanner{
         };
     }
 
-    ///The function extracts all the src ips from the
+    /// The function extracts all the src ips from the
     /// packets and remove duplicate ones.
     /// Input: a Vector variable of SinglePackets- the
     /// packets to go over.
@@ -139,7 +147,7 @@ pub mod download_scanner{
 
         // Example source IP address
         let the_domain: &str = domain.as_str();
-        let api_key = &get_api_key().unwrap().to_string();
+        let api_key = &get_api_key();
 
         // Create a VirusTotal client
         let client = VtClient::new(api_key);
@@ -153,7 +161,7 @@ pub mod download_scanner{
         return report.data.attributes.last_analysis_stats;
     }
 
-    ///The function sends the IP to virus total async and
+    /// The function sends the IP to virus total async and
     /// gets its results.
     /// Input: an IP variable -the ip to check.
     /// Output: an Option<LastAnalysisStats> value- the results(if
@@ -162,7 +170,7 @@ pub mod download_scanner{
 
         let ip_str = ip.copy().get_ip();
         let the_ip: &str = ip_str.as_str();
-        let api_key = &get_api_key().unwrap().to_string();
+        let api_key = &get_api_key();
 
         // Create a VirusTotal client
         let client = VtClient::new(api_key);
@@ -174,17 +182,6 @@ pub mod download_scanner{
         };
 
         return report.data.attributes.last_analysis_stats;
-    }
-
-    ///The function gets the api key for virus total from the env file.
-    /// Input: None.
-    /// Output: a Result<String, String> value- the api key
-    /// for the virus total api.
-    fn get_api_key() -> Result<String, String>{
-        return match dotenv::from_path("./env_files/variables.env"){
-            Ok(_) => {Ok(dotenv::var("API_KEY_VT").unwrap())}
-            Err(err) => {Err(err.to_string())}
-        };
     }
 }
 

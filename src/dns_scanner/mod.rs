@@ -9,7 +9,8 @@ pub mod dns_scanner{
     use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::{BROADCAST_IP, IP};
-    use crate::sniffer::sniffer::{SinglePacket, filter_packets, get_string_packet};
+    use crate::server::server::Server;
+    use crate::sniffer::sniffer::{SinglePacket, filter_packets};
 
     pub const ATTACK_NAME : &str = "DNS";
     pub const DNS_PORT: u16 = 53;
@@ -29,7 +30,7 @@ pub mod dns_scanner{
         ///The function checks the packets which was sniffed before
         /// and decides if there was a Dns Hijacking Attack or not.
         /// Input: A vector of SinglePackets- the packets to check.
-        /// Output: An IP Value- the IP who did the attack(if
+        /// Output: An IP value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
             println!("Amount DNS packets: {}", packets.clone().len());
@@ -47,10 +48,8 @@ pub mod dns_scanner{
                     Ok(packet) => {
                         packet
                     }
-                    Err(err) => {
-                        println!("Packet's String:\n {}", get_string_packet(packet.clone()));
-                        println!("Err DNS: {}", err.to_string());
-                        continue; //probably not a DNS Packet
+                    Err(_) => {
+                        continue; //can not parse the packet
                     }
                 };
                 //Extracting the domain to check from the dns response
@@ -74,11 +73,9 @@ pub mod dns_scanner{
                         }
                         _ => continue
                     };
-                    println!("Current ip: {}", the_current_ip.copy().get_ip());
                     if !records.is_empty(){ //this site exists
                         //Going over the given records from the DNSSEC
                         for record in &records{
-                            println!("Record DH: {}", record.get_ip());
                             //If the record ip is the given ip
                             if record.get_ip() == the_current_ip.get_ip(){
                                 valid_site = true;
@@ -95,14 +92,17 @@ pub mod dns_scanner{
     }
 
     impl ScannerFunctions for DnsScanner{
-
-        ///The function scans the network and checks if there is
+        /// The function scans the network and checks if there is
         /// a DNS HIJACKING Attack or not.
-        /// Input: self reference(DnsScanner)
-        /// Output: An IP Value- the IP of the fake site(if
-        /// the site is good -returning default IP Broadcast).
-        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
-            return DnsScanner::check_packets(filter_packets(packets.clone(), DNS_PORT));
+        /// Input: self reference(DnsScanner) and a Vec<SinglePacket>-
+        /// the packets to scan.
+        /// Output: None.
+        fn scan(&self, packets: Vec<SinglePacket>) {
+            let result = DnsScanner::check_packets(filter_packets(packets.clone(), DNS_PORT));
+
+            //Running the async function of handling the result
+            let rt = Runtime::new().unwrap();
+            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
@@ -119,7 +119,6 @@ pub mod dns_scanner{
     fn send_lookup_request(domain_to_check: String) -> Vec<IP>{
         // Create a resolver with DNSSEC validation enabled
         let dns_resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default()).unwrap();
-        println!("DH Created the resolver");
 
         // Pin the future to the heap
         let binding = dns_resolver.clone();
@@ -129,10 +128,10 @@ pub mod dns_scanner{
             _ => return Vec::new()
         };
 
+        //Getting the results of the lookup
         let the_results = match result_lookup {
             Ok(result) => {result}
-            Err(e) => {
-                println!("Err DH: {}", e.to_string());
+            Err(_) => { //no results of the lookup
                 return Vec::new();
             }
         };
@@ -148,9 +147,9 @@ pub mod dns_scanner{
 
     ///The function extracts the asked domain from
     ///the dns response.
-    /// Input: a SinglePacket reference- the response to extract from.
-    /// Output: a Some(String) value - the requested domain(if there is
-    /// no domain- the function will return None.
+    /// Input: a dns_parser::Packet reference- the response to extract from.
+    /// Output: a Some(String) value - the requested domain (if there is
+    /// no domain- the function will return None).
     fn extract_domain_from_dns_response(response: &dns_parser::Packet) -> Option<String> {
 
         // Extract the first question from the DNS packet
@@ -159,19 +158,21 @@ pub mod dns_scanner{
             None => return None,
         };
 
-        // Check if the question type is A or AAAA (IPv4 or IPv6)
+        // Check if the question type is A (IPv4)
         if question.qtype != QueryType::A{
-            println!("Not a good DH qtype");
             return None;
         }
 
         // Extract the requested domain
         let domain = question.qname.to_string();
-        println!("Domain of DH: {}", domain.clone());
 
         return Some(domain);
     }
 
+    ///The function extracts the data of a dns packet.
+    /// Input: a SinglePacket reference- the reference to the packet.
+    /// Output: Some packet if there is a dns payload, and None
+    /// if it does not.
     fn extract_dns_packet(packet: &SinglePacket) -> Option<SinglePacket>{
         let ethernet_packet = EthernetPacket::new(packet)?;
         let ip_packet = Ipv4Packet::new(ethernet_packet.payload())?;

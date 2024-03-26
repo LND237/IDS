@@ -1,7 +1,11 @@
 pub mod xss_scanner{
+    use pnet::packet::{ethernet::EthernetPacket, ip::IpNextHeaderProtocols,
+                       ipv4::Ipv4Packet, Packet, tcp::TcpPacket};
+    use tokio::runtime::Runtime;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
-    use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet, extract_http_payload, filter_packets};
+    use crate::server::server::{Server};
+    use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet, filter_packets};
 
     pub const ATTACK_NAME : &str = "XSS";
     pub const HTTP_PORT: u16 = 80;
@@ -33,11 +37,10 @@ pub mod xss_scanner{
                     Some(the_payload) => {the_payload},
                     None => {continue}
                 };
+                //Extracting the http headers of the packet
                 let headers = match parse_http_headers(&mut payload){
                     Ok(the_headers) => {the_headers},
-                    Err(e) => {
-                        println!("Err http parse: {}", e.to_string());
-                        continue}
+                    Err(_) => {continue}
                 };
                 if let None = headers.find(CSP){
                     return Some(extract_ip_src_from_packet(packet));
@@ -50,12 +53,16 @@ pub mod xss_scanner{
     impl ScannerFunctions for XssScanner{
 
         ///The function scans the network and checks if there is
-        /// a XSS Attack or not.
-        /// Input: self-reference(XssScanner)
-        /// Output: An IP Value-the IP of the fake site (if
-        /// the site is good-returning default IP Broadcast).
-        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP> {
-            return XssScanner::check_packets(filter_packets(packets, HTTP_PORT));
+        /// a XSS Attack or not and handles the result.
+        /// Input: self-reference(XssScanner) and a Vec<SinglePacket>
+        /// variable- the packets to check.
+        /// Output: None.
+        fn scan(&self, packets: Vec<SinglePacket>) {
+            let result = XssScanner::check_packets(filter_packets(packets.clone(), HTTP_PORT));
+
+            //Running the async function of handling the result
+            let rt = Runtime::new().unwrap();
+            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }
 
         ///The function gets the base data of it.
@@ -67,9 +74,9 @@ pub mod xss_scanner{
     }
 
 
-    ///The function extracts the headers from a HTTP packet, if it is not it will return Err
+    ///The function extracts the headers from an HTTP packet, if it is not it will return Err
     /// Input: a SinglePacket reference-the response to extract from.
-    /// Output: an Option<Vec<Header>> value - the headers of the HTTP packet, or Err if not an HTTP packet
+    /// Output: a Result<String, String> value - the headers of the HTTP packet, or Err if fails.
     fn parse_http_headers(payload: &mut SinglePacket) -> Result<String, String> {
         // Assuming the payload is valid UTF-8
         let payload_str = std::str::from_utf8(payload).unwrap_or("Can not show payload");
@@ -78,9 +85,24 @@ pub mod xss_scanner{
             let headers_str = &payload_str[..header_end_index + 4]; // Include the empty line
             return Ok(headers_str.to_string());
         }
-        println!("Payloud str: {}", payload_str);
         return Err("could not find end headers".to_string());
+    }
 
+    ///The function extracts the http payload from
+    /// the packet.
+    /// Input: a reference to a SinglePacket variable-
+    /// the packet to extract the http payload from.
+    /// Output: an Option<SinglePacket> value- the payload
+    /// if exists.
+    pub fn extract_http_payload(packet: &SinglePacket) -> Option<SinglePacket> {
+        let ethernet_packet = EthernetPacket::new(packet)?;
+        let ip_packet = Ipv4Packet::new(ethernet_packet.payload())?;
+        if ip_packet.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
+            let tcp_packet = TcpPacket::new(ip_packet.payload())?;
+            Some(tcp_packet.payload().to_vec())
+        } else {
+            None
+        }
     }
 
 }

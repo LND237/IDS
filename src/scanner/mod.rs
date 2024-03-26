@@ -7,7 +7,17 @@ pub mod scanner {
     // Interface for scanners
     pub trait ScannerFunctions: 'static {
         //Public function for all Scanners
-        fn scan(&self, packets: Vec<SinglePacket>) -> Option<IP>;
+
+        ///The function scans the attack and handles the result of
+        /// the scan.
+        /// Input: a self reference, and a Vec<SinglePacket> variables-
+        /// the packets to scan.
+        /// Output: None.
+        fn scan(&self, packets: Vec<SinglePacket>);
+
+        /// The function gets a copy of the base data(name and ip) of a scanner.
+        /// Input: a self reference.
+        /// Output: a Scanner value- the base data
         fn get_base_data(&self) -> Scanner;
     }
 

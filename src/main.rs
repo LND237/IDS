@@ -15,6 +15,7 @@ mod xss_scanner;
 mod download_scanner;
 mod smurf_scanner;
 mod server;
+mod env_file;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {

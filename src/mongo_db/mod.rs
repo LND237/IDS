@@ -5,6 +5,7 @@ pub mod mongo_db{
     use mongodb::{Client, Collection, Database};
     use mongodb::options::{ClientOptions, ServerApi, ServerApiVersion};
     use urlencoding::encode;
+    use crate::env_file::env_file::{get_password, get_username};
     use crate::ip::ip::IP;
 
     const DB_DOMAIN_PART_1 : &str = "mongodb+srv://";
@@ -42,14 +43,14 @@ pub mod mongo_db{
             return Self{ip_attacker, attack_name, date}
         }
 
-        ///The function gets the ip of the attacker.
+        /// The function gets the ip of the attacker.
         /// Input: None.
         /// Output: an IP value- the ip of the attacker.
         pub fn get_ip_attacker(&self) -> IP{
             return self.ip_attacker.copy();
         }
 
-        ///The function gets the name of the attack.
+        /// The function gets the name of the attack.
         /// Input: None.
         /// Output: A string value- the name of the attack.
         pub fn get_attack_name(&self) -> String{
@@ -63,7 +64,7 @@ pub mod mongo_db{
             return self.date;
         }
 
-        ///The function makes a string in json format
+        /// The function makes a string in json format
         /// from an AttackData structure.
         /// Input: None.
         /// Output: a string value - the json string.
@@ -72,7 +73,7 @@ pub mod mongo_db{
                            self.attack_name.clone(), self.date.to_string());
         }
 
-        ///The function copies the AttackData struct.
+        /// The function copies the AttackData struct.
         /// Input: None.
         /// Output: a value of AttackData- the copied data.
         pub fn copy(&self) -> Self{
@@ -109,28 +110,35 @@ pub mod mongo_db{
             return Ok(Self{username: username.clone(), password: password.clone(), db: get_access_db(client.clone(), DB_NAME.to_string().clone())});
         }
 
-        ///The function gets the username of the database.
+        /// Default Constructor of struct MongoDB.
+        /// Input: None.
+        /// Output: if there is an error- a mongodb::error, else- Ok<self> value.
+        pub async fn new_default() -> mongodb::error::Result<Self>{
+            return Self::new(get_username(), get_password()).await;
+        }
+
+        /// The function gets the username of the database.
         /// Input: None.
         /// Output: A string value- the username for the database.
         pub fn get_username(&self) -> String{
             return self.username.clone();
         }
 
-        ///The function gets the password of the database.
+        /// The function gets the password of the database.
         /// Input: None.
         /// Output: A string value- the password for the database.
         pub fn get_password(&self) -> String{
             return self.password.clone();
         }
 
-        ///The function copies the database structure.
+        /// The function copies the database structure.
         /// Input: None.
         /// Output: a Self structure(MongoDB)- a copy of the structure.
         pub fn copy(&self) -> Self{
             return Self{username: self.username.clone(), password: self.password.clone(), db: self.db.clone()};
         }
 
-        ///The function adds an attack to the database according to its data and
+        /// The function adds an attack to the database according to its data and
         /// the collection to insert to(the ip of the client).
         /// Input: a self reference(MongoDB), an IP variable- the ip of the client to insert the
         /// data to and an AttackData variable- the data to insert.
@@ -212,7 +220,7 @@ pub mod mongo_db{
 
     ///The function sends a ping function to the database and checks if it responses.
     ///Input: The client to access the database with.
-    ///Output: None unless there is an error.
+    ///Output: Ok unless there is an error.
     async fn ping_mongodb(client: &Client, database_name: String) -> mongodb::error::Result<()> {
         client.database(&database_name.clone()).run_command(doc! {"ping": 1}, None).await?;
         Ok(())

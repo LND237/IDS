@@ -29,6 +29,9 @@ pub mod sniffer{
             return Self { port, ip: IP::copy(&ip), packets: Vec::new() };
         }
 
+        /// Default Constructor of class Sniffer.
+        /// Input: An IP variable- the ip of the destination to sniff.
+        /// Output: a Self value.
         pub fn new_default_port(ip: IP) -> Self{
             return Self { port: ALL_PORTS, ip: IP::copy(&ip), packets: Vec::new() }
         }
@@ -211,8 +214,10 @@ pub mod sniffer{
     /// Output: a NetworkInterface value- the interface to sniff with
     /// (if there is no interface- return None).
     fn find_interface_with_traffic() -> Option<NetworkInterface> {
-
-            let the_local_ip = local_ip().unwrap();
+        let the_local_ip = match local_ip(){
+            Ok(ip) => {ip}
+            Err(_) => {return None;}
+        };
         // Get a list of available network interfaces
         let interfaces = datalink::interfaces();
 
@@ -228,24 +233,22 @@ pub mod sniffer{
         }
         return None;
     }
-    pub fn extract_http_payload(packet: &[u8]) -> Option<SinglePacket> {
-        let ethernet_packet = EthernetPacket::new(packet)?;
-        let ip_packet = Ipv4Packet::new(ethernet_packet.payload())?;
-        if ip_packet.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
-            let tcp_packet = TcpPacket::new(ip_packet.payload())?;
-            Some(tcp_packet.payload().to_vec())
-        } else {
-            None
-        }
-    }
 
+    ///The function filters the packets according to their destination
+    /// port.
+    /// Input: a Vec<SinglePacket> variable- the packets to filter and
+    /// an u16 variable- the number of the destination port.
+    /// Output: a Vec<SinglePacket> value- the packet with
+    /// the specific destination port only.
     pub fn filter_packets(packets: Vec<SinglePacket>, port: u16) -> Vec<SinglePacket>{
         let mut filtered_packets = Vec::new();
 
+        //Going over the packets
         for packet in packets{
             if let Some(ethernet) = EthernetPacket::new(&packet) {
                 // Extract the IPv4 packet
                 if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
+                    //If it is an Udp packet
                     if let Some(transport) =  UdpPacket::new(ipv4.payload()){
                         if port == transport.get_source(){
                             filtered_packets.push(packet.clone());
