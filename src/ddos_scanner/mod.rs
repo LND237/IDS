@@ -61,6 +61,8 @@ pub mod ddos_scanner{
         /// Output: None
         fn scan(&self, packets: Vec<SinglePacket>){
             let result = DdosScanner::check_packets(packets);
+
+            //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
             rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }

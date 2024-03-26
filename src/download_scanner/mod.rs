@@ -95,8 +95,9 @@ pub mod download_scanner{
         fn scan(&self, packets: Vec<SinglePacket>) {
             let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);
             the_packets.append(&mut filter_packets(packets.clone(), HTTPS_PORT));
-
             let result = DownloadScanner::check_packets(the_packets.clone());
+            
+            //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
             rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }

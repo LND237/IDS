@@ -9,7 +9,7 @@ pub mod dns_scanner{
     use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::{BROADCAST_IP, IP};
-    use crate::server::server::{Server};
+    use crate::server::server::Server;
     use crate::sniffer::sniffer::{SinglePacket, filter_packets};
 
     pub const ATTACK_NAME : &str = "DNS";
@@ -99,6 +99,8 @@ pub mod dns_scanner{
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>) {
             let result = DnsScanner::check_packets(filter_packets(packets.clone(), DNS_PORT));
+
+            //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
             rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }

@@ -55,6 +55,8 @@ pub mod smurf_scanner{
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>){
             let result = SmurfScanner::check_packets(packets);
+
+            //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
             rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }

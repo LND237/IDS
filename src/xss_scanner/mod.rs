@@ -1,9 +1,9 @@
 pub mod xss_scanner{
-    use pnet::packet::ethernet::EthernetPacket;
-    use pnet::packet::ip::IpNextHeaderProtocols;
-    use pnet::packet::ipv4::Ipv4Packet;
-    use pnet::packet::Packet;
-    use pnet::packet::tcp::TcpPacket;
+    use pnet::packet::{ethernet::EthernetPacket,
+                       ip::IpNextHeaderProtocols,
+                       ipv4::Ipv4Packet,
+                       Packet,
+                       tcp::TcpPacket};
     use tokio::runtime::Runtime;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
@@ -62,6 +62,8 @@ pub mod xss_scanner{
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>) {
             let result = XssScanner::check_packets(filter_packets(packets.clone(), HTTP_PORT));
+
+            //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
             rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
         }
