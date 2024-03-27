@@ -19,6 +19,20 @@ namespace Client
         public MainWindow()
         {
             InitializeComponent();
+            /*Communicator communicator = new Communicator();
+            this.headline.Text = "Starting to listen";
+            while (true)
+            {
+                try
+                {
+                    AttackData data = communicator.GetMessageServer();
+                    this.headline.Text = data.ToString();
+                }
+                catch(Exception excp) 
+                {
+                    this.headline.Text = excp.Message;
+                }
+            }*/
         }
     }
 }
