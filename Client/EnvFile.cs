@@ -8,42 +8,21 @@ using DotNetEnv;
 
 namespace Client
 {
-    internal class EnvFile
+    public class EnvFile
     {
-        private const string RELATIVE_PATH = @"../../../../env_files/variables.env";
-        
-        /// <summary>
-        /// The function extracts the username from the env file.
-        /// </summary>
-        /// <returns>The username</returns>
-        public static string GetUsername()
-        {
-            string username = EnvFile.GetVariable(GetEnvFullDirectory(), "USERNAME_DB");
-            return username;
-        }
-
-        /// <summary>
-        /// The function extracts the password from the env file.
-        /// </summary>
-        /// <returns>The password</returns>
-        public static string GetPassword()
-        {
-            string username = EnvFile.GetVariable(GetEnvFullDirectory(), "PASSWORD_DB");
-            return username;
-        }
+        private static readonly string PATH = GetEnvFullDirectory();
 
         /// <summary>
         /// The function gets a value of a variable in the
         /// env file.
         /// </summary>
-        /// <param name="path">The full path to the env file.</param>
         /// <param name="variableName">The name of the variable with the data
         /// in the env file.</param>
         /// <returns>The requested value</returns>
-        private static string GetVariable(string path, string variableName)
+        private static string GetVariable(string variableName)
         {
             string value = "";
-            Env.Load(path);
+            Env.Load(PATH);
 
             value = Environment.GetEnvironmentVariable(variableName);
 
@@ -51,7 +30,7 @@ namespace Client
             {
                 return value;
             }
-            return "";
+            throw new ArgumentNullException();
         }
 
         /// <summary>
@@ -61,6 +40,8 @@ namespace Client
         /// <returns>The full path</returns>
         private static string GetEnvFullDirectory()
         {
+            const string RELATIVE_PATH = @"../../../../env_files/variables.env";
+
             // Get the directory of the executable
             string executableDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
