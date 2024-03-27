@@ -1,15 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using WpfApp1.Models.Ip;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace WpfApp1.Models.MongoDB
 {
 
@@ -36,7 +28,7 @@ namespace WpfApp1.Models.MongoDB
         /// the
         public MongoDBAttackLogger(string username, string password, string databaseName, string ip)
         {
-            string encodedPassword = Uri.EscapeDataString(password);//encode passowrd
+            string encodedPassword = Uri.EscapeDataString(password);//encode password
 
             connectionString = "mongodb+srv://" + username + ":" + encodedPassword + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
             var client = new MongoClient(connectionString);
