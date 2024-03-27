@@ -2,6 +2,7 @@ use std::io::stdin;
 use crate::ip::ip::IP;
 use crate::server::server::Server;
 use local_ip_address::local_ip;
+use crate::env_file::env_file::{get_password, get_username};
 
 mod ip;
 mod sniffer;
@@ -19,16 +20,17 @@ mod env_file;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
-    dotenv::from_path("./env_files/variables.env").expect("Enable to open env file");
     let ip = IP::new(local_ip().unwrap().to_string()).unwrap();
     println!("IP: {}", ip.copy().get_ip());
 
-    let username: &str = &dotenv::var("USERNAME_DB").unwrap();
-    let password: &str = &dotenv::var("PASSWORD_DB").unwrap();
+    let username = get_username();
+    let password = get_password();
+
+    println!("Username: {}, Password: {}", username.clone(), password.clone());
 
     let ip_vector = vec![ip.copy()];
 
-    let mut server = match Server::new(ip_vector.clone(), username.to_string(), password.to_string()).await{
+    let mut server = match Server::new(ip_vector.clone(), username.clone().to_string(), password.clone().to_string()).await{
         Ok(server) => {server}
         Err(msg) => {panic!("{}", msg.to_string())}
     };
