@@ -1,0 +1,15 @@
+﻿<Window x:Class="Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Client"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Background="#323234">
+        <Rectangle HorizontalAlignment="Left" Height="124" Margin="506,165,0,0" Stroke="Transparent" VerticalAlignment="Top" Width="148" Fill="#212120" RadiusX="10" RadiusY="10"/>
+        <Rectangle HorizontalAlignment="Left" Height="124" Margin="298,165,0,0" Stroke="Transparent" VerticalAlignment="Top" Width="148" Fill="#212120" RadiusX="10" RadiusY="10"/>
+        <TextBlock HorizontalAlignment="Left" Margin="446,91,0,0" TextWrapping="Wrap" Text="Pronet." VerticalAlignment="Top" Height="34" Width="107" Foreground="White" FontFamily="Arial Black" FontSize="24"/>
+
+    </Grid>
+</Window>
