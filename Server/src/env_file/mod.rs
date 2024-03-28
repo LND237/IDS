@@ -1,5 +1,5 @@
 pub mod env_file{
-    const ENV_FILE_PATH: &str = "./env_files/variables.env";
+    const ENV_FILE_PATH: &str = "../env_files/variables.env";
     const ERROR_MSG: &str = "Enable to open env file";
 
     ///The function gets the username from the env file.
