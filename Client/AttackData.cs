@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Client
 {
-    internal class AttackData
+    public class AttackData
     {
         [JsonProperty("ip")]
         private string ip;
@@ -70,7 +70,7 @@ namespace Client
             AttackData data = JsonConvert.DeserializeObject<AttackData>(json);
             if (data == null) 
             {
-                throw new Exception("Can not convert to json");
+                throw new ArgumentNullException();
             }
             return data;
         }
