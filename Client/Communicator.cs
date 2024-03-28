@@ -9,18 +9,19 @@ using System.Net;
 
 namespace Client
 {
-    internal class Communicator
+    public class Communicator
     {
-        private const int PORT_NUM = 50001;
         private const int MAX_SIZE_BUFFER = 1024;
-        private readonly IP ip;
+        private readonly TcpListener listener;
 
         /// <summary>
-        /// Constructor of class Communicator.
+        /// Constructor of communicator.
         /// </summary>
-        public Communicator()
+        /// <param name="port">The number of port to listen.</param>
+        public Communicator(int port)
         {
-            this.ip = new IP("127.0.0.1");
+            IP ip = new IP("127.0.0.1");
+            this.listener = CreateListener(ip, port);
         }
 
         /// <summary>
@@ -31,18 +32,9 @@ namespace Client
         public AttackData GetMessageServer()
         {
             string dataReceived = "";
-            // Specify the IP address and port on which the server will listen
-            IPAddress ipAddress = IPAddress.Parse(ip.GetIP()); // Listen on localhost
-
-            // Create a TCP listener
-            TcpListener listener = new TcpListener(ipAddress, PORT_NUM);
-
-            // Start listening for incoming connection requests
-            listener.Start();
 
             // Accept the pending client connection
-            TcpClient client = listener.AcceptTcpClient();
-            Console.WriteLine("Client connected.");
+            TcpClient client = this.listener.AcceptTcpClient();
 
             // Get the network stream for reading
             NetworkStream stream = client.GetStream();
@@ -50,8 +42,6 @@ namespace Client
 
             // Close the client connection
             client.Close();
-
-            listener.Stop();
 
             return AttackData.Deserialize(dataReceived);
         }
@@ -72,11 +62,51 @@ namespace Client
             // Read data from the client
             while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) != 0)
             {
-                // Convert the data received into a string
-                dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                try
+                {
+                    // Trying to convert the data received into a string
+                    dataReceived += Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                }
+                catch //UTF Encoding did not work 
+                {
+                    dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                }
             }
 
             return dataReceived;
+        }
+
+        /// <summary>
+        /// The function creates a listener.
+        /// </summary>
+        /// <param name="ip">The ip to listen from.</param>
+        /// <param name="port">The number of port to listen.</param>
+        /// <returns>The listener.</returns>
+        private static TcpListener CreateListener(IP ip, int port)
+        {
+            // Specify the IP address and port on which the server will listen
+            IPAddress ipAddress = IPAddress.Parse(ip.GetIP()); // Listen on localhost
+
+            // Create a TCP listener
+            TcpListener listener = new TcpListener(ipAddress, port);
+
+            return listener;
+        }
+
+        /// <summary>
+        /// The function makes the listener to start listening.
+        /// </summary>
+        public void StartListening()
+        {
+            this.listener.Start();
+        }
+
+        /// <summary>
+        /// The function makes the listener to stop listening.
+        /// </summary>
+        public void StopListening() 
+        {
+            this.listener.Stop();
         }
 
     }
