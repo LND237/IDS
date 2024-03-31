@@ -147,11 +147,11 @@ pub mod server{
         ///Output: None.
         pub async fn handle_result(ip_client: IP, attack_name: String, result: Option<IP>){
             const PORT_NUM : u16 = 50001;
-            const AMOUNT_TIME_BLOCKING_ICMP: i32 = 10;
+            const AMOUNT_SECONDS_BLOCKING_ICMP: i32 = 10;
             let mut data_to_send = None;
             match result {
                 None => {
-                    block_icmp_limited_time(AMOUNT_TIME_BLOCKING_ICMP).await;
+                    block_icmp_limited_time(AMOUNT_SECONDS_BLOCKING_ICMP).await;
                     data_to_send = Some(AttackData::new(IP::new_default(), attack_name.clone(), Utc::now()));
                 },
                 Some(ip) => {
