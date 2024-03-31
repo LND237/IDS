@@ -6,6 +6,7 @@ pub mod server{
     use crate::ddos_scanner::ddos_scanner::DdosScanner;
     use crate::dns_scanner::dns_scanner::DnsScanner;
     use crate::download_scanner::download_scanner::DownloadScanner;
+    use crate::firewall::firewall::{block_icmp_limited_time, block_ip};
     use crate::ip::ip::IP;
     use crate::mongo_db::mongo_db::{AttackData, MongoDB};
     use crate::scanner::scanner::ScannerFunctions;
@@ -146,14 +147,22 @@ pub mod server{
         ///Output: None.
         pub async fn handle_result(ip_client: IP, attack_name: String, result: Option<IP>){
             const PORT_NUM : u16 = 50001;
+            const AMOUNT_SECONDS_BLOCKING_ICMP: i32 = 10;
             let mut data_to_send = None;
             match result {
                 None => {
+                    block_icmp_limited_time(AMOUNT_SECONDS_BLOCKING_ICMP).await;
                     data_to_send = Some(AttackData::new(IP::new_default(), attack_name.clone(), Utc::now()));
                 },
                 Some(ip) => {
+                    match block_ip(ip.copy()){
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("Error firewall: {}", e.to_string());
+                        }
+                    };
                     //If an ip of attacker
-                    if ip.get_ip() != IP::new_default().get_ip(){
+                    if ip.copy().get_ip() != IP::new_default().get_ip(){
                         data_to_send = Some(AttackData::new(ip.copy(), attack_name.clone(), Utc::now()));
                     }
                 }
