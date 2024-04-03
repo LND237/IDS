@@ -8,27 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0fca8796-0e1f-423c-b8b0-a5d84bf37859" name="Changes" comment="completed XSS scanner">
-      <change beforePath="$PROJECT_DIR$/../Client/Client.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../Client/Client.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Client/Communicator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Client/Communicator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Client/IP.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Client/IP.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Client/MainWindow.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/../Client/MainWindow.xaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Client/MainWindow.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Client/MainWindow.xaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Client/MongoDBAttackLogger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Client/MongoDBAttackLogger.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ddos_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ddos_scanner/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dns_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/dns_scanner/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/download_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/download_scanner/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/firewall/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/firewall/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mongo_db/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mongo_db/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/scanner/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/smurf_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/smurf_scanner/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/spec_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/spec_scanner/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/xss_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/xss_scanner/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/target/.rustc_info.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +94,7 @@
       <workItem from="1706196206210" duration="5451000" />
       <workItem from="1706812659143" duration="21000" />
       <workItem from="1711561820312" duration="79000" />
-      <workItem from="1712077184391" duration="4267000" />
+      <workItem from="1712077184391" duration="5042000" />
     </task>
     <task id="LOCAL-00001" summary="completed XSS scanner">
       <option name="closed" value="true" />
@@ -134,20 +115,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="completed XSS scanner" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/firewall/mod.rs</url>
-          <line>89</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/firewall/mod.rs</url>
-          <line>48</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="CargoCommandRunConfiguration">
         <watch expression="command-&gt;inner.stdout.variant0" />

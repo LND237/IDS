@@ -9,7 +9,8 @@ pub mod firewall{
     /// Input: an IP variable- the ip to block.
     /// Output: The result of the blocking.
     pub fn block_ip(ip_attacker: IP) -> Result<Output, String> {
-        let mut rule_name = "IDS-".to_string() + ip_attacker.get_ip().as_mut_str();
+        let mut name_arg = "name=";
+        let mut rule_name = name_arg.to_string() + &"IDS-".to_string() + ip_attacker.get_ip().as_mut_str();
         let mut name_arg = "name=".to_owned() + rule_name.as_mut_str();
         let mut binding = Command::new("netsh");
         let mut command = binding
@@ -21,7 +22,7 @@ pub mod firewall{
             .arg("dir=in")
             .arg("action=block")
             .arg(format!("remoteip={}", ip_attacker.get_ip().as_mut_str()));
-        
+
         if is_rule_exists(rule_name){
             return Err("This rule is already exists!".to_string());
         }
@@ -87,7 +88,7 @@ pub mod firewall{
                 if output.status.success() {
                     return Ok(output);
                 }
-                Err("No success running firewall command! It needs Administrator privilege".to_string())
+                Err("No success running firewall command! It might be related to running without Administrator privilege".to_string())
             }
             Err(e) => {
                 Err(e.to_string())
