@@ -9,7 +9,7 @@
     <Grid Background="#323234">
         <Rectangle HorizontalAlignment="Left" Height="124" Margin="506,165,0,0" Stroke="Transparent" VerticalAlignment="Top" Width="148" Fill="#212120" RadiusX="10" RadiusY="10"/>
         <Rectangle HorizontalAlignment="Left" Height="124" Margin="298,165,0,0" Stroke="Transparent" VerticalAlignment="Top" Width="148" Fill="#212120" RadiusX="10" RadiusY="10"/>
-        <TextBlock x:Name="headline" HorizontalAlignment="Left" Margin="446,91,0,0" TextWrapping="Wrap" Text="Pronet." VerticalAlignment="Top" Height="34" Width="107" Foreground="White" FontFamily="Arial Black" FontSize="24"/>
+        <TextBlock HorizontalAlignment="Left" Margin="446,91,0,0" TextWrapping="Wrap" Text="Pronet." VerticalAlignment="Top" Height="34" Width="107" Foreground="White" FontFamily="Arial Black" FontSize="24"/>
 
     </Grid>
 </Window>

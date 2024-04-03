@@ -1,14 +1,14 @@
-﻿using MongoDB.Bson;
+﻿using Client;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using WpfApp1.Models.Ip;
-namespace WpfApp1.Models.MongoDB
+namespace Client
 {
 
     internal class MongoDBAttackLogger
     {
         private readonly IMongoDatabase _database;
-        private readonly IP _clientIp;
+        private readonly MAC _clientMac;
         private readonly string connectionString;
         public class AttackLog //attacks data  struct
         {
@@ -25,15 +25,16 @@ namespace WpfApp1.Models.MongoDB
         /// <param name="username"> the username for the connection</param>
         /// <param name="password"> the password for the connection</param>
         /// <param name="databaseName"> the databaseName for the connection</param>
+        /// <param name="address"> the name of the collection</param>
         /// the
-        public MongoDBAttackLogger(string username, string password, string databaseName, string ip)
+        public MongoDBAttackLogger(string username, string password, string databaseName, MAC address)
         {
             string encodedPassword = Uri.EscapeDataString(password);//encode password
 
             connectionString = "mongodb+srv://" + username + ":" + encodedPassword + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
             var client = new MongoClient(connectionString);
             _database = client.GetDatabase(databaseName);
-            this._clientIp = new IP(ip);
+            this._clientMac = address.Copy();
         }
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace WpfApp1.Models.MongoDB
         /// <returns>all the attacks of the client</returns>
         public async Task<List<AttackLog>> getAllAttacks()
         {
-            var collection = _database.GetCollection<AttackLog>(this._clientIp.GetIP());
+            var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
 
             var filter = Builders<AttackLog>.Filter.Empty; // Get all documents
             var attackLogs = await collection.Find(filter).ToListAsync();
@@ -56,7 +57,7 @@ namespace WpfApp1.Models.MongoDB
         /// <returns>list of attackLogs</returns>
         public async Task<List<AttackLog>> GetLastAttacks(int count)
         {
-            var collection = _database.GetCollection<AttackLog>(this._clientIp.GetIP());
+            var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
 
             var sort = Builders<AttackLog>.Sort.Descending(log => log.Time); // Sort by Time (descending)
             var attackLogs = await collection.Find(Builders<AttackLog>.Filter.Empty)
@@ -74,7 +75,7 @@ namespace WpfApp1.Models.MongoDB
         /// <returns>list of the attacks</returns>
         public async Task<List<AttackLog>> GetAttacksInLastNMinutes(int minutes)
         {
-            var collection = _database.GetCollection<AttackLog>(this._clientIp.GetIP());
+            var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
             var cutoffTime = DateTime.Now.Subtract(TimeSpan.FromMinutes(minutes));
 
             var filter = Builders<AttackLog>.Filter.Gt(log => log.Time, cutoffTime);
@@ -90,7 +91,7 @@ namespace WpfApp1.Models.MongoDB
         /// <returns>list of attacks</returns>
         public async Task<List<AttackLog>> GetAttackerIpAttacks(string attackerIp)
         {
-            var collection = _database.GetCollection<AttackLog>(this._clientIp.GetIP());
+            var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
             var filter = Builders<AttackLog>.Filter.Eq(log => log.AttackerIp, attackerIp);
 
             var attackLogs = await collection.Find(filter).ToListAsync();
@@ -101,7 +102,7 @@ namespace WpfApp1.Models.MongoDB
         /// the function gets a list of all the attackers ip's (no duplicated values)
         public async Task<List<string>> GetAllAttackerIpsAsync()
         {
-            var collection = _database.GetCollection<AttackLog>(this._clientIp.GetIP());
+            var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
 
             var attackerIps = await collection.Distinct<string>("AttackerIp", Builders<AttackLog>.Filter.Empty)
                                               .ToListAsync();

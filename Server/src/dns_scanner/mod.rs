@@ -7,6 +7,7 @@ pub mod dns_scanner{
     use pnet::packet::udp::UdpPacket;
     use tokio::runtime::Runtime;
     use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
+    use crate::address::address::Address;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::{BROADCAST_IP, IP};
     use crate::server::server::Server;
@@ -22,9 +23,9 @@ pub mod dns_scanner{
 
     impl DnsScanner{
         ///Constructor of struct DnsScanner.
-        /// Input: an IP variable- the ip to scan from.
-        pub fn new(ip: IP) -> Self {
-            return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
+        /// Input: an Address variable- the address to scan.
+        pub fn new(address: Address) -> Self {
+            return Self{base: Scanner::new(address.clone(), ATTACK_NAME.to_string())};
         }
 
         ///The function checks the packets which was sniffed before
@@ -39,7 +40,6 @@ pub mod dns_scanner{
                 let dns_pack = match extract_dns_packet(&packet){
                     Some(pack) => pack,
                     None => {
-                        // println!("Err: not udp");
                         continue;
                     }
                 };
@@ -102,13 +102,13 @@ pub mod dns_scanner{
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 
