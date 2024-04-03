@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-namespace WpfApp1.Models.Ip
+
+namespace Client
 {
-    internal class IP
+    public class IP
     {
         private readonly string _ip;
         /// <summary>

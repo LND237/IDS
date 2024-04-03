@@ -1,5 +1,6 @@
 pub mod spec_scanner{
     use tokio::runtime::Runtime;
+    use crate::address::address::Address;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::server::server::{Server};
@@ -15,10 +16,11 @@ pub mod spec_scanner{
 
     impl SpecScanner{
         ///Constructor of struct SpecScanner.
-        /// Input: 2 IP variables- the ips of the client to
+        /// Input: An address variable- the address of the client
+        /// and an IP variable- the ips of the client to
         /// defend and the attacker to block.
-        pub fn new(ip_client: IP, ip_attacker: IP) -> Self {
-            return Self{base: Scanner::new(ip_client.copy(), SPEC_ATTACK_NAME.to_string()), spec_ip: ip_attacker.copy()};
+        pub fn new(address_client: Address, ip_attacker: IP) -> Self {
+            return Self{base: Scanner::new(address_client.clone(), SPEC_ATTACK_NAME.to_string()), spec_ip: ip_attacker.copy()};
         }
 
         ///The function gets the ip to defend from.
@@ -58,14 +60,14 @@ pub mod spec_scanner{
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
         }
 
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 

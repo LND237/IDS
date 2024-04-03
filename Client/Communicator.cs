@@ -1,5 +1,5 @@
 ﻿using System;
-using WpfApp1.Models.Ip;
+using Client;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,8 +20,7 @@ namespace Client
         /// <param name="port">The number of port to listen.</param>
         public Communicator(int port)
         {
-            IP ip = new IP("127.0.0.1");
-            this.listener = CreateListener(ip, port);
+            this.listener = CreateListener(port);
         }
 
         /// <summary>
@@ -79,16 +78,12 @@ namespace Client
         /// <summary>
         /// The function creates a listener.
         /// </summary>
-        /// <param name="ip">The ip to listen from.</param>
         /// <param name="port">The number of port to listen.</param>
         /// <returns>The listener.</returns>
-        private static TcpListener CreateListener(IP ip, int port)
+        private static TcpListener CreateListener(int port)
         {
-            // Specify the IP address and port on which the server will listen
-            IPAddress ipAddress = IPAddress.Parse(ip.GetIP()); // Listen on localhost
-
             // Create a TCP listener
-            TcpListener listener = new TcpListener(ipAddress, port);
+            TcpListener listener = new TcpListener(IPAddress.Any, port);
 
             return listener;
         }

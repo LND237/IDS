@@ -10,6 +10,7 @@ pub mod download_scanner{
     use crate::xss_scanner::xss_scanner::HTTP_PORT;
     use virustotal3::LastAnalysisStats;
     use virustotal3::VtClient;
+    use crate::address::address::Address;
     use crate::server::server::{Server};
 
     //Public Constants
@@ -27,10 +28,10 @@ pub mod download_scanner{
     impl DownloadScanner {
         //Public function
         ///Constructor of DownloadScanner struct.
-        /// Input: an IP struct- the IP to check.
+        /// Input: an address variable- the address to scan.
         /// Output: a struct of DownloadScanner.
-        pub fn new(ip: IP) -> Self{
-            return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
+        pub fn new(address: Address) -> Self{
+            return Self{base: Scanner::new(address.clone(), ATTACK_NAME.to_string())};
         }
         //Private Function
         ///The function checks the packets which was sniffed before
@@ -99,13 +100,13 @@ pub mod download_scanner{
             
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,25 +21,26 @@ namespace Client
         {
             InitializeComponent();
             //Example of using communicator
-            /*const int PORT_NUM = 50001, MAX_AMOUNT_PACKET = 5;
+            /*const int PORT_NUM = 50001, MAX_AMOUNT_PACKET = 1;
             int amount_packets = 0;
             Communicator communicator = new Communicator(PORT_NUM);
-            this.headline.Text = "Starting to listen";
             communicator.StartListening();
             while (amount_packets < MAX_AMOUNT_PACKET)
             {
                 try
                 {
                     AttackData data = communicator.GetMessageServer();
-                    this.headline.Text = data.ToString();
                     amount_packets++;
                 }
                 catch(Exception excp) 
                 {
-                    this.headline.Text = excp.Message;
+                    string text = excp.Message;
                 }
             }
             communicator.StopListening();*/
+            /*IP ip = LocalAddress.GetLocalIP();
+            MAC mac = LocalAddress.GetLocalMAC();*/
+            
         }
     }
 }

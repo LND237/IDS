@@ -3,6 +3,7 @@ pub mod smurf_scanner{
     use pnet::packet::icmp::IcmpPacket;
     use pnet::packet::Packet;
     use tokio::runtime::Runtime;
+    use crate::address::address::Address;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::server::server::{Server};
@@ -19,10 +20,10 @@ pub mod smurf_scanner{
 
     impl SmurfScanner{
         ///Constructor of DdosScanner struct.
-        /// Input: an IP struct- the IP to check.
+        /// Input: an Address struct- the address to check.
         /// Output: a struct of SmurfScanner.
-        pub fn new(ip: IP) -> Self{
-            return SmurfScanner{base: Scanner::new(ip, String::from(ATTACK_NAME))};
+        pub fn new(address: Address) -> Self{
+            return SmurfScanner{base: Scanner::new(address.clone(), String::from(ATTACK_NAME))};
         }
 
         ///The function checks the packets which was sniffed before
@@ -58,13 +59,13 @@ pub mod smurf_scanner{
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 

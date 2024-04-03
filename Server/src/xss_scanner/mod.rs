@@ -2,6 +2,7 @@ pub mod xss_scanner{
     use pnet::packet::{ethernet::EthernetPacket, ip::IpNextHeaderProtocols,
                        ipv4::Ipv4Packet, Packet, tcp::TcpPacket};
     use tokio::runtime::Runtime;
+    use crate::address::address::Address;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::server::server::{Server};
@@ -18,9 +19,9 @@ pub mod xss_scanner{
 
     impl XssScanner{
         ///Constructor of struct XssScanner.
-        /// Input: an IP variable-the ip to scan from.
-        pub fn new(ip: IP) -> Self {
-            return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
+        /// Input: an Address variable-the address to scan from.
+        pub fn new(address: Address) -> Self {
+            return Self{base: Scanner::new(address.clone(), ATTACK_NAME.to_string())};
         }
 
         ///The function checks the packets which were sniffed before
@@ -62,14 +63,14 @@ pub mod xss_scanner{
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
         }
 
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 
