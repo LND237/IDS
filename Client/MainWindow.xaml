@@ -7,19 +7,41 @@
         mc:Ignorable="d"
         Background="#323234"
         WindowStyle="None"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="1000">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Vertical">
+        <!--navigation bar-->
+        <StackPanel Orientation="Vertical" Grid.Column="0">
             <Image Source="icons/home.png" Stretch="None" HorizontalAlignment="Center"/>
             <Image Source="icons/settings.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0"/>
             <TextBlock Text="Attack List" FontSize="20px" Foreground="White" HorizontalAlignment="Center" Margin="0,10,0,0"/>
             <Image Source="icons/Graphs.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0"/>
             <Image Source="icons/FAQ.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0"/>
             <TextBlock Text="Progress.Connected." FontSize="10px" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,70,0,0" HorizontalAlignment="Center" Foreground="White"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Column="1">
+            <TextBlock Text="Pronet." FontSize="60px" Foreground="White" FontWeight="ExtraBold" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+            <TextBlock Text="Dashboard" FontSize="20px" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Text="Top threat summary attacks" FontWeight="ExtraBlack" Foreground="White" FontSize="20px" HorizontalAlignment="Center"/>
+                    <Grid>
+                        <Rectangle Fill="#212120" Width="350px" Height="300px" RadiusX="10" RadiusY="10" HorizontalAlignment="Center"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="hhh" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
         </StackPanel>
 
     </Grid>
