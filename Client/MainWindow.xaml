@@ -5,11 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Client"
         mc:Ignorable="d"
+        Background="#323234"
+        WindowStyle="None"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Background="#323234">
-        <Rectangle HorizontalAlignment="Left" Height="124" Margin="506,165,0,0" Stroke="Transparent" VerticalAlignment="Top" Width="148" Fill="#212120" RadiusX="10" RadiusY="10"/>
-        <Rectangle HorizontalAlignment="Left" Height="124" Margin="298,165,0,0" Stroke="Transparent" VerticalAlignment="Top" Width="148" Fill="#212120" RadiusX="10" RadiusY="10"/>
-        <TextBlock HorizontalAlignment="Left" Margin="446,91,0,0" TextWrapping="Wrap" Text="Pronet." VerticalAlignment="Top" Height="34" Width="107" Foreground="White" FontFamily="Arial Black" FontSize="24"/>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical">
+            <Image Source="icons/home.png" Stretch="None" HorizontalAlignment="Center"/>
+            <Image Source="icons/settings.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            <TextBlock Text="Attack List" FontSize="20px" Foreground="White" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            <Image Source="icons/Graphs.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            <Image Source="icons/FAQ.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            <TextBlock Text="Progress.Connected." FontSize="10px" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,70,0,0" HorizontalAlignment="Center" Foreground="White"/>
+        </StackPanel>
 
     </Grid>
 </Window>
