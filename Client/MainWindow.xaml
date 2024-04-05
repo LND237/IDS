@@ -25,22 +25,31 @@
 
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <TextBlock Text="Pronet." FontSize="60px" Foreground="White" FontWeight="ExtraBold" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-            <TextBlock Text="Dashboard" FontSize="20px" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Dashboard" FontSize="20px" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="8*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="8*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" Orientation="Vertical">
-                    <TextBlock Text="Top threat summary attacks" FontWeight="ExtraBlack" Foreground="White" FontSize="20px" HorizontalAlignment="Center"/>
-                    <Grid>
-                        <Rectangle Fill="#212120" Width="350px" Height="300px" RadiusX="10" RadiusY="10" HorizontalAlignment="Center"/>
-                    </Grid>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="hhh" Foreground="White"/>
+                <Grid Grid.Column="0">
+                    <Rectangle Fill="#212120" Height="300px" RadiusX="10" RadiusY="10" Margin="21,0,21,0"/>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Top threat summary attacks" FontWeight="ExtraBlack" Foreground="White" FontSize="20px" HorizontalAlignment="Center"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="20">
+                            <TextBlock Text="Type" Foreground="White" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" Margin="5,0,0,0"/>
+                            <TextBlock Text="Attacker IP" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" Margin="50,0,0,0"/>
+                            <TextBlock Text="Date" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Right" Margin="70,0,0,0"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
+                <Grid Grid.Column="2">
+                    <Rectangle Fill="#212120" Height="300px" RadiusX="10" RadiusY="10" Margin="21,0,21,0"/>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Attacks" FontWeight="ExtraBlack" Foreground="White" FontSize="20px" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </StackPanel>
 
