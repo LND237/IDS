@@ -16,7 +16,7 @@
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="6*"/>
         </Grid.ColumnDefinitions>
-        <!--notification text-->
+        <!--#region texts-->
         <StackPanel Orientation="Vertical" Grid.Column="0">
             <Border CornerRadius="10" Background="#80000000" Margin="5 75">
                 <TextBlock Text="Dark Mode" Foreground="#FFFFFFFF" FontSize="16" FontWeight="Bold" Padding="5" HorizontalAlignment="Center"/>
@@ -25,13 +25,15 @@
                 <TextBlock Text="Notification" Foreground="#FFFFFFFF" FontSize="16" FontWeight="Bold" Padding="5" HorizontalAlignment="Center"/>
             </Border>
         </StackPanel>
+        <!--#endregion-->
 
-        <!--toggle button1-->
+        <!--#region dark mode toggle button-->
         <Grid Margin="0,25,0,300" Grid.Column="1" HorizontalAlignment="Center">
             <ToggleButton x:Name="Toggle1" Height="50" Width="120" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ToggleButton.Template>
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="BT1" Background="#212120" CornerRadius="25" Padding="1">
+                            <!--circle button-->
                             <Border x:Name="BBT1" Background="White"
                                     Width="40" Height="30" Margin="5"
                                     CornerRadius="25" HorizontalAlignment="Left">
@@ -49,13 +51,15 @@
                 </ToggleButton.Template>
             </ToggleButton>
         </Grid>
-        <!--toggle button2-->
-        <!--toggle button1-->
+        <!--#endregion-->
+
+        <!--#region notification toggle button-->
         <Grid Margin="0,25,0,70" Grid.Column="1" HorizontalAlignment="Center">
             <ToggleButton x:Name="Toggle2" Height="50" Width="120" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ToggleButton.Template>
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="BT2" Background="#212120" CornerRadius="25" Padding="1">
+                            <!--circle button-->
                             <Border x:Name="BBT2" Background="White"
                                     Width="40" Height="30" Margin="5"
                                     CornerRadius="25" HorizontalAlignment="Left">
@@ -73,5 +77,7 @@
                 </ToggleButton.Template>
             </ToggleButton>
         </Grid>
+        <!--#endregion-->
+        
     </Grid>
 </Page>

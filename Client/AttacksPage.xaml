@@ -14,19 +14,26 @@
 
     <Grid>
         <StackPanel Orientation="Vertical">
+            <!--#region title-->
             <TextBlock Text="Pronet." FontSize="60px" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center"/>
             <TextBlock Text="Attacks" FontSize="20px" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
-
+            <!--#endregion-->
+            
+            <!--#region queries-->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="4*"/>
                     <ColumnDefinition Width="6*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
+                    <!--#region search attacker ip-->
                     <Border Height="50" Width="300" CornerRadius="25" Background="#212120">
                         <Grid>
+                            <!-- The text typed -->
                             <TextBox Width="250" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="SearchIPTextBox" Margin="5" Foreground="White" FontSize="20px"/>
+                            <!--Hint texy-->
                             <TextBlock IsHitTestVisible="False" Text="Search Attacker IP" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
+                                <!--Change the hint text with the typed one-->
                                 <TextBlock.Style>
                                     <Style TargetType="{x:Type TextBlock}">
                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -40,9 +47,12 @@
                             </TextBlock>
                         </Grid>
                     </Border>
+                    <!--#endregion-->
+                    
+                    <!--#region Attack type-->
                     <Border Height="50" Width="300" CornerRadius="25" Background="#212120" Margin="0 10">
                         <Grid>
-
+                             <!--#region Combo box selection-->
                             <ComboBox Name="attackTypeComboBox">
                                 <ComboBoxItem Content="DDoS" />
                                 <ComboBoxItem Content="Drive by download" />
@@ -50,6 +60,9 @@
                                 <ComboBoxItem Content="DNS hijacking" />
                                 <ComboBoxItem Content="XSS" />
                             </ComboBox>
+                            <!--#endregion-->
+                            
+                             <!--#region hint text-->
                             <TextBlock IsHitTestVisible="False" Text="Attack Type" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
                                 <TextBlock.Style>
                                     <Style TargetType="{x:Type TextBlock}">
@@ -62,11 +75,15 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
+                            <!--#endregion-->
+                            
                         </Grid>
 
                     </Border>
+                    <!--#endregion-->
                 </StackPanel>
             </Grid>
+            <!--#endregion-->
         </StackPanel>
     </Grid>
 </Page>
