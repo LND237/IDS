@@ -20,5 +20,15 @@ namespace Client
         {
             InitializeComponent();
         }
+
+        private void Settings_Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Main.Content = new SettingsPage();
+        }
+
+        private void Attacks_Text_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Main.Content = new AttacksPage();
+        }
     }
 }

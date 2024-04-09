@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace Client
 {
     /// <summary>
-    /// Interaction logic for Settings.xaml
+    /// Interaction logic for AttacksPage.xaml
     /// </summary>
-    public partial class Settings : Window
+    public partial class AttacksPage : Page
     {
-        public Settings()
+        public AttacksPage()
         {
             InitializeComponent();
         }
