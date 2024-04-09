@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MahApps.Metro" Version="2.4.10" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="icons\FAQ.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

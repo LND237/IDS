@@ -4,12 +4,69 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Client"
+      xmlns:mahApps="http://metro.mahapps.com/winfx/2009"
+      xmlns:System="clr-namespace:System;assembly=mscorlib"
+
       Background="#323234"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="AttacksPage">
 
     <Grid>
-        
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Pronet." FontSize="60px" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center"/>
+            <TextBlock Text="Attacks" FontSize="20px" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="6*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <Border Height="50" Width="300" CornerRadius="25" Background="#212120">
+                        <Grid>
+                            <TextBox Width="250" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="SearchIPTextBox" Margin="5" Foreground="White" FontSize="20px"/>
+                            <TextBlock IsHitTestVisible="False" Text="Search Attacker IP" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=SearchIPTextBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                    <Border Height="50" Width="300" CornerRadius="25" Background="#212120" Margin="0 10">
+                        <Grid>
+
+                            <ComboBox Name="attackTypeComboBox">
+                                <ComboBoxItem Content="DDoS" />
+                                <ComboBoxItem Content="Drive by download" />
+                                <ComboBoxItem Content="Smurf" />
+                                <ComboBoxItem Content="DNS hijacking" />
+                                <ComboBoxItem Content="XSS" />
+                            </ComboBox>
+                            <TextBlock IsHitTestVisible="False" Text="Attack Type" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=attackTypeComboBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
     </Grid>
 </Page>

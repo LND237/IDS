@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:Client"
         mc:Ignorable="d"
         Background="#323234"
-        WindowStyle="None"
-        Title="MainWindow" Height="450" Width="1000">
+        WindowStyle="SingleBorderWindow"
+        Title="MainWindow" Height="500" Width="1000">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
