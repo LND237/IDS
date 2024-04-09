@@ -16,7 +16,7 @@ pub mod spec_scanner{
 
     impl SpecScanner{
         ///Constructor of struct SpecScanner.
-        /// Input: An address variable- the address of the client
+        /// Input: An IP variable- the ip of the client
         /// and an IP variable- the ips of the client to
         /// defend and the attacker to block.
         pub fn new(ip_client: IP, ip_attacker: IP) -> Self {
@@ -52,8 +52,8 @@ pub mod spec_scanner{
     impl ScannerFunctions for SpecScanner{
         ///The function scans the network and checks if there is
         /// a Specific Attack or not and handles the result.
-        /// Input: self reference(SpecScanner) and a Vec<SinglePacket>- the
-        /// packets to check.
+        /// Input: self reference(SpecScanner), a Vec<SinglePacket>- the
+        /// packets to check and an Address variable- the client's address.
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
             let result = self.check_packets(packets);

@@ -39,10 +39,7 @@ async fn main() -> mongodb::error::Result<()> {
     let password = get_password();
 
     //let mut address_client = get_address();
-    let address_client = Address::new(
-        MAC::new("00:E0:4C:36:05:0D".to_string()).unwrap(),
-        IP::new("192.168.1.139".to_string()).unwrap()
-    );
+    let address_client = get_address();
 
     let mut server = match Server::new(address_client.clone(), username.clone().to_string(), password.clone().to_string()).await{
         Ok(server) => {server}
@@ -122,27 +119,6 @@ fn get_address() -> Address{
     println!("Please enter his mac address: ");
     let mac = get_mac_input();
     return Address::new(mac.clone(), ip.clone());
-}
-
-///The function gets a couple of addresses from the user.
-/// Input: None.
-/// Output: a Vec<Address> value- the given addresses.
-fn get_addresses() -> Vec<Address>{
-    const EXIT_STR: &str = "exit";
-    let mut addresses = Vec::new();
-    let mut input = String::new();
-
-    //While the user did not finish to insert addresses
-    while !input.eq(&EXIT_STR.to_string()){
-        println!("Do you want to add another address? Enter '{}' to finish: ", EXIT_STR);
-        input = get_string_input();
-        if !input.eq(&EXIT_STR.to_string()){
-            println!("So please enter an address");
-            addresses.push(get_address());
-        }
-    }
-
-    return addresses.clone();
 }
 
 

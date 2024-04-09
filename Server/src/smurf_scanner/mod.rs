@@ -10,7 +10,7 @@ pub mod smurf_scanner{
     use crate::sniffer::sniffer::{extract_ip_src_from_packet, SinglePacket};
 
     pub const ATTACK_NAME : &str = "Smurf";
-    const RATE_LIMIT: i32 = 150;
+    const RATE_LIMIT: i32 = 300;
     const REPLAY_ICMP_CODE : i32 = 0;
 
     #[derive(Clone)]
@@ -20,7 +20,7 @@ pub mod smurf_scanner{
 
     impl SmurfScanner{
         ///Constructor of DdosScanner struct.
-        /// Input: an Address struct- the address to check.
+        /// Input: an IP struct- the ip to scan.
         /// Output: a struct of SmurfScanner.
         pub fn new(ip: IP) -> Self{
             return SmurfScanner{base: Scanner::new(ip.clone(), String::from(ATTACK_NAME))};
@@ -28,7 +28,8 @@ pub mod smurf_scanner{
 
         ///The function checks the packets which was sniffed before
         /// and decides if there was a Smurf Attack or not.
-        /// Input: A vector of SinglePackets- the packets to check.
+        /// Input: A vector of SinglePackets- the packets to check and an
+        /// IP variable- the ip of the client.
         /// Output: An IP Value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>, client_ip: IP) -> Option<IP> {
@@ -39,7 +40,6 @@ pub mod smurf_scanner{
                     amount_icmp_packets += 1;
                 }
             }
-            println!("Amount of ICMPs: {}", amount_icmp_packets);
             //Checking if it is over the RATE_LIMIT
             if amount_icmp_packets >= RATE_LIMIT{
                 return None; //no specific attacker was recognized
@@ -51,8 +51,8 @@ pub mod smurf_scanner{
     impl ScannerFunctions for SmurfScanner{
         ///The function scans the network and checks if there is
         /// a Smurf Attack or not and handles the result.
-        /// Input: self reference(SmurfScanner) and a Vec<SinglePacket>- the
-        /// packets to scan.
+        /// Input: self reference(SmurfScanner), a Vec<SinglePacket>- the
+        /// packets to scan and an Address variable- the address of the client.
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
             let result = SmurfScanner::check_packets(packets, client_address.clone().get_ip());

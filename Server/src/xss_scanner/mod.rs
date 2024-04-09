@@ -19,7 +19,7 @@ pub mod xss_scanner{
 
     impl XssScanner{
         ///Constructor of struct XssScanner.
-        /// Input: an Address variable-the address to scan from.
+        /// Input: an IP variable- the address to scan from.
         pub fn new(ip: IP) -> Self {
             return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
         }
@@ -30,7 +30,6 @@ pub mod xss_scanner{
         /// Output: An IP Value-the IP who did the attack (if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
-            println!("Amount XSS Packets: {}", packets.clone().len());
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
@@ -55,8 +54,9 @@ pub mod xss_scanner{
 
         ///The function scans the network and checks if there is
         /// a XSS Attack or not and handles the result.
-        /// Input: self-reference(XssScanner) and a Vec<SinglePacket>
-        /// variable- the packets to check.
+        /// Input: self-reference(XssScanner), a Vec<SinglePacket>
+        /// variable- the packets to check and an Address variable-
+        /// the address of the client.
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let result = XssScanner::check_packets(filter_packets(packets.clone(), HTTP_PORT));
@@ -84,7 +84,6 @@ pub mod xss_scanner{
         // Find the empty line separating headers and body
         if let Some(header_end_index) = payload_str.find("\r\n\r\n") {
             let headers_str = &payload_str[..header_end_index + 4]; // Include the empty line
-            println!("Headers str: {}", headers_str);
             return Ok(headers_str.to_string());
         }
         return Err("could not find end headers".to_string());

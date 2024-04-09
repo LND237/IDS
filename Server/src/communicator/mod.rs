@@ -74,7 +74,7 @@ pub mod communicator{
 
     ///The function makes the string to use for connecting to the
     /// server in the client.
-    /// Input: an IP variable - the ip to connect to and an
+    /// Input: an IP reference variable - the ip to connect to and an
     /// u16 variable - the destination port to use.
     /// Output: a String value - the string to connect with.
     fn build_connection_str_tcp(ip_dest: &IP, port: u16) -> String{
@@ -84,11 +84,12 @@ pub mod communicator{
     ///The function connects to the client's server and sends
     /// the data of the attack to it.
     /// Input: an AttackData variable - the data to send ,
-    /// an IP variable - the ip to connect to and an
+    /// an IP reference variable - the ip to connect to and an
     /// u16 variable - the destination port to us.
     /// Output: a Result<(), String>- if the sending went well.
     pub fn notify_client(ip_client: &IP, port: u16, data: AttackData) -> Result<(), String> {
         let connection_str = build_connection_str_tcp(ip_client, port).clone();
+        //Connecting to client
         let mut stream = match TcpStream::connect(connection_str.clone()){
             Ok(tcp_stream) => {tcp_stream}
             Err(e) => {return Err(e.to_string())}

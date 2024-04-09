@@ -28,7 +28,7 @@ pub mod download_scanner{
     impl DownloadScanner {
         //Public function
         ///Constructor of DownloadScanner struct.
-        /// Input: an address variable- the address to scan.
+        /// Input: an IP variable- the ip to scan.
         /// Output: a struct of DownloadScanner.
         pub fn new(ip: IP) -> Self{
             return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
@@ -90,8 +90,9 @@ pub mod download_scanner{
     impl ScannerFunctions for DownloadScanner{
         /// The function scans the network and checks if there is
         /// a Drive By Download Attack or not and handles the result.
-        /// Input: self reference(DownloadScanner) and a Vec<SinglePacket> value-
-        /// the packets to check.
+        /// Input: self reference(DownloadScanner), a Vec<SinglePacket> value-
+        /// the packets to check and an Address variable- the address
+        /// of the client.
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);

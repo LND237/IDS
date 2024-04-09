@@ -60,12 +60,11 @@ pub mod server{
         /// Output: None.
         fn spawn_scanner_threads(&mut self) {
             //Sniffing the packets to scan
-            let local_ip = IP::new(local_ip_address::local_ip().unwrap().to_string()).unwrap();
+            let local_ip = IP::new(local_ip().unwrap().to_string()).unwrap();
 
             let mut sniffer = Sniffer::new_default_port(local_ip.clone());
             let packets = sniffer.sniff(MAX_AMOUNT_OF_PACKETS, SNIFF_TIME);
             let client_address = self.clone().client_address.clone();
-            println!("Total amount: {}", packets.clone().len());
 
             //Initiating the threads for all the scanners
             MultiScanner::spawn_thread_for_scanner(self.clone().ddos_scanner.clone(), packets.clone(), client_address.clone());
@@ -77,8 +76,8 @@ pub mod server{
 
         ///The function makes a thread for a scan function of a scanner.
         /// S: The type of the scanner
-        ///Input: S type- the scanner and a Vec<SinglePacket> variable- the
-        /// packets to scan.
+        ///Input: S type- the scanner, a Vec<SinglePacket> variable- the
+        /// packets to scan and an Address variable- the address of the client.
         /// Output: None.
         fn spawn_thread_for_scanner<S>(scanner: S, packets: Vec<SinglePacket>, address_client: Address)
             where
@@ -100,7 +99,7 @@ pub mod server{
     impl Server{
 
         ///Constructor of struct Server.
-        /// Input: a Vec<Address> variable- the addresses of the clients and
+        /// Input: an Address variable- the address of the client and
         /// 2 String variables- the username and the password for accessing
         /// the database.
         /// Output: A Self value(Server)[If there is an error,
@@ -137,7 +136,7 @@ pub mod server{
 
         ///The function handles the result of the scan and
         /// acts according to it.
-        /// Input: an Address variable- the address of the scanned client,
+        /// Input: an Address variable- the address of the client,
         ///a String variable- the name of the attack which was scanned,
         ///an Option<IP> variable- the result itself.
         ///Output: None.
@@ -151,8 +150,8 @@ pub mod server{
                     data_to_send = Some(AttackData::new(IP::new_default(), attack_name.clone(), Utc::now()));
                 },
                 Some(ip) => {
-                    //If an ip of attacker
-                    if ip.copy().get_ip() != IP::new_default().get_ip(){
+                    //If an ip of attacker(not of the client)
+                    if ip.copy().get_ip() != IP::new_default().get_ip() && ip.clone().get_ip() != address_client.clone().get_ip().get_ip(){
                         data_to_send = Some(AttackData::new(ip.copy(), attack_name.clone(), Utc::now()));
                         match block_ip(ip.copy()){
                             Ok(_) => {}
@@ -167,8 +166,8 @@ pub mod server{
             if let Some(the_data) = data_to_send{
                 println!("{} from {}", attack_name.clone(), the_data.copy().get_ip_attacker().get_ip());
                 //Adding data to database
-                /*let database = MongoDB::new_default().await.unwrap();
-                let _ = database.add_attack(address_client.clone().get_mac(), the_data.copy()).await;*/
+                let database = MongoDB::new_default().await.unwrap();
+                let _ = database.add_attack(address_client.clone().get_mac(), the_data.copy()).await;
                 //Notifying the client about the attack
                 let client_ip = address_client.clone().get_ip();
                 match notify_client(&client_ip, PORT_NUM, the_data.copy()){
@@ -180,10 +179,10 @@ pub mod server{
     }
 
     ///The function inits the data of the scanners about all the clients.
-    /// Input: a Vec<Address> variable- the addresses of the clients and a
+    /// Input: an Address variable- the address of the client and a
     /// MongoDB variable- the database with the attackers of the
-    /// clients.
-    /// Output: a HashMap<Address, MultiScanner>- the scanners for all the clients.
+    /// client.
+    /// Output: a MultiScanner value- the scanner for the client.
     async fn init_client(client_address : Address, database: MongoDB) -> MultiScanner{
         let ips_attackers = database.get_all_attackers(client_address.clone().get_mac()).await;
 

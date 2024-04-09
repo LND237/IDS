@@ -23,7 +23,7 @@ pub mod dns_scanner{
 
     impl DnsScanner{
         ///Constructor of struct DnsScanner.
-        /// Input: an Address variable- the address to scan.
+        /// Input: an IP variable- the ip address to scan.
         pub fn new(ip: IP) -> Self {
             return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
         }
@@ -34,7 +34,6 @@ pub mod dns_scanner{
         /// Output: An IP value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
-            println!("Amount DNS packets: {}", packets.clone().len());
             //Going over the packets of the dns
             for packet in packets{
                 let dns_pack = match extract_dns_packet(&packet){
@@ -94,8 +93,9 @@ pub mod dns_scanner{
     impl ScannerFunctions for DnsScanner{
         /// The function scans the network and checks if there is
         /// a DNS HIJACKING Attack or not.
-        /// Input: self reference(DnsScanner) and a Vec<SinglePacket>-
-        /// the packets to scan.
+        /// Input: self reference(DnsScanner), a Vec<SinglePacket>-
+        /// the packets to scan and an Address variable- the address
+        /// of the client.
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let result = DnsScanner::check_packets(filter_packets(packets.clone(), DNS_PORT));

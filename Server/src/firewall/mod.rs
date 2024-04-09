@@ -10,15 +10,14 @@ pub mod firewall{
     /// Output: The result of the blocking.
     pub fn block_ip(ip_attacker: IP) -> Result<Output, String> {
         let mut name_arg = "name=";
-        let mut rule_name = name_arg.to_string() + &"IDS-".to_string() + ip_attacker.get_ip().as_mut_str();
-        let mut name_arg = "name=".to_owned() + rule_name.as_mut_str();
+        let mut rule_name = "IDS-".to_string() + ip_attacker.get_ip().as_mut_str();
         let mut binding = Command::new("netsh");
         let mut command = binding
             .arg("advfirewall")
             .arg("firewall")
             .arg("add")
             .arg("rule")
-            .arg(name_arg.clone())
+            .arg(name_arg.to_owned() + rule_name.as_mut_str())
             .arg("dir=out")
             .arg("action=block")
             .arg(format!("remoteip={}", ip_attacker.get_ip().as_mut_str()));

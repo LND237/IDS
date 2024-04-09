@@ -11,8 +11,9 @@ pub mod scanner {
 
         ///The function scans the attack and handles the result of
         /// the scan.
-        /// Input: a self reference, and a Vec<SinglePacket> variables-
-        /// the packets to scan.
+        /// Input: a self reference, a Vec<SinglePacket> variables-
+        /// the packets to scan and an Address variable- the
+        /// address of the client.
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address);
 
