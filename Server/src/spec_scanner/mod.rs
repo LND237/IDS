@@ -16,11 +16,11 @@ pub mod spec_scanner{
 
     impl SpecScanner{
         ///Constructor of struct SpecScanner.
-        /// Input: An address variable- the address of the client
+        /// Input: An IP variable- the ip of the client
         /// and an IP variable- the ips of the client to
         /// defend and the attacker to block.
-        pub fn new(address_client: Address, ip_attacker: IP) -> Self {
-            return Self{base: Scanner::new(address_client.clone(), SPEC_ATTACK_NAME.to_string()), spec_ip: ip_attacker.copy()};
+        pub fn new(ip_client: IP, ip_attacker: IP) -> Self {
+            return Self{base: Scanner::new(ip_client.clone(), SPEC_ATTACK_NAME.to_string()), spec_ip: ip_attacker.copy()};
         }
 
         ///The function gets the ip to defend from.
@@ -52,15 +52,15 @@ pub mod spec_scanner{
     impl ScannerFunctions for SpecScanner{
         ///The function scans the network and checks if there is
         /// a Specific Attack or not and handles the result.
-        /// Input: self reference(SpecScanner) and a Vec<SinglePacket>- the
-        /// packets to check.
+        /// Input: self reference(SpecScanner), a Vec<SinglePacket>- the
+        /// packets to check and an Address variable- the client's address.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>){
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
             let result = self.check_packets(packets);
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address, self.base.get_name(), result))
         }
 
         ///The function gets the base data of it.

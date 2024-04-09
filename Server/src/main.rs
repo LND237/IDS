@@ -30,21 +30,18 @@ mod mac;
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
     let ip = IP::new(local_ip().unwrap().to_string()).unwrap();
+    println!("Local Address: ");
     println!("IP: {}", ip.copy().get_ip());
     let mac = MAC::new(get_mac_address().unwrap().unwrap().to_string()).unwrap();
     println!("MAC: {}", mac.clone().get_mac());
-
-    let local_address = Address::new(mac.clone(), ip.clone());
-
+    
     let username = get_username();
     let password = get_password();
 
-    println!("Username: {}, Password: {}", username.clone(), password.clone());
+    //let mut address_client = get_address();
+    let address_client = get_address();
 
-    let mut address_vector = get_addresses();
-    address_vector.push(local_address.clone());
-
-    let mut server = match Server::new(address_vector.clone(), username.clone().to_string(), password.clone().to_string()).await{
+    let mut server = match Server::new(address_client.clone(), username.clone().to_string(), password.clone().to_string()).await{
         Ok(server) => {server}
         Err(msg) => {panic!("{}", msg.to_string())}
     };
@@ -54,7 +51,7 @@ async fn main() -> mongodb::error::Result<()> {
     //Example for communicator check
     /*let ip_client = IP::new("192.168.1.139".to_string()).unwrap();
     let data = AttackData::new(IP::new_default(), "DD".to_string(), Utc::now());
-    notify_client(ip_client.copy(), 50001, data.clone()).expect("Looser");*/
+    notify_client(&ip_client.copy(), 50001, data.clone()).expect("Looser");*/
     Ok(())
 }
 
@@ -122,27 +119,6 @@ fn get_address() -> Address{
     println!("Please enter his mac address: ");
     let mac = get_mac_input();
     return Address::new(mac.clone(), ip.clone());
-}
-
-///The function gets a couple of addresses from the user.
-/// Input: None.
-/// Output: a Vec<Address> value- the given addresses.
-fn get_addresses() -> Vec<Address>{
-    const EXIT_STR: &str = "exit";
-    let mut addresses = Vec::new();
-    let mut input = String::new();
-
-    //While the user did not finish to insert addresses
-    while !input.eq(&EXIT_STR.to_string()){
-        println!("Do you want to add another address? Enter '{}' to finish: ", EXIT_STR);
-        input = get_string_input();
-        if !input.eq(&EXIT_STR.to_string()){
-            println!("So please enter an address");
-            addresses.push(get_address());
-        }
-    }
-
-    return addresses.clone();
 }
 
 

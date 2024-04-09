@@ -9,7 +9,18 @@
   <component name="ChangeListManager">
     <list default="true" id="0fca8796-0e1f-423c-b8b0-a5d84bf37859" name="Changes" comment="completed XSS scanner">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/communicator/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/communicator/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ddos_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ddos_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dns_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/dns_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/download_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/download_scanner/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/firewall/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/firewall/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/smurf_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/smurf_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/spec_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/spec_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/xss_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/xss_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/target/.rustc_info.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,7 +55,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Feature/Adding__MAC__Address&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Feature/Configuring__Proxy&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/test0/Magshimim/C5/haifa-1505-ids/Server/src&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -53,6 +64,7 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
     &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -95,6 +107,10 @@
       <workItem from="1706812659143" duration="21000" />
       <workItem from="1711561820312" duration="79000" />
       <workItem from="1712077184391" duration="5042000" />
+      <workItem from="1712590038290" duration="5354000" />
+      <workItem from="1712671920119" duration="7005000" />
+      <workItem from="1712683258331" duration="1757000" />
+      <workItem from="1712692882484" duration="1425000" />
     </task>
     <task id="LOCAL-00001" summary="completed XSS scanner">
       <option name="closed" value="true" />
@@ -109,6 +125,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="completed XSS scanner" />

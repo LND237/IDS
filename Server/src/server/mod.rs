@@ -1,5 +1,4 @@
 pub mod server{
-    use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
     use std::{thread, time};
     use chrono::Utc;
@@ -15,13 +14,15 @@ pub mod server{
     use crate::smurf_scanner::smurf_scanner::SmurfScanner;
     use crate::xss_scanner::xss_scanner::XssScanner;
     use crate::sniffer::sniffer::{SinglePacket, Sniffer};
+    use local_ip_address::local_ip;
+
 
 
     const MAX_AMOUNT_OF_PACKETS : i32 = 1000;
     const SNIFF_TIME: i32 = 3;
     #[derive(Clone)]
     pub struct MultiScanner{
-        address: Address,
+        client_address: Address,
         ddos_scanner : DdosScanner,
         dns_scanner : DnsScanner,
         download_scanner : DownloadScanner,
@@ -34,13 +35,14 @@ pub mod server{
         ///Input: an Address variable- the address of the client to scan.
         /// Output: A Self value(MultiScanner).
         pub fn new(address_client: Address) -> Self{
+            let self_ip = IP::new(local_ip().unwrap().to_string()).unwrap();
             return Self{
-                address: address_client.clone(),
-                ddos_scanner: DdosScanner::new(address_client.clone()),
-                dns_scanner: DnsScanner::new(address_client.clone()),
-                download_scanner: DownloadScanner::new(address_client.clone()),
-                smurf_scanner: SmurfScanner::new(address_client.clone()),
-                xss_scanner: XssScanner::new(address_client.clone())};
+                client_address: address_client.clone(),
+                ddos_scanner: DdosScanner::new(self_ip.clone()),
+                dns_scanner: DnsScanner::new(self_ip.clone()),
+                download_scanner: DownloadScanner::new(self_ip.clone()),
+                smurf_scanner: SmurfScanner::new(self_ip.clone()),
+                xss_scanner: XssScanner::new(self_ip.clone())};
         }
 
         ///The function goes over all the scanners in the
@@ -58,58 +60,60 @@ pub mod server{
         /// Output: None.
         fn spawn_scanner_threads(&mut self) {
             //Sniffing the packets to scan
-            let mut sniffer = Sniffer::new_default_port(self.address.get_ip());
+            let local_ip = IP::new(local_ip().unwrap().to_string()).unwrap();
+
+            let mut sniffer = Sniffer::new_default_port(local_ip.clone());
             let packets = sniffer.sniff(MAX_AMOUNT_OF_PACKETS, SNIFF_TIME);
-            println!("Total amount: {}", packets.clone().len());
+            let client_address = self.clone().client_address.clone();
 
             //Initiating the threads for all the scanners
-            MultiScanner::spawn_thread_for_scanner(self.clone().ddos_scanner.clone(), packets.clone());
-            MultiScanner::spawn_thread_for_scanner(self.clone().dns_scanner.clone(), packets.clone());
-            MultiScanner::spawn_thread_for_scanner(self.clone().download_scanner.clone(), packets.clone());
-            MultiScanner::spawn_thread_for_scanner(self.clone().smurf_scanner.clone(), packets.clone());
-            MultiScanner::spawn_thread_for_scanner(self.clone().xss_scanner.clone(), packets.clone());
+            MultiScanner::spawn_thread_for_scanner(self.clone().ddos_scanner.clone(), packets.clone(), client_address.clone());
+            MultiScanner::spawn_thread_for_scanner(self.clone().dns_scanner.clone(), packets.clone(), client_address.clone());
+            MultiScanner::spawn_thread_for_scanner(self.clone().download_scanner.clone(), packets.clone(), client_address.clone());
+            MultiScanner::spawn_thread_for_scanner(self.clone().smurf_scanner.clone(), packets.clone(), client_address.clone());
+            MultiScanner::spawn_thread_for_scanner(self.clone().xss_scanner.clone(), packets.clone(), client_address.clone());
         }
 
         ///The function makes a thread for a scan function of a scanner.
         /// S: The type of the scanner
-        ///Input: S type- the scanner and a Vec<SinglePacket> variable- the
-        /// packets to scan.
+        ///Input: S type- the scanner, a Vec<SinglePacket> variable- the
+        /// packets to scan and an Address variable- the address of the client.
         /// Output: None.
-        fn spawn_thread_for_scanner<S>(scanner: S, packets: Vec<SinglePacket>)
+        fn spawn_thread_for_scanner<S>(scanner: S, packets: Vec<SinglePacket>, address_client: Address)
             where
                 S: ScannerFunctions + Clone + Send + 'static,
         {
             let scanner_clone = scanner.clone();
 
             thread::spawn(move || {
-                scanner_clone.scan(packets);
+                scanner_clone.scan(packets, address_client.clone());
             });
         }
     }
 
     pub struct Server{
-        clients: HashMap<Address, MultiScanner>,
+        client: MultiScanner,
         db: MongoDB
     }
 
     impl Server{
 
         ///Constructor of struct Server.
-        /// Input: a Vec<Address> variable- the addresses of the clients and
+        /// Input: an Address variable- the address of the client and
         /// 2 String variables- the username and the password for accessing
         /// the database.
         /// Output: A Self value(Server)[If there is an error,
         /// returning String msg value]
-        pub async fn new(addresses: Vec<Address>, db_username : String, db_password: String) -> Result<Self, String>{
+        pub async fn new(client: Address, db_username : String, db_password: String) -> Result<Self, String>{
             //Building the database
             let database = match MongoDB::new(db_username.clone(), db_password.clone()).await{
                 Ok(db) => {db},
                 Err(msg) => {return Err(msg.to_string())}
             };
 
-            let the_clients = init_clients(addresses.clone(), database.copy()).await;
+            let the_client = init_client(client.clone(), database.copy()).await;
 
-            return Ok(Self{clients : the_clients, db: database.copy()});
+            return Ok(Self{ client: the_client, db: database.copy()});
         }
 
         ///The function starts to run the server and
@@ -118,29 +122,21 @@ pub mod server{
         /// Output: None.
         pub async fn run(&mut self) {
             loop {
-                let mut threads = Vec::new();
+                //Getting the MultiScanner
+                let the_multi_scanner = self.client.clone();
+                let multi_scanner = Arc::new(Mutex::new(the_multi_scanner));
 
-                for (_, multi_scanner) in self.clients.clone() {
-                    let multi_scanner = Arc::new(Mutex::new(multi_scanner));
-
-                    let thread_handle = thread::spawn(move || {
-                        let mut multi_scanner = multi_scanner.lock().unwrap();
-                        multi_scanner.scan_all();
-                    });
-                    threads.push(thread_handle);
-                }
-
-                // Wait for all threads to finish
-                for thread in threads {
-                    thread.join().unwrap();
-                }
+                let _ = thread::spawn(move || {
+                    let mut multi_scanner = multi_scanner.lock().unwrap();
+                    multi_scanner.scan_all();
+                }).join();
                 tokio::time::sleep(time::Duration::from_secs(1)).await;
             }
         }
 
         ///The function handles the result of the scan and
         /// acts according to it.
-        /// Input: an Address variable- the address of the scanned client,
+        /// Input: an Address variable- the address of the client,
         ///a String variable- the name of the attack which was scanned,
         ///an Option<IP> variable- the result itself.
         ///Output: None.
@@ -154,8 +150,8 @@ pub mod server{
                     data_to_send = Some(AttackData::new(IP::new_default(), attack_name.clone(), Utc::now()));
                 },
                 Some(ip) => {
-                    //If an ip of attacker
-                    if ip.copy().get_ip() != IP::new_default().get_ip(){
+                    //If an ip of attacker(not of the client)
+                    if ip.copy().get_ip() != IP::new_default().get_ip() && ip.clone().get_ip() != address_client.clone().get_ip().get_ip(){
                         data_to_send = Some(AttackData::new(ip.copy(), attack_name.clone(), Utc::now()));
                         match block_ip(ip.copy()){
                             Ok(_) => {}
@@ -173,7 +169,8 @@ pub mod server{
                 let database = MongoDB::new_default().await.unwrap();
                 let _ = database.add_attack(address_client.clone().get_mac(), the_data.copy()).await;
                 //Notifying the client about the attack
-                let _ = match notify_client(address_client.get_ip().copy(), PORT_NUM, the_data.copy()){
+                let client_ip = address_client.clone().get_ip();
+                match notify_client(&client_ip, PORT_NUM, the_data.copy()){
                     Ok(_) => {println!("Data sent to client successfully!")}
                     Err(msg) => {println!("Err client: {}", msg.to_string())}
                 };
@@ -182,26 +179,18 @@ pub mod server{
     }
 
     ///The function inits the data of the scanners about all the clients.
-    /// Input: a Vec<Address> variable- the addresses of the clients and a
+    /// Input: an Address variable- the address of the client and a
     /// MongoDB variable- the database with the attackers of the
-    /// clients.
-    /// Output: a HashMap<Address, MultiScanner>- the scanners for all the clients.
-    async fn init_clients(clients_addresses : Vec<Address>, database: MongoDB) -> HashMap<Address, MultiScanner> {
-        let mut clients = HashMap::new();
+    /// client.
+    /// Output: a MultiScanner value- the scanner for the client.
+    async fn init_client(client_address : Address, database: MongoDB) -> MultiScanner{
+        let ips_attackers = database.get_all_attackers(client_address.clone().get_mac()).await;
 
-        //Going over the addresses
-        for address in clients_addresses{
-            let ips_attackers = database.get_all_attackers(address.clone().get_mac()).await;
-
-            //Implementing firewall rules for all the attackers
-            for ip in ips_attackers{
-                let _ = block_ip(ip.copy());
-            }
-
-            clients.insert(address.clone(),
-                           MultiScanner::new(address.clone()));
+        //Implementing firewall rules for all the attackers
+        for ip in ips_attackers{
+            let _ = block_ip(ip.copy());
         }
 
-        return clients;
+        return MultiScanner::new(client_address.clone());
     }
 }
