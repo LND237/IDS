@@ -81,6 +81,13 @@
 
                     </Border>
                     <!--#endregion-->
+
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="icons/Calender.png" Height="100" Width="100"/>
+                        <Border Height="50" Width="200" CornerRadius="25" Background="#212120">
+                            <DatePicker Width="150" Height="30" Foreground="White" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
+                        </Border>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
             <!--#endregion-->
