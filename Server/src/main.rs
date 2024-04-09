@@ -30,21 +30,17 @@ mod mac;
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
     let ip = IP::new(local_ip().unwrap().to_string()).unwrap();
+    println!("Local Address: ");
     println!("IP: {}", ip.copy().get_ip());
     let mac = MAC::new(get_mac_address().unwrap().unwrap().to_string()).unwrap();
     println!("MAC: {}", mac.clone().get_mac());
-
-    let local_address = Address::new(mac.clone(), ip.clone());
-
+    
     let username = get_username();
     let password = get_password();
 
-    println!("Username: {}, Password: {}", username.clone(), password.clone());
+    let mut address_client = get_address();
 
-    let mut address_vector = get_addresses();
-    address_vector.push(local_address.clone());
-
-    let mut server = match Server::new(address_vector.clone(), username.clone().to_string(), password.clone().to_string()).await{
+    let mut server = match Server::new(address_client.clone(), username.clone().to_string(), password.clone().to_string()).await{
         Ok(server) => {server}
         Err(msg) => {panic!("{}", msg.to_string())}
     };

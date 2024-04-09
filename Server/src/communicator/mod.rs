@@ -88,7 +88,10 @@ pub mod communicator{
     /// u16 variable - the destination port to us.
     /// Output: a Result<(), String>- if the sending went well.
     pub fn notify_client(ip_client: IP, port: u16, data: AttackData) -> Result<(), String> {
-        let mut stream = TcpStream::connect(build_connection_str_tcp(ip_client.copy(), port).clone()).expect("Failed to connect to server");
+        let mut stream = match TcpStream::connect(build_connection_str_tcp(ip_client.copy(), port).clone()){
+            Ok(tcp_stream) => {tcp_stream}
+            Err(_) => {return Err("Client is offline".to_string())}
+        };
         let data_to_send = data.get_data_str_json();
 
         stream.write_all(data_to_send.as_bytes()).expect("Failed to send data!");

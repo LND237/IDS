@@ -30,8 +30,8 @@ pub mod download_scanner{
         ///Constructor of DownloadScanner struct.
         /// Input: an address variable- the address to scan.
         /// Output: a struct of DownloadScanner.
-        pub fn new(address: Address) -> Self{
-            return Self{base: Scanner::new(address.clone(), ATTACK_NAME.to_string())};
+        pub fn new(ip: IP) -> Self{
+            return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
         }
         //Private Function
         ///The function checks the packets which was sniffed before
@@ -93,14 +93,14 @@ pub mod download_scanner{
         /// Input: self reference(DownloadScanner) and a Vec<SinglePacket> value-
         /// the packets to check.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>) {
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);
             the_packets.append(&mut filter_packets(packets.clone(), HTTPS_PORT));
             let result = DownloadScanner::check_packets(the_packets.clone());
             
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.

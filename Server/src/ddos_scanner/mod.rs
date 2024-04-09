@@ -19,8 +19,8 @@ pub mod ddos_scanner{
         ///Constructor of DdosScanner struct.
         /// Input: an Address struct- the address to check.
         /// Output: a struct of DdosScanner.
-        pub fn new(address: Address) -> Self{
-            return DdosScanner{base: Scanner::new(address.clone(), String::from(ATTACK_NAME))};
+        pub fn new(ip: IP) -> Self{
+            return DdosScanner{base: Scanner::new(ip.clone(), String::from(ATTACK_NAME))};
         }
         ///The function checks the packets which was sniffed before
         /// and decides if there was a Ddos Attack or not.
@@ -60,12 +60,12 @@ pub mod ddos_scanner{
         /// Input: self reference(DdosScanner) and a Vec<SinglePacket>
         /// variable- the packets to check.
         /// Output: None
-        fn scan(&self, packets: Vec<SinglePacket>){
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
             let result = DdosScanner::check_packets(packets);
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.

@@ -22,8 +22,8 @@ pub mod smurf_scanner{
         ///Constructor of DdosScanner struct.
         /// Input: an Address struct- the address to check.
         /// Output: a struct of SmurfScanner.
-        pub fn new(address: Address) -> Self{
-            return SmurfScanner{base: Scanner::new(address.clone(), String::from(ATTACK_NAME))};
+        pub fn new(ip: IP) -> Self{
+            return SmurfScanner{base: Scanner::new(ip.clone(), String::from(ATTACK_NAME))};
         }
 
         ///The function checks the packets which was sniffed before
@@ -54,12 +54,12 @@ pub mod smurf_scanner{
         /// Input: self reference(SmurfScanner) and a Vec<SinglePacket>- the
         /// packets to scan.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>){
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
             let result = SmurfScanner::check_packets(packets);
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.

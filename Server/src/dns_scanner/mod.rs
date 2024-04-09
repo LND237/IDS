@@ -24,8 +24,8 @@ pub mod dns_scanner{
     impl DnsScanner{
         ///Constructor of struct DnsScanner.
         /// Input: an Address variable- the address to scan.
-        pub fn new(address: Address) -> Self {
-            return Self{base: Scanner::new(address.clone(), ATTACK_NAME.to_string())};
+        pub fn new(ip: IP) -> Self {
+            return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
         }
 
         ///The function checks the packets which was sniffed before
@@ -97,12 +97,12 @@ pub mod dns_scanner{
         /// Input: self reference(DnsScanner) and a Vec<SinglePacket>-
         /// the packets to scan.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>) {
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let result = DnsScanner::check_packets(filter_packets(packets.clone(), DNS_PORT));
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_address(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.

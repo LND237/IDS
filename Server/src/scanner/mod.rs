@@ -2,6 +2,7 @@ pub mod scanner {
     use std::future::Future;
     use tokio::runtime::Runtime;
     use crate::address::address::Address;
+    use crate::ip::ip::IP;
     use crate::sniffer::sniffer::SinglePacket;
 
     // Interface for scanners
@@ -13,7 +14,7 @@ pub mod scanner {
         /// Input: a self reference, and a Vec<SinglePacket> variables-
         /// the packets to scan.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>);
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address);
 
         /// The function gets a copy of the base data(name and ip) of a scanner.
         /// Input: a self reference.
@@ -24,7 +25,7 @@ pub mod scanner {
     #[derive(Clone)]
     pub struct Scanner{
         attack_name: String,
-        address: Address
+        ip_scan: IP
     }
 
     impl Scanner{
@@ -32,8 +33,8 @@ pub mod scanner {
         ///Input: an Address structure- the address for the Scanner and
         /// a String variable- the name of the attack to scan.
         /// Output: The Scanner object Structure.
-        pub fn new(address: Address, attack_name: String) -> Self{
-            return Scanner{address: address.clone(), attack_name: attack_name.clone()};
+        pub fn new(ip: IP, attack_name: String) -> Self{
+            return Scanner{ ip_scan: ip.clone(), attack_name: attack_name.clone()};
         }
 
         ///The function gets the name of the attack which the
@@ -48,8 +49,8 @@ pub mod scanner {
         /// scanner.
         /// Input: self reference(Scanner).
         /// Output: The Address to scan.
-        pub fn get_address(&self) -> Address{
-            return self.address.clone();
+        pub fn get_ip(&self) -> IP{
+            return self.ip_scan.clone();
         }
     }
     ///The function runs an async function as

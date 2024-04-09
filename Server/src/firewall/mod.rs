@@ -19,7 +19,7 @@ pub mod firewall{
             .arg("add")
             .arg("rule")
             .arg(name_arg.clone())
-            .arg("dir=in")
+            .arg("dir=out")
             .arg("action=block")
             .arg(format!("remoteip={}", ip_attacker.get_ip().as_mut_str()));
 
