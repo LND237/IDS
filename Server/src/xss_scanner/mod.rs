@@ -84,6 +84,7 @@ pub mod xss_scanner{
         // Find the empty line separating headers and body
         if let Some(header_end_index) = payload_str.find("\r\n\r\n") {
             let headers_str = &payload_str[..header_end_index + 4]; // Include the empty line
+            println!("Headers str: {}", headers_str);
             return Ok(headers_str.to_string());
         }
         return Err("could not find end headers".to_string());

@@ -60,7 +60,9 @@ pub mod server{
         /// Output: None.
         fn spawn_scanner_threads(&mut self) {
             //Sniffing the packets to scan
-            let mut sniffer = Sniffer::new_default_port(self.client_address.get_ip());
+            let local_ip = IP::new(local_ip_address::local_ip().unwrap().to_string()).unwrap();
+
+            let mut sniffer = Sniffer::new_default_port(local_ip.clone());
             let packets = sniffer.sniff(MAX_AMOUNT_OF_PACKETS, SNIFF_TIME);
             let client_address = self.clone().client_address.clone();
             println!("Total amount: {}", packets.clone().len());
@@ -165,10 +167,11 @@ pub mod server{
             if let Some(the_data) = data_to_send{
                 println!("{} from {}", attack_name.clone(), the_data.copy().get_ip_attacker().get_ip());
                 //Adding data to database
-                let database = MongoDB::new_default().await.unwrap();
-                let _ = database.add_attack(address_client.clone().get_mac(), the_data.copy()).await;
+                /*let database = MongoDB::new_default().await.unwrap();
+                let _ = database.add_attack(address_client.clone().get_mac(), the_data.copy()).await;*/
                 //Notifying the client about the attack
-                let _ = match notify_client(address_client.get_ip().copy(), PORT_NUM, the_data.copy()){
+                let client_ip = address_client.clone().get_ip();
+                match notify_client(&client_ip, PORT_NUM, the_data.copy()){
                     Ok(_) => {println!("Data sent to client successfully!")}
                     Err(msg) => {println!("Err client: {}", msg.to_string())}
                 };

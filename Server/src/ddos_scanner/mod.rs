@@ -27,7 +27,7 @@ pub mod ddos_scanner{
         /// Input: A vector of SinglePackets- the packets to check.
         /// Output: An IP value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
-        fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
+        fn check_packets(packets: Vec<SinglePacket>, client_ip: IP) -> Option<IP> {
             let mut hash_map_ip: HashMap<IP, i32> = HashMap::new();
 
             //Going over the packets
@@ -45,7 +45,7 @@ pub mod ddos_scanner{
             //Going over the hashmap
             for (key, value) in hash_map_ip{
                 //If this IP did a DDos attack
-                if value > RATE_LIMIT{
+                if value > RATE_LIMIT && key.get_ip() != client_ip.get_ip(){
                     println!("{}: {}", key.copy().get_ip(), value);
                     return Some(key.copy());
                 }
@@ -61,7 +61,7 @@ pub mod ddos_scanner{
         /// variable- the packets to check.
         /// Output: None
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
-            let result = DdosScanner::check_packets(packets);
+            let result = DdosScanner::check_packets(packets, client_address.clone().get_ip());
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();

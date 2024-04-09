@@ -18,7 +18,7 @@ pub mod communicator{
         /// Input: None.
         /// Output: a String value - the string to connect with.
         fn build_connection_str_tcp(&self) -> String{
-            return build_connection_str_tcp(self.get_ip_dest(), self.get_port_num());
+            return build_connection_str_tcp(&self.ip_dest, self.get_port_num());
         }
 
         //Public Functions
@@ -77,7 +77,7 @@ pub mod communicator{
     /// Input: an IP variable - the ip to connect to and an
     /// u16 variable - the destination port to use.
     /// Output: a String value - the string to connect with.
-    fn build_connection_str_tcp(ip_dest: IP, port: u16) -> String{
+    fn build_connection_str_tcp(ip_dest: &IP, port: u16) -> String{
         return ip_dest.get_ip() + ":" + &port.to_string();
     }
 
@@ -87,10 +87,11 @@ pub mod communicator{
     /// an IP variable - the ip to connect to and an
     /// u16 variable - the destination port to us.
     /// Output: a Result<(), String>- if the sending went well.
-    pub fn notify_client(ip_client: IP, port: u16, data: AttackData) -> Result<(), String> {
-        let mut stream = match TcpStream::connect(build_connection_str_tcp(ip_client.copy(), port).clone()){
+    pub fn notify_client(ip_client: &IP, port: u16, data: AttackData) -> Result<(), String> {
+        let connection_str = build_connection_str_tcp(ip_client, port).clone();
+        let mut stream = match TcpStream::connect(connection_str.clone()){
             Ok(tcp_stream) => {tcp_stream}
-            Err(_) => {return Err("Client is offline".to_string())}
+            Err(e) => {return Err(e.to_string())}
         };
         let data_to_send = data.get_data_str_json();
 

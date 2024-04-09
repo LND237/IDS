@@ -7,7 +7,7 @@ pub mod smurf_scanner{
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::server::server::{Server};
-    use crate::sniffer::sniffer::{SinglePacket};
+    use crate::sniffer::sniffer::{extract_ip_src_from_packet, SinglePacket};
 
     pub const ATTACK_NAME : &str = "Smurf";
     const RATE_LIMIT: i32 = 150;
@@ -31,11 +31,11 @@ pub mod smurf_scanner{
         /// Input: A vector of SinglePackets- the packets to check.
         /// Output: An IP Value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
-        fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
+        fn check_packets(packets: Vec<SinglePacket>, client_ip: IP) -> Option<IP> {
             let mut amount_icmp_packets = 0;
             //Going over the packets
             for packet in packets{
-                if is_icmp_replay_packet(packet.clone()){
+                if is_icmp_replay_packet(packet.clone()) && extract_ip_src_from_packet(packet.clone()).get_ip() != client_ip.get_ip(){
                     amount_icmp_packets += 1;
                 }
             }
@@ -55,7 +55,7 @@ pub mod smurf_scanner{
         /// packets to scan.
         /// Output: None.
         fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
-            let result = SmurfScanner::check_packets(packets);
+            let result = SmurfScanner::check_packets(packets, client_address.clone().get_ip());
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();

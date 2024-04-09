@@ -38,7 +38,11 @@ async fn main() -> mongodb::error::Result<()> {
     let username = get_username();
     let password = get_password();
 
-    let mut address_client = get_address();
+    //let mut address_client = get_address();
+    let address_client = Address::new(
+        MAC::new("00:E0:4C:36:05:0D".to_string()).unwrap(),
+        IP::new("192.168.1.139".to_string()).unwrap()
+    );
 
     let mut server = match Server::new(address_client.clone(), username.clone().to_string(), password.clone().to_string()).await{
         Ok(server) => {server}
@@ -50,7 +54,7 @@ async fn main() -> mongodb::error::Result<()> {
     //Example for communicator check
     /*let ip_client = IP::new("192.168.1.139".to_string()).unwrap();
     let data = AttackData::new(IP::new_default(), "DD".to_string(), Utc::now());
-    notify_client(ip_client.copy(), 50001, data.clone()).expect("Looser");*/
+    notify_client(&ip_client.copy(), 50001, data.clone()).expect("Looser");*/
     Ok(())
 }
 
