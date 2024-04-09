@@ -30,5 +30,10 @@ namespace Client
         {
             Main.Content = new AttacksPage();
         }
+
+        private void FAQ_Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Main.Content = new FAQ();
+        }
     }
 }
