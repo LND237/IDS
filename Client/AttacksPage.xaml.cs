@@ -22,24 +22,42 @@ namespace Client
     {
         private string IP;
         private string attacktype;
-        private DateTime startDate;
-        private DateTime endDate;
+        private string startDate;
+        private string endDate;
         public AttacksPage()
         {
             InitializeComponent();
         }
 
-
-        private void Search_Button_Click(object sender, RoutedEventArgs e)
+        private void ClearInputs()
         {
-            this.IP = SearchIPTextBox.Text;
-            this.attacktype = attackTypeComboBox.Text;
-            this.startDate = DateTime.Parse(StartDate.Text);
-            this.endDate = DateTime.Parse(EndDate.Text);
             SearchIPTextBox.Clear();
             attackTypeComboBox.SelectedIndex = -1;
             StartDate.Text = "";
             EndDate.Text = "";
+        }
+        private void Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                this.IP = SearchIPTextBox.Text;
+                this.attacktype = attackTypeComboBox.Text;
+                this.startDate = StartDate.Text;
+                this.endDate = EndDate.Text;
+                if(this.startDate != "" && this.endDate != "")
+                {
+
+                    if(DateTime.Parse(startDate) > DateTime.Parse(endDate))
+                    {
+                        throw new Exception("START DATE NUST BE BEFORE END DATE!");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            ClearInputs();
         }
         
     }
