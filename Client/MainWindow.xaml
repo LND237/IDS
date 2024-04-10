@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Client"
         mc:Ignorable="d"
-        Background="#323234"
+        Background="{DynamicResource GrayArea}"
         WindowStyle="SingleBorderWindow"
         Title="MainWindow" Height="500" Width="1000">
     <Grid>
@@ -18,17 +18,17 @@
         <StackPanel Orientation="Vertical" Grid.Column="0">
             <Image Source="icons/home.png" Stretch="None" HorizontalAlignment="Center" MouseDown="Home_Image_MouseDown"/>
             <Image Source="icons/settings.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0" Mouse.MouseDown="Settings_Image_MouseDown"/>
-            <TextBlock Text="Attack List" FontSize="20px" Foreground="White" HorizontalAlignment="Center" Margin="0,10,0,0" MouseDown="Attacks_Text_MouseDown"/>
+            <TextBlock Text="Attack List" FontSize="20px" Foreground="{DynamicResource Text}" HorizontalAlignment="Center" Margin="0,10,0,0" MouseDown="Attacks_Text_MouseDown"/>
             <Image Source="icons/Graphs.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0" Mouse.MouseDown="Visualization_Image_MouseDown"/>
             <Image Source="icons/FAQ.png" Stretch="None" HorizontalAlignment="Center" Margin="0,10,0,0" Mouse.MouseDown="FAQ_Image_MouseDown"/>
-            <TextBlock Text="Progress.Connected." FontSize="10px" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,70,0,0" HorizontalAlignment="Center" Foreground="White"/>
+            <TextBlock Text="Progress.Connected." FontSize="10px" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,70,0,0" HorizontalAlignment="Center" Foreground="{DynamicResource Text}"/>
         </StackPanel>
          <!--#endregion-->
         <!--Main Grid-->
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <!--#region Pronet title-->
-            <TextBlock Text="Pronet." FontSize="60px" Foreground="White" FontWeight="ExtraBold" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-            <TextBlock Text="Dashboard" FontSize="20px" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <TextBlock Text="Pronet." FontSize="60px" Foreground="{DynamicResource Text}" FontWeight="ExtraBold" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+            <TextBlock Text="Dashboard" FontSize="20px" Foreground="{DynamicResource Text}" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
             <!--#endregion-->
             
             <!--#region Attacks Grid-->

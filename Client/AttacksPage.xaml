@@ -7,7 +7,7 @@
       xmlns:mahApps="http://metro.mahapps.com/winfx/2009"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
 
-      Background="#323234"
+      Background="{DynamicResource GrayArea}"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="AttacksPage">
@@ -15,8 +15,8 @@
     <Grid>
         <StackPanel Orientation="Vertical">
             <!--#region title-->
-            <TextBlock Text="Pronet." FontSize="60px" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center"/>
-            <TextBlock Text="Attacks" FontSize="20px" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
+            <TextBlock Text="Pronet." FontSize="60px" FontWeight="ExtraBold" Foreground="{DynamicResource Text}" HorizontalAlignment="Center"/>
+            <TextBlock Text="Attacks" FontSize="20px" FontWeight="SemiBold" Foreground="{DynamicResource Text}" HorizontalAlignment="Center"/>
             <!--#endregion-->
 
             <!--#region queries-->
@@ -27,10 +27,10 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <!--#region search attacker ip-->
-                    <Border Height="50" Width="300" CornerRadius="25" Background="#212120">
+                    <Border Height="50" Width="300" CornerRadius="25" Background="{DynamicResource BoldArea}">
                         <Grid>
                             <!-- The text typed -->
-                            <TextBox Width="280" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="SearchIPTextBox" Margin="5" Foreground="White" FontSize="20px"/>
+                            <TextBox Width="280" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="SearchIPTextBox" Margin="5" Foreground="{DynamicResource Text}" FontSize="20px"/>
                             <!--Hint texy-->
                             <TextBlock IsHitTestVisible="False" Text="Search Attacker IP" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
                                 <!--Change the hint text with the typed one-->
@@ -50,7 +50,7 @@
                     <!--#endregion-->
 
                     <!--#region Attack type-->
-                    <Border Height="50" Width="300" CornerRadius="25" Background="#212120" Margin="0 10">
+                    <Border Height="50" Width="300" CornerRadius="25" Background="{DynamicResource BoldArea}" Margin="0 10">
                         <Grid>
                             <!--#region Combo box selection-->
                             <ComboBox Name="attackTypeComboBox" Width="290">
@@ -86,19 +86,19 @@
                     <StackPanel Orientation="Horizontal">
                         <Image Source="icons/Calender.png" Height="100" Width="100" HorizontalAlignment="Center"/>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Start Date:" Foreground="White" FontSize="20px" FontWeight="Light" HorizontalAlignment="Center"/>
-                            <Border Height="50" Width="200" CornerRadius="25" Background="#212120" VerticalAlignment="Top">
+                            <TextBlock Text="Start Date:" Foreground="{DynamicResource Text}" FontSize="20px" FontWeight="Light" HorizontalAlignment="Center"/>
+                            <Border Height="50" Width="200" CornerRadius="25" Background="{DynamicResource BoldArea}" VerticalAlignment="Top">
                                 <DatePicker x:Name="StartDate" Width="150" Height="40" Text="fffff" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
                             </Border>
-                            <TextBlock Text="End Date:" Foreground="White" FontSize="20px" FontWeight="light" HorizontalAlignment="Center"/>
-                            <Border Height="50" Width="200" CornerRadius="25" Background="#212120" Margin="05">
+                            <TextBlock Text="End Date:" Foreground="{DynamicResource Text}" FontSize="20px" FontWeight="light" HorizontalAlignment="Center"/>
+                            <Border Height="50" Width="200" CornerRadius="25" Background="{DynamicResource BoldArea}" Margin="05">
                                 <DatePicker x:Name="EndDate" Width="150" Height="40" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
                             </Border>
                         </StackPanel>
                     </StackPanel>
                     <!--#endregion-->
                     
-                    <Button Content="Search:" Foreground="Gray" Background="Black" Width="190" BorderBrush="Transparent" BorderThickness="0" Margin="0 10" Click="Search_Button_Click"/>
+                    <Button Content="Search:" Foreground="Gray" Background="{DynamicResource BoldArea}" Width="190" BorderBrush="Transparent" BorderThickness="0" Margin="0 10" Click="Search_Button_Click"/>
                 </StackPanel>
                 <!--#region filtered attacks-->
                 <Grid Grid.Column="1" Background="#212120" Height="300px" VerticalAlignment="Top">

@@ -8,7 +8,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Uwp.Notifications;
+using Windows.ApplicationModel.Activation;
 
 namespace Client
 {
@@ -48,9 +50,12 @@ namespace Client
             //communicator.StopListening();
             //IP ip = LocalAddress.GetLocalIP();
             //MAC mac = LocalAddress.GetLocalMAC();
-
-            //Thread thread = new Thread(GetMessages);
-            //thread.Start();
+            Thread thread = new Thread(GetMessages);
+            thread.Start();
+        }
+        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Main.Content = new DashboardPage();
         }
 
         private void Settings_Image_MouseDown(object sender, MouseButtonEventArgs e)
@@ -73,6 +78,7 @@ namespace Client
             Main.Content = new VisualizationPage();
         }
 
+
         private void GetMessages()
         {
             while (true)
@@ -81,14 +87,17 @@ namespace Client
                 {
                     try
                     {
+
                         //AttackData attack = SettingsPage.communicator.GetMessageServer();
                         // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
                         new ToastContentBuilder()
-                            .AddArgument("action", "viewConversation")
+                           
                             .AddArgument("conversationId", 9813)
                             .AddText("Andrew sent you a picture")
                             .AddText("Check this out, The Enchantments in Washington!")
                             .Show(); // Not seeing the Show() method? Make sure you have version 7.0, and if you're using .NET 6 (or later), then your TFM must be net6.0-windows10.0.17763.0 or greater
+
+                        Thread.Sleep(10000);
                     }
                     catch
                     {
