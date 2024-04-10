@@ -58,7 +58,7 @@ namespace Client
             const string DATABASE_NAME = "IDE_DB";
             string username = EnvFile.GetVariable("USERNAME_DB"), password = EnvFile.GetVariable("PASSWORD_DB");
             MongoDBAttackLogger database = new MongoDBAttackLogger(username, password, DATABASE_NAME, LocalAddress.GetLocalMAC());
-            List<MongoDBAttackLogger.AttackLog> attacks = database.getAllAttacks();
+            List<AttackLog> attacks = database.getAllAttacks();
 
             this.categories = new List<Category>();
             this.columns = new List<Column>();
@@ -71,7 +71,7 @@ namespace Client
             }
             
             //Getting amount of each attack
-            foreach(MongoDBAttackLogger.AttackLog attack in attacks) 
+            foreach(AttackLog attack in attacks) 
             {
                 attackCounter[attack.AttackName] += 1;
             }

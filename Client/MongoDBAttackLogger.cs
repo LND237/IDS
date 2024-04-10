@@ -2,28 +2,14 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
+
 namespace Client
 {
-
-    internal class MongoDBAttackLogger
+    public class MongoDBAttackLogger
     {
         private readonly IMongoDatabase _database;
         private readonly MAC _clientMac;
-        private readonly string connectionString;
-        public class AttackLog //attacks data  struct
-        {
-            [BsonId]
-            public ObjectId Id { get; set; }
 
-            [BsonElement("ip")]
-            public required string AttackerIp { get; set; }
-
-            [BsonElement("name")]
-            public required string AttackName { get; set; }
-
-            [BsonElement("date")]
-            public string Time { get; set; }
-        }
         /// <summary>
         /// c'tor for the class.
         /// </summary>
@@ -34,17 +20,14 @@ namespace Client
         /// the
         public MongoDBAttackLogger(string username, string password, string databaseName, MAC address)
         {
+            //Preparing connection uri
             string encodedPassword = Uri.EscapeDataString(password);//encode password
-
-            //connectionString = "mongodb+srv://" + username + ":" + encodedPassword + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
-            //connectionString = "mongodb+srv://bsyl:" + encodedPassword + "@ideproject.jii1z04.mongodb.net/?retryWrites=true&w=majority&appName=ideProject";
-            //var client = new MongoClient(connectionString);
-            //_database = client.GetDatabase(databaseName);
-            //this._clientMac = address.Copy();
             string connectionUri = "mongodb+srv://" + username + ":" + encodedPassword + "@ideproject.jii1z04.mongodb.net/?retryWrites=true&w=majority&appName=ideProject";
+            
             var settings = MongoClientSettings.FromConnectionString(connectionUri);
             // Set the ServerApi field of the settings object to set the version of the Stable API on the client
             settings.ServerApi = new ServerApi(ServerApiVersion.V1);
+            
             var client = new MongoClient(settings);
             _database = client.GetDatabase(databaseName);
             this._clientMac = address.Copy();
@@ -61,7 +44,7 @@ namespace Client
             var filter = Builders<AttackLog>.Filter.Empty; // Get all documents
             var attackLogs = collection.Find(filter).ToList();
 
-            return attackLogs;
+            return GetFormattedLogs(attackLogs);
         }
         /// <summary>
         /// get the last N attacks of the client
@@ -78,7 +61,7 @@ namespace Client
                                              .Limit(count)
                                              .ToList();
 
-            return attackLogs;
+            return GetFormattedLogs(attackLogs);
         }
 
         /// <summary>
@@ -89,12 +72,22 @@ namespace Client
         public List<AttackLog> GetAttacksInLastNMinutes(int minutes)
         {
             var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
-            var cutoffTime = DateTime.Now.Subtract(TimeSpan.FromMinutes(minutes));
+            DateTime startTimeUtc = DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(minutes));
 
-            var filter = Builders<AttackLog>.Filter.Gt(log => DateTime.Parse(log.Time), cutoffTime);
+            var filter = Builders<AttackLog>.Filter.Where(log => DateTime.Parse(log.Time) > startTimeUtc.ToUniversalTime());
             var attackLogs = collection.Find(filter).ToList();
 
-            return attackLogs;
+            return GetFormattedLogs(attackLogs);
+        }
+
+        public List<AttackLog> GetAttacksBeforeDate(DateTime endDate)
+        {
+            var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
+
+            var filter = Builders<AttackLog>.Filter.Where(log => DateTime.Parse(log.Time) < endDate);
+            var attackLogs = collection.Find(filter).ToList();
+
+            return GetFormattedLogs(attackLogs);
         }
 
         /// <summary>
@@ -108,18 +101,54 @@ namespace Client
             var filter = Builders<AttackLog>.Filter.Eq(log => log.AttackerIp, attackerIp);
 
             var attackLogs = collection.Find(filter).ToList();
-            return attackLogs;
+            return GetFormattedLogs(attackLogs);
         }
 
 
-        /// the function gets a list of all the attackers ip's (no duplicated values)
-        public List<string> GetAllAttackerIpsAsync()
+        /// <summary>
+        /// the function gets a list of all the attackers ip's (no duplicated values).
+        /// </summary>
+        /// <returns>The ips.</returns>
+        public List<IP> GetAllAttackerIps()
         {
             var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
 
-            var attackerIps = collection.Distinct<string>("AttackerIp", Builders<AttackLog>.Filter.Empty).ToList();
+            var attackerIpsStrings = collection.Distinct<string>("AttackerIp", Builders<AttackLog>.Filter.Empty).ToList();
 
-            return attackerIps;
+            List<IP> ips = new List<IP>();
+
+            foreach(string ipStr  in attackerIpsStrings)
+            {
+                ips.Add(new IP(ipStr));
+            }
+            return ips;
+        }
+
+        public List<AttackLog> GetFormattedLogs(List<AttackLog> attackLogs)
+        {
+            const string FULL_NAME_DBD = "Drive By Download";
+            
+            //Going over the logs and editing them
+            foreach (AttackLog log in attackLogs)
+            {
+                string date = log.Time;
+                // Split the string by whitespaces
+                string[] parts = date.Split(':');
+
+                // Extract the desired format (first two parts)
+                log.Time = string.Join(":", parts.Take(2));
+
+                if (log.AttackName.Equals(FULL_NAME_DBD))
+                {
+                    log.AttackName = "DBD";
+                }
+
+                if (log.AttackerIp.Equals(IP.BROADCAST_IP))
+                {
+                    log.AttackerIp = "Unkown";
+                }
+            }
+            return attackLogs;
         }
 
 

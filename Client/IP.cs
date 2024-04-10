@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Client
 {
     public class IP
     {
-        private readonly string _ip;
+        public string ip { get; set; }
+        public static readonly string BROADCAST_IP = "255.255.255.255";
         /// <summary>
         /// c'tor for ip class
         /// </summary>
@@ -19,14 +21,14 @@ namespace Client
             {
                 throw new Exception("Invalid IP!");
             }
-            this._ip = ip;
+            this.ip = ip;
         }
         /// <summary>
         /// default c'tor, set ip to broadcast
         /// </summary>
         public IP()
         {
-            this._ip = "255.255.255.255";
+            this.ip = BROADCAST_IP;
         }
         /// <summary>
         /// get the ip as string
@@ -34,7 +36,7 @@ namespace Client
         /// <returns>the ip as string</returns>
         public string GetIP()
         {
-            return this._ip;
+            return this.ip;
         }
         /// <summary>
         /// the function validates Ip address
@@ -43,23 +45,24 @@ namespace Client
         /// <returns>true if valid, otherwise false</returns>
         public bool IsValidIp(string ipAddress)
         {
-            // Try parsing as a valid IP address (encompasses both IPv4 and IPv6)
-            if (IPAddress.TryParse(ipAddress, out _))
+            try
             {
-                return true;
-            }
-
-            // Additional IPv4 specific validation (in case TryParse succeeded with an IPv4)
-            if (ipAddress.Contains("."))
-            {
-                var parts = ipAddress.Split('.');
-                if (parts.Length == 4)
+                if (string.IsNullOrWhiteSpace(ipAddress))
                 {
-                    return parts.All(part => byte.TryParse(part, out byte value) && value <= 255);
+                    return false;
                 }
-            }
 
-            return false; // If none of the conditions were met
+                string[] splitValues = ipAddress.Split('.');
+                if (splitValues.Length != 4)
+                {
+                    return false;
+                }
+
+                byte tempForParsing;
+
+                return splitValues.All(r => byte.TryParse(r, out tempForParsing));
+            }
+            catch { return false; }
         }
     }
 }
