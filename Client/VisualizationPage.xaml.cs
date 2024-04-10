@@ -26,7 +26,7 @@ namespace Client
     {
         private static readonly Dictionary<string, string> ATTACKS_COLORS = new Dictionary<string, string>()
         {
-            {"DDOS", "#9FCDFF" }, {"DNS", "#984FFF"}, {"Drive By Download", "#666B70"}, {"Smurf", "1DDD92"}, {"XSS", "#189FD1"}
+            {"DDOS", "#9FCDFF" }, {"DNS", "#984FFF"}, {"Drive By Download", "#666B70"}, {"Smurf", "#1DDD92"}, {"XSS", "#189FD1"}
         };
         private List<Category> categories { get; set; }
         private List<Column> columns { get; set; }
@@ -34,22 +34,61 @@ namespace Client
         {
             const int PIE_WIDTH = 150, PIE_HEIGHT = 150;
             InitializeComponent();
-
+            this.InitPageData();
 
             #region test #data
-            categories = [new Category(59, "DDOS", new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["DDOS"]))),
-            new Category(10, "DNS", new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["DNS"]))),
-            new Category(10, "Category 3", new SolidColorBrush((Color)ColorConverter.ConvertFromString("#666B70"))),
-            new Category(10, "Category 4", new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1DDD92"))),
-            new Category(11, "Category 5", new SolidColorBrush((Color)ColorConverter.ConvertFromString("#189FD1")))];
-            columns = [new Column("XSS", 7, new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["XSS"]))),
-                new Column("DBD", 16, new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["Drive By Download"])))];
+            //categories = [new Category(59, "DDOS", new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["DDOS"]))),
+            //new Category(10, "DNS", new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["DNS"]))),
+            //new Category(10, "Category 3", new SolidColorBrush((Color)ColorConverter.ConvertFromString("#666B70"))),
+            //new Category(10, "Category 4", new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1DDD92"))),
+            //new Category(11, "Category 5", new SolidColorBrush((Color)ColorConverter.ConvertFromString("#189FD1")))];
+            //columns = [new Column("XSS", 7, new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["XSS"]))),
+            //    new Column("DBD", 16, new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS["Drive By Download"])))];
             #endregion
 
             detailsItemsControlPie.ItemsSource = categories;
             detailsItemsControlColumn.ItemsSource = columns;
 
             DrawPie(categories, PIE_WIDTH, PIE_HEIGHT);
+        }
+
+        private void InitPageData()
+        {
+            //Extracting attack's data from database
+            const string DATABASE_NAME = "IDE_DB";
+            string username = EnvFile.GetVariable("USERNAME_DB"), password = EnvFile.GetVariable("PASSWORD_DB");
+            MongoDBAttackLogger database = new MongoDBAttackLogger(username, password, DATABASE_NAME, LocalAddress.GetLocalMAC());
+            List<MongoDBAttackLogger.AttackLog> attacks = database.getAllAttacks();
+
+            this.categories = new List<Category>();
+            this.columns = new List<Column>();
+
+            //Creating counting dictionary for attacks
+            Dictionary<string, int> attackCounter = new Dictionary<string, int>();
+            foreach(string key in ATTACKS_COLORS.Keys)
+            {
+                attackCounter.Add(key, 0);
+            }
+            
+            //Getting amount of each attack
+            foreach(MongoDBAttackLogger.AttackLog attack in attacks) 
+            {
+                attackCounter[attack.AttackName] += 1;
+            }
+
+            //Going over the amounts
+            foreach (var (attackName, amountAttack) in attackCounter) 
+            {
+                int precentageAttack = (int)((float)amountAttack * 100 / attacks.Count);
+                Brush colorAttack = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS[attackName]));
+                string nameOfAttack = attackName;
+                if(attackName.Equals("Drive By Download"))
+                {
+                    nameOfAttack = "DBD";
+                }
+                this.categories.Add(new Category(precentageAttack, nameOfAttack, colorAttack));
+                this.columns.Add(new Column(nameOfAttack, amountAttack, colorAttack));
+            }
         }
 
         /// <summary>
