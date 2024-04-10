@@ -18,9 +18,16 @@ namespace Client
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static readonly int LAST_DAY_AMOUNT_MINUTES = 1440;
+        private List<AttackLog> attackLogs;
+        private List<IP> ipsAttackers;
         public MainWindow()
         {
             InitializeComponent();
+            this.attackLogs = GetDatabase().GetAttacksInLastNMinutes(LAST_DAY_AMOUNT_MINUTES * 30);
+            InitAttackers();
+            this.detailsItemsTopAttacks.ItemsSource = attackLogs;
+            this.detailsItemsAttackers.ItemsSource = ipsAttackers;
             //Example of using communicator
             //const int PORT_NUM = 50001, MAX_AMOUNT_PACKET = 1;
             //int amount_packets = 0;
@@ -41,15 +48,7 @@ namespace Client
             //communicator.StopListening();
             //IP ip = LocalAddress.GetLocalIP();
             //MAC mac = LocalAddress.GetLocalMAC();
-            MAC mac = new MAC("00:E0:4C:36:05:0D");
-            const string DATABASE_NAME = "IDE_DB";
-            string username = EnvFile.GetVariable("USERNAME_DB"), password = EnvFile.GetVariable("PASSWORD_DB");
-            MongoDBAttackLogger database = new MongoDBAttackLogger(username, password, DATABASE_NAME, mac);
-            var data = database.getAllAttacks();
-            foreach (var fa in data)
-            {
 
-            }
             //Thread thread = new Thread(GetMessages);
             //thread.Start();
         }
@@ -98,6 +97,31 @@ namespace Client
 
                 }
             }
+        }
+
+        private void Home_Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            InitializeComponent();
+        }
+
+        private void InitAttackers()
+        {
+            const int MAX_AMOUNT_IPS = 5;
+            MongoDBAttackLogger database = MainWindow.GetDatabase();
+            List<IP> ipsAttackers = database.GetAllAttackerIps();
+            if(ipsAttackers.Count > MAX_AMOUNT_IPS)
+            {
+                ipsAttackers = ipsAttackers.Slice(0, MAX_AMOUNT_IPS);
+            }
+            this.ipsAttackers = ipsAttackers;
+        }
+
+        public static MongoDBAttackLogger GetDatabase()
+        {
+            const string DATABASE_NAME = "IDE_DB";
+            string username = EnvFile.GetVariable("USERNAME_DB"), password = EnvFile.GetVariable("PASSWORD_DB");
+            MongoDBAttackLogger database = new MongoDBAttackLogger(username, password, DATABASE_NAME, LocalAddress.GetLocalMAC());
+            return database;
         }
     }
 }
