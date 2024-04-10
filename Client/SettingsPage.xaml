@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:Client"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Background="#323234"
+      Background="{DynamicResource GrayArea}"
       Title="SettingsPage">
 
     <Grid>
@@ -18,33 +18,33 @@
         </Grid.ColumnDefinitions>
         <!--#region texts-->
         <StackPanel Orientation="Vertical" Grid.Column="0">
-            <Border CornerRadius="10" Background="#80000000" Margin="5 75">
-                <TextBlock Text="Dark Mode" Foreground="#FFFFFFFF" FontSize="16" FontWeight="Bold" Padding="5" HorizontalAlignment="Center"/>
+            <Border CornerRadius="10" Background="{DynamicResource BoldArea}" Margin="5 75">
+                <TextBlock Text="Dark Mode" Foreground="{DynamicResource Text}" FontSize="16" FontWeight="Bold" Padding="5" HorizontalAlignment="Center"/>
             </Border>
-            <Border CornerRadius="10" Background="#80000000" Margin="5">
-                <TextBlock Text="Notification" Foreground="#FFFFFFFF" FontSize="16" FontWeight="Bold" Padding="5" HorizontalAlignment="Center"/>
+            <Border CornerRadius="10" Background="{DynamicResource BoldArea}" Margin="5">
+                <TextBlock Text="Notification" Foreground="{DynamicResource Text}" FontSize="16" FontWeight="Bold" Padding="5" HorizontalAlignment="Center"/>
             </Border>
         </StackPanel>
         <!--#endregion-->
 
         <!--#region dark mode toggle button-->
         <Grid Margin="0,25,0,300" Grid.Column="1" HorizontalAlignment="Center">
-            <ToggleButton x:Name="Toggle1" Height="50" Width="120" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ToggleButton x:Name="Toggle1" Height="50" Width="120" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="Toggle1_Checked" Unchecked="Toggle1_Unchecked">
                 <ToggleButton.Template>
                     <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="BT1" Background="#212120" CornerRadius="25" Padding="1">
+                        <Border x:Name="BT1" Background="LimeGreen" CornerRadius="25" Padding="1">
                             <!--circle button-->
-                            <Border x:Name="BBT1" Background="White"
+                            <Border x:Name="BBT1" Background="{DynamicResource Toggle}"
                                     Width="40" Height="30" Margin="5"
-                                    CornerRadius="25" HorizontalAlignment="Left">
+                                    CornerRadius="25" HorizontalAlignment="Right">
                                 <ContentPresenter/>
                             </Border>
      
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="BBT1" Property="HorizontalAlignment" Value="Right"/>
-                                <Setter TargetName="BT1" Property="Background" Value="LimeGreen"/>
+                                <Setter TargetName="BBT1" Property="HorizontalAlignment" Value="Left"/>
+                                <Setter TargetName="BT1" Property="Background" Value="{DynamicResource BoldArea}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -55,12 +55,12 @@
 
         <!--#region notification toggle button-->
         <Grid Margin="0,25,0,70" Grid.Column="1" HorizontalAlignment="Center">
-            <ToggleButton x:Name="Toggle2" Height="50" Width="120" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ToggleButton x:Name="Toggle2" Height="50" Width="120" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="Toggle2_Checked" Unchecked="Toggle2_Unchecked">
                 <ToggleButton.Template>
                     <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="BT2" Background="#212120" CornerRadius="25" Padding="1">
+                        <Border x:Name="BT2" Background="{DynamicResource BoldArea}" CornerRadius="25" Padding="1">
                             <!--circle button-->
-                            <Border x:Name="BBT2" Background="White"
+                            <Border x:Name="BBT2" Background="{DynamicResource Toggle}"
                                     Width="40" Height="30" Margin="5"
                                     CornerRadius="25" HorizontalAlignment="Left">
                                 <ContentPresenter/>

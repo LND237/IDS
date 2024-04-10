@@ -44,8 +44,9 @@ namespace Client
             {
                 // Only consider Ethernet network interfaces
                 if (nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet &&
-                    nic.OperationalStatus == OperationalStatus.Up)
+                    nic.Name.Contains("Ethernet"))
                 {
+                    string nicName = nic.Name;
                     string macAddr = nic.GetPhysicalAddress().ToString();
                     string formattedMacAddr = FormatMAC(macAddr);
                     return new MAC(formattedMacAddr);
