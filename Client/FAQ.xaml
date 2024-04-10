@@ -6,33 +6,33 @@
       xmlns:local="clr-namespace:Client"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Background="#323234"
+      Background="{DynamicResource GrayArea}"
       Title="FAQ">
 
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Width="719">
-            <TextBlock Text="Pronet." FontSize="60px" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center"/>
-            <TextBlock Text="Frequently Asked Questions" FontSize="20px" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-            <Border Height="100" Background="#212120" CornerRadius="25" Margin="10">
+            <TextBlock Text="Pronet." FontSize="60px" FontWeight="ExtraBold" Foreground="{DynamicResource Text}" HorizontalAlignment="Center"/>
+            <TextBlock Text="Frequently Asked Questions" FontSize="20px" FontWeight="Bold" Foreground="{DynamicResource Text}" HorizontalAlignment="Center"/>
+            <Border Height="100" Background="{DynamicResource BoldArea}" CornerRadius="25" Margin="10">
                 <StackPanel>
-                    <TextBlock Text="Q:Which attacks do we prevent" Foreground="White" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Center"/>
-                    <TextBlock Text="A: We prevent Ddos, XSS﻿, DNS Hijacking and Drive by Download Attacks .In addition, the Pronet project protects against the Smurf attack(Not the blue creatures). Those attacks are network attacks. You can find more data about them in your (now) secured internet." Foreground="White" FontSize="15px" Height="70" TextWrapping="Wrap" Margin="5"/>
+                    <TextBlock Text="Q:Which attacks do we prevent" Foreground="{DynamicResource Text}" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Center"/>
+                    <TextBlock Text="A: We prevent Ddos, XSS﻿, DNS Hijacking and Drive by Download Attacks .In addition, the Pronet project protects against the Smurf attack(Not the blue creatures). Those attacks are network attacks. You can find more data about them in your (now) secured internet." Foreground="{DynamicResource Text}" FontSize="15px" Height="70" TextWrapping="Wrap" Margin="5"/>
                 </StackPanel>
             </Border>
-            <Border Height="100" Background="#212120" CornerRadius="25" Margin="5">
+            <Border Height="100" Background="{DynamicResource BoldArea}" CornerRadius="25" Margin="5">
                 <StackPanel>
-                    <TextBlock Text="Q:How we prevent attacks" Foreground="White" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Q:How we prevent attacks" Foreground="{DynamicResource Text}" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Center"/>
                     <TextBlock Text="A: Our first concern, is you to be safe. We use our servers to intercept the incoming
 network traffic and analyze the attacks patterns. So when an attacks is happening the
-traffic will be blocked while your computer is safe and sound." Foreground="White" FontSize="15px" Height="70" TextWrapping="Wrap" Margin="5"/>
+traffic will be blocked while your computer is safe and sound." Foreground="{DynamicResource Text}" FontSize="15px" Height="70" TextWrapping="Wrap" Margin="5"/>
                 </StackPanel>
             </Border>
-            <Border Height="100" Background="#212120" CornerRadius="25" Margin="10">
+            <Border Height="100" Background="{DynamicResource BoldArea}" CornerRadius="25" Margin="10">
                 <StackPanel>
-                    <TextBlock Text="Q:Who created this amazing protector" Foreground="White" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Q:Who created this amazing protector" Foreground="{DynamicResource Text}" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Center"/>
                     <TextBlock Text="A: Thank you, this amazing project was created by Yoav Levy and Boaz Sarel. 
 We created this protector to make sure that your internet will be completely secured .
-Thank you for downloading Pronet. Please support Pronet in discord." Foreground="White" FontSize="15px" Height="70" TextWrapping="Wrap" Margin="5"/>
+Thank you for downloading Pronet. Please support Pronet in discord." Foreground="{DynamicResource Text}" FontSize="15px" Height="70" TextWrapping="Wrap" Margin="5"/>
                 </StackPanel>
             </Border>
         </StackPanel>

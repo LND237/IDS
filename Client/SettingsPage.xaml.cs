@@ -43,11 +43,14 @@ namespace Client
         private void Toggle1_Checked(object sender, RoutedEventArgs e)
         {
             DarkMode = true;
+            AppTheme.ChangeTheme(new Uri("Themes/Light.xaml", UriKind.Relative));
+
         }
 
         private void Toggle1_Unchecked(object sender, RoutedEventArgs e)
         {
             DarkMode = false;
+            AppTheme.ChangeTheme(new Uri("Themes/Dark.xaml", UriKind.Relative));
         }
     }
 }

@@ -1,4 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
+    <SolidColorBrush Color="#323234" x:Key="GrayArea"/>
+    <SolidColorBrush Color="#212120" x:Key="BoldArea"/>
+    <SolidColorBrush Color="White" x:Key="Text"/>
+    <SolidColorBrush Color="White" x:Key="Toggle"/>
 </ResourceDictionary>
