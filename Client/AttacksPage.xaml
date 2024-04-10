@@ -54,7 +54,7 @@
                         <Grid>
                             <!--#region Combo box selection-->
                             <ComboBox Name="attackTypeComboBox" Width="290">
-                                <ComboBoxItem Content="DDoS" />
+                                <ComboBoxItem Content="DDOS" />
                                 <ComboBoxItem Content="Drive by download" />
                                 <ComboBoxItem Content="Smurf" />
                                 <ComboBoxItem Content="DNS hijacking" />
@@ -101,16 +101,38 @@
                     <Button Content="Search:" Foreground="Gray" Background="Black" Width="190" BorderBrush="Transparent" BorderThickness="0" Margin="0 10" Click="Search_Button_Click"/>
                 </StackPanel>
                 <!--#region filtered attacks-->
-                <Grid Grid.Column="1" Margin="0 10">
-                    <Rectangle Fill="#212120" Height="300px" RadiusX="10" RadiusY="10" Margin="21,0,21,0"/>
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Attacks" FontWeight="ExtraBlack" Foreground="White" FontSize="20px" HorizontalAlignment="Center"/>
-
-                        <StackPanel Orientation="Horizontal" Margin="20">
-                            <TextBlock Text="Type" Foreground="White" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" Margin="5,0,0,0" HorizontalAlignment="Left"/>
-                            <TextBlock Text="Attacker IP" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Center" Margin="100,0,0,0"/>
-                            <TextBlock Text="Date" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Right" Margin="120,0,0,0"/>
-                        </StackPanel>
+                <Grid Grid.Column="1" Background="#212120" Height="300px" VerticalAlignment="Top">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="9*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5,0,0,0">
+                        <TextBlock Text="Type" Foreground="White" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" Margin="5,0,0,0"/>
+                        <TextBlock Text="Attacker IP" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" Margin="15,0,0,0"/>
+                        <TextBlock Text="Date" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Right" Margin="15,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Vertical">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Top" Margin="0, 20" Orientation="Vertical">
+                                <Canvas x:Name="TopAttacksCanvas" Margin="0,0,0,0"/>
+                                <ItemsControl x:Name="detailsItemsTopAttacks">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:AttackLog}">
+                                            <StackPanel Orientation="Horizontal" Margin="5" VerticalAlignment="Bottom">
+                                                <TextBlock Text="{Binding AttackName}" Foreground="White" FontSize="20px" Margin="5,0,0,0"/>
+                                                <TextBlock Text="{Binding AttackerIp}" Foreground="White" FontSize="20px" Margin="15,0,0,0"/>
+                                                <TextBlock Text="{Binding Time}" Foreground="White" FontSize="20px" HorizontalAlignment="Right" Margin="15,0,0,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Grid>
                 <!--#endregion-->
