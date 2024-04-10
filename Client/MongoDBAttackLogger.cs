@@ -15,9 +15,14 @@ namespace Client
             [BsonId]
             public ObjectId Id { get; set; }
 
+            [BsonElement("ip")]
             public required string AttackerIp { get; set; }
+
+            [BsonElement("name")]
             public required string AttackName { get; set; }
-            public DateTime Time { get; set; }
+
+            [BsonElement("date")]
+            public string Time { get; set; }
         }
         /// <summary>
         /// c'tor for the class.
@@ -31,8 +36,16 @@ namespace Client
         {
             string encodedPassword = Uri.EscapeDataString(password);//encode password
 
-            connectionString = "mongodb+srv://" + username + ":" + encodedPassword + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
-            var client = new MongoClient(connectionString);
+            //connectionString = "mongodb+srv://" + username + ":" + encodedPassword + "@" + databaseName + ".mongodb.net/?retryWrites=true&w=majority";
+            //connectionString = "mongodb+srv://bsyl:" + encodedPassword + "@ideproject.jii1z04.mongodb.net/?retryWrites=true&w=majority&appName=ideProject";
+            //var client = new MongoClient(connectionString);
+            //_database = client.GetDatabase(databaseName);
+            //this._clientMac = address.Copy();
+            string connectionUri = "mongodb+srv://" + username + ":" + encodedPassword + "@ideproject.jii1z04.mongodb.net/?retryWrites=true&w=majority&appName=ideProject";
+            var settings = MongoClientSettings.FromConnectionString(connectionUri);
+            // Set the ServerApi field of the settings object to set the version of the Stable API on the client
+            settings.ServerApi = new ServerApi(ServerApiVersion.V1);
+            var client = new MongoClient(settings);
             _database = client.GetDatabase(databaseName);
             this._clientMac = address.Copy();
         }
@@ -41,12 +54,12 @@ namespace Client
         /// gets all the attacks of the client
         /// </summary>
         /// <returns>all the attacks of the client</returns>
-        public async Task<List<AttackLog>> getAllAttacks()
+        public List<AttackLog> getAllAttacks()
         {
             var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
 
             var filter = Builders<AttackLog>.Filter.Empty; // Get all documents
-            var attackLogs = await collection.Find(filter).ToListAsync();
+            var attackLogs = collection.Find(filter).ToList();
 
             return attackLogs;
         }
@@ -55,15 +68,15 @@ namespace Client
         /// </summary>
         /// <param name="count"> the amount of the last attacks to get</param>
         /// <returns>list of attackLogs</returns>
-        public async Task<List<AttackLog>> GetLastAttacks(int count)
+        public List<AttackLog> GetLastAttacks(int count)
         {
             var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
 
             var sort = Builders<AttackLog>.Sort.Descending(log => log.Time); // Sort by Time (descending)
-            var attackLogs = await collection.Find(Builders<AttackLog>.Filter.Empty)
+            var attackLogs = collection.Find(Builders<AttackLog>.Filter.Empty)
                                              .Sort(sort)
                                              .Limit(count)
-                                             .ToListAsync();
+                                             .ToList();
 
             return attackLogs;
         }
@@ -73,13 +86,13 @@ namespace Client
         /// </summary>
         /// <param name="minutes"> the amount of minutes</param>
         /// <returns>list of the attacks</returns>
-        public async Task<List<AttackLog>> GetAttacksInLastNMinutes(int minutes)
+        public List<AttackLog> GetAttacksInLastNMinutes(int minutes)
         {
             var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
             var cutoffTime = DateTime.Now.Subtract(TimeSpan.FromMinutes(minutes));
 
-            var filter = Builders<AttackLog>.Filter.Gt(log => log.Time, cutoffTime);
-            var attackLogs = await collection.Find(filter).ToListAsync();
+            var filter = Builders<AttackLog>.Filter.Gt(log => DateTime.Parse(log.Time), cutoffTime);
+            var attackLogs = collection.Find(filter).ToList();
 
             return attackLogs;
         }
@@ -89,23 +102,22 @@ namespace Client
         /// </summary>
         /// <param name="attackerIp">the ip of the attacker</param>
         /// <returns>list of attacks</returns>
-        public async Task<List<AttackLog>> GetAttackerIpAttacks(string attackerIp)
+        public List<AttackLog> GetAttackerIpAttacks(string attackerIp)
         {
             var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
             var filter = Builders<AttackLog>.Filter.Eq(log => log.AttackerIp, attackerIp);
 
-            var attackLogs = await collection.Find(filter).ToListAsync();
+            var attackLogs = collection.Find(filter).ToList();
             return attackLogs;
         }
 
 
         /// the function gets a list of all the attackers ip's (no duplicated values)
-        public async Task<List<string>> GetAllAttackerIpsAsync()
+        public List<string> GetAllAttackerIpsAsync()
         {
             var collection = _database.GetCollection<AttackLog>(this._clientMac.GetAddress());
 
-            var attackerIps = await collection.Distinct<string>("AttackerIp", Builders<AttackLog>.Filter.Empty)
-                                              .ToListAsync();
+            var attackerIps = collection.Distinct<string>("AttackerIp", Builders<AttackLog>.Filter.Empty).ToList();
 
             return attackerIps;
         }
