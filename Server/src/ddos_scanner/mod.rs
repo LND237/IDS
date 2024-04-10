@@ -1,13 +1,14 @@
 pub mod ddos_scanner{
     use std::collections::HashMap;
     use tokio::runtime::Runtime;
+    use crate::address::address::Address;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::server::server::Server;
     use crate::sniffer::sniffer::{SinglePacket, extract_ip_src_from_packet};
 
     pub const ATTACK_NAME : &str = "DDOS";
-    const RATE_LIMIT: i32 = 500;
+    const RATE_LIMIT: i32 = 750;
 
     #[derive(Clone)]
     pub struct DdosScanner{
@@ -16,17 +17,18 @@ pub mod ddos_scanner{
 
     impl DdosScanner{
         ///Constructor of DdosScanner struct.
-        /// Input: an IP struct- the IP to check.
+        /// Input: an IP struct- the address to scan.
         /// Output: a struct of DdosScanner.
         pub fn new(ip: IP) -> Self{
-            return DdosScanner{base: Scanner::new(ip, String::from(ATTACK_NAME))};
+            return DdosScanner{base: Scanner::new(ip.clone(), String::from(ATTACK_NAME))};
         }
         ///The function checks the packets which was sniffed before
         /// and decides if there was a Ddos Attack or not.
-        /// Input: A vector of SinglePackets- the packets to check.
+        /// Input: A vector of SinglePackets- the packets to check and
+        /// an IP value- the ip of the client.
         /// Output: An IP value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
-        fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
+        fn check_packets(packets: Vec<SinglePacket>, client_ip: IP) -> Option<IP> {
             let mut hash_map_ip: HashMap<IP, i32> = HashMap::new();
 
             //Going over the packets
@@ -44,8 +46,7 @@ pub mod ddos_scanner{
             //Going over the hashmap
             for (key, value) in hash_map_ip{
                 //If this IP did a DDos attack
-                if value > RATE_LIMIT{
-                    println!("{}: {}", key.copy().get_ip(), value);
+                if value > RATE_LIMIT && key.get_ip() != client_ip.get_ip(){
                     return Some(key.copy());
                 }
             }
@@ -56,21 +57,22 @@ pub mod ddos_scanner{
     impl ScannerFunctions for DdosScanner{
         ///The function scans and checks if there is
         /// a DDOS Attack or not and handles the result.
-        /// Input: self reference(DdosScanner) and a Vec<SinglePacket>
-        /// variable- the packets to check.
+        /// Input: self reference(DdosScanner), a Vec<SinglePacket>
+        /// variable- the packets to check and an Address variable-
+        /// the address of the client.
         /// Output: None
-        fn scan(&self, packets: Vec<SinglePacket>){
-            let result = DdosScanner::check_packets(packets);
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address){
+            let result = DdosScanner::check_packets(packets, client_address.clone().get_ip());
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 

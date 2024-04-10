@@ -2,6 +2,7 @@ pub mod xss_scanner{
     use pnet::packet::{ethernet::EthernetPacket, ip::IpNextHeaderProtocols,
                        ipv4::Ipv4Packet, Packet, tcp::TcpPacket};
     use tokio::runtime::Runtime;
+    use crate::address::address::Address;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::IP;
     use crate::server::server::{Server};
@@ -18,9 +19,9 @@ pub mod xss_scanner{
 
     impl XssScanner{
         ///Constructor of struct XssScanner.
-        /// Input: an IP variable-the ip to scan from.
+        /// Input: an IP variable- the address to scan from.
         pub fn new(ip: IP) -> Self {
-            return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
+            return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
         }
 
         ///The function checks the packets which were sniffed before
@@ -29,7 +30,6 @@ pub mod xss_scanner{
         /// Output: An IP Value-the IP who did the attack (if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
-            println!("Amount XSS Packets: {}", packets.clone().len());
             //Going over the packets of the dns
             for mut packet in packets{
                 // Parse the HTTP response packet
@@ -54,22 +54,23 @@ pub mod xss_scanner{
 
         ///The function scans the network and checks if there is
         /// a XSS Attack or not and handles the result.
-        /// Input: self-reference(XssScanner) and a Vec<SinglePacket>
-        /// variable- the packets to check.
+        /// Input: self-reference(XssScanner), a Vec<SinglePacket>
+        /// variable- the packets to check and an Address variable-
+        /// the address of the client.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>) {
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let result = XssScanner::check_packets(filter_packets(packets.clone(), HTTP_PORT));
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
 
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 
