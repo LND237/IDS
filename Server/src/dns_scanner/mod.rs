@@ -7,6 +7,7 @@ pub mod dns_scanner{
     use pnet::packet::udp::UdpPacket;
     use tokio::runtime::Runtime;
     use trust_dns_resolver::{TokioAsyncResolver, config::{ResolverConfig, ResolverOpts}};
+    use crate::address::address::Address;
     use crate::scanner::scanner::{Scanner, ScannerFunctions};
     use crate::ip::ip::{BROADCAST_IP, IP};
     use crate::server::server::Server;
@@ -22,9 +23,9 @@ pub mod dns_scanner{
 
     impl DnsScanner{
         ///Constructor of struct DnsScanner.
-        /// Input: an IP variable- the ip to scan from.
+        /// Input: an IP variable- the ip address to scan.
         pub fn new(ip: IP) -> Self {
-            return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
+            return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
         }
 
         ///The function checks the packets which was sniffed before
@@ -33,13 +34,11 @@ pub mod dns_scanner{
         /// Output: An IP value- the IP who did the attack(if
         /// there is no attack-returning default IP Broadcast)
         fn check_packets(packets: Vec<SinglePacket>) -> Option<IP> {
-            println!("Amount DNS packets: {}", packets.clone().len());
             //Going over the packets of the dns
             for packet in packets{
                 let dns_pack = match extract_dns_packet(&packet){
                     Some(pack) => pack,
                     None => {
-                        // println!("Err: not udp");
                         continue;
                     }
                 };
@@ -94,21 +93,22 @@ pub mod dns_scanner{
     impl ScannerFunctions for DnsScanner{
         /// The function scans the network and checks if there is
         /// a DNS HIJACKING Attack or not.
-        /// Input: self reference(DnsScanner) and a Vec<SinglePacket>-
-        /// the packets to scan.
+        /// Input: self reference(DnsScanner), a Vec<SinglePacket>-
+        /// the packets to scan and an Address variable- the address
+        /// of the client.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>) {
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let result = DnsScanner::check_packets(filter_packets(packets.clone(), DNS_PORT));
 
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 

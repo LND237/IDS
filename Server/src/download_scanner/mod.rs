@@ -10,6 +10,7 @@ pub mod download_scanner{
     use crate::xss_scanner::xss_scanner::HTTP_PORT;
     use virustotal3::LastAnalysisStats;
     use virustotal3::VtClient;
+    use crate::address::address::Address;
     use crate::server::server::{Server};
 
     //Public Constants
@@ -27,10 +28,10 @@ pub mod download_scanner{
     impl DownloadScanner {
         //Public function
         ///Constructor of DownloadScanner struct.
-        /// Input: an IP struct- the IP to check.
+        /// Input: an IP variable- the ip to scan.
         /// Output: a struct of DownloadScanner.
         pub fn new(ip: IP) -> Self{
-            return Self{base: Scanner::new(ip.copy(), ATTACK_NAME.to_string())};
+            return Self{base: Scanner::new(ip.clone(), ATTACK_NAME.to_string())};
         }
         //Private Function
         ///The function checks the packets which was sniffed before
@@ -89,23 +90,24 @@ pub mod download_scanner{
     impl ScannerFunctions for DownloadScanner{
         /// The function scans the network and checks if there is
         /// a Drive By Download Attack or not and handles the result.
-        /// Input: self reference(DownloadScanner) and a Vec<SinglePacket> value-
-        /// the packets to check.
+        /// Input: self reference(DownloadScanner), a Vec<SinglePacket> value-
+        /// the packets to check and an Address variable- the address
+        /// of the client.
         /// Output: None.
-        fn scan(&self, packets: Vec<SinglePacket>) {
+        fn scan(&self, packets: Vec<SinglePacket>, client_address: Address) {
             let mut the_packets = filter_packets(packets.clone(), HTTP_PORT);
             the_packets.append(&mut filter_packets(packets.clone(), HTTPS_PORT));
             let result = DownloadScanner::check_packets(the_packets.clone());
             
             //Running the async function of handling the result
             let rt = Runtime::new().unwrap();
-            rt.block_on(Server::handle_result(self.base.get_ip(), self.base.get_name(), result))
+            rt.block_on(Server::handle_result(client_address.clone(), self.base.get_name(), result))
         }
         ///The function gets the base data of it.
         /// Input: None.
         /// Output: a Scanner value- the base data.
         fn get_base_data(&self) -> Scanner {
-            return self.base.copy();
+            return self.base.clone();
         }
     }
 

@@ -7,6 +7,7 @@ pub mod mongo_db{
     use urlencoding::encode;
     use crate::env_file::env_file::{get_password, get_username};
     use crate::ip::ip::IP;
+    use crate::mac::mac::MAC;
 
     const DB_DOMAIN_PART_1 : &str = "mongodb+srv://";
     const DB_DOMAIN_PART_2 : &str = "@ideproject.jii1z04.mongodb.net/?retryWrites=true&w=majority";
@@ -140,14 +141,14 @@ pub mod mongo_db{
 
         /// The function adds an attack to the database according to its data and
         /// the collection to insert to(the ip of the client).
-        /// Input: a self reference(MongoDB), an IP variable- the ip of the client to insert the
+        /// Input: a self reference(MongoDB), a MAC variable- the mac of the client to insert the
         /// data to and an AttackData variable- the data to insert.
         /// Output: If there is an error- a mongodb::error value.
-        pub async fn add_attack(&self, ip_client: IP, data: AttackData) -> mongodb::error::Result<()>{
-            let str_ip_client = ip_client.get_ip();
+        pub async fn add_attack(&self, mac_client: MAC, data: AttackData) -> mongodb::error::Result<()>{
+            let str_mac_client = mac_client.get_mac();
 
-            if !self.check_collection_existence(str_ip_client.clone()).await{
-                 match self.db.create_collection(str_ip_client.clone(), None).await{
+            if !self.check_collection_existence(str_mac_client.clone()).await{
+                 match self.db.create_collection(str_mac_client.clone(), None).await{
                      Ok(_) => {}
                      Err(msg) => {return Err(msg)}
                  };
@@ -160,20 +161,20 @@ pub mod mongo_db{
                 "date": data.get_date().to_string()
             };
 
-            self.db.collection(&str_ip_client.clone()).insert_one(attack_doc, None).await?;
+            self.db.collection(&str_mac_client.clone()).insert_one(attack_doc, None).await?;
             Ok(())
         }
 
         ///The function gets all the attackers of a single client.
-        /// Input: a self reference(MongoDB), an IP variable- the ip of the client
+        /// Input: a self reference(MongoDB), a MAC variable- the mac of the client
         /// to check.
         /// Output: a Vec<IP> value- all the ips of the attackers.
-        pub async fn get_all_attackers(&self, ip_client: IP) -> Vec<IP>{
+        pub async fn get_all_attackers(&self, mac_client: MAC) -> Vec<IP>{
             let mut clients = Vec::new();
 
             //If the client is already in the database
-            if self.check_collection_existence(ip_client.get_ip().clone()).await{
-                let collection = self.db.collection(&ip_client.get_ip().clone());
+            if self.check_collection_existence(mac_client.get_mac().clone()).await{
+                let collection = self.db.collection(&mac_client.get_mac().clone());
                 clients = get_attackers_from_collection(collection).await;
 
             }

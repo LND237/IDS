@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AutoImportSettings">
-    <option name="autoReloadType" value="SELECTIVE" />
+    <option name="autoReloadType" value="ALL" />
   </component>
   <component name="CargoProjects">
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0fca8796-0e1f-423c-b8b0-a5d84bf37859" name="Changes" comment="completed XSS scanner" />
+    <list default="true" id="0fca8796-0e1f-423c-b8b0-a5d84bf37859" name="Changes" comment="completed XSS scanner">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/communicator/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/communicator/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ddos_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ddos_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dns_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/dns_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/download_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/download_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/firewall/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/firewall/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/smurf_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/smurf_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/spec_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/spec_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/xss_scanner/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/xss_scanner/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/target/.rustc_info.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,7 +33,7 @@
         <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="zurfbacr" />
@@ -37,18 +51,47 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Cargo.Run.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Feature/XSS__Scanner&quot;,
+    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Feature/Configuring__Proxy&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/test0/Magshimim/C5/haifa-1505-ids/Server/src&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\test0\Magshimim\C5\haifa-1505-ids\Server\src" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
+      <option name="command" value="run" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
   </component>
@@ -62,6 +105,12 @@
       <updated>1706196204860</updated>
       <workItem from="1706196206210" duration="5451000" />
       <workItem from="1706812659143" duration="21000" />
+      <workItem from="1711561820312" duration="79000" />
+      <workItem from="1712077184391" duration="5042000" />
+      <workItem from="1712590038290" duration="5354000" />
+      <workItem from="1712671920119" duration="7005000" />
+      <workItem from="1712683258331" duration="1757000" />
+      <workItem from="1712692882484" duration="1425000" />
     </task>
     <task id="LOCAL-00001" summary="completed XSS scanner">
       <option name="closed" value="true" />
@@ -77,8 +126,26 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="completed XSS scanner" />
     <option name="LAST_COMMIT_MESSAGE" value="completed XSS scanner" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="CargoCommandRunConfiguration">
+        <watch expression="command-&gt;inner.stdout.variant0" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
