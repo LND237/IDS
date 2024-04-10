@@ -1,5 +1,4 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
-using System.Text;
+﻿using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -40,6 +39,7 @@ namespace Client
             communicator.StopListening();*/
             /*IP ip = LocalAddress.GetLocalIP();
             MAC mac = LocalAddress.GetLocalMAC();*/
+           
             
         }
 
@@ -56,6 +56,11 @@ namespace Client
         private void FAQ_Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Main.Content = new FAQ();
+        }
+
+        private void Visualization_Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Main.Content = new VisualizationPage();
         }
     }
 }

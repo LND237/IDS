@@ -19,7 +19,7 @@ namespace Client
         /// <param name="variableName">The name of the variable with the data
         /// in the env file.</param>
         /// <returns>The requested value</returns>
-        private static string GetVariable(string variableName)
+        public static string GetVariable(string variableName)
         {
             string value = "";
             Env.Load(PATH);

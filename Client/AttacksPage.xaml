@@ -88,17 +88,17 @@
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Start Date:" Foreground="White" FontSize="20px" FontWeight="Light" HorizontalAlignment="Center"/>
                             <Border Height="50" Width="200" CornerRadius="25" Background="#212120" VerticalAlignment="Top">
-                                <DatePicker Width="150" Height="40" Text="fffff" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
+                                <DatePicker x:Name="StartDate" Width="150" Height="40" Text="fffff" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
                             </Border>
                             <TextBlock Text="End Date:" Foreground="White" FontSize="20px" FontWeight="light" HorizontalAlignment="Center"/>
                             <Border Height="50" Width="200" CornerRadius="25" Background="#212120" Margin="05">
-                                <DatePicker Width="150" Height="40" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
+                                <DatePicker x:Name="EndDate" Width="150" Height="40" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
                             </Border>
                         </StackPanel>
                     </StackPanel>
                     <!--#endregion-->
                     
-                    <Button Content="Search:" Foreground="Gray" Background="Black" Width="190" BorderBrush="Transparent" BorderThickness="0" Margin="0 10"/>
+                    <Button Content="Search:" Foreground="Gray" Background="Black" Width="190" BorderBrush="Transparent" BorderThickness="0" Margin="0 10" Click="Search_Button_Click"/>
                 </StackPanel>
                 <!--#region filtered attacks-->
                 <Grid Grid.Column="1" Margin="0 10">

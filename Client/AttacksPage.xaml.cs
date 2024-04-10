@@ -20,9 +20,27 @@ namespace Client
     /// </summary>
     public partial class AttacksPage : Page
     {
+        private string IP;
+        private string attacktype;
+        private DateTime startDate;
+        private DateTime endDate;
         public AttacksPage()
         {
             InitializeComponent();
         }
+
+
+        private void Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.IP = SearchIPTextBox.Text;
+            this.attacktype = attackTypeComboBox.Text;
+            this.startDate = DateTime.Parse(StartDate.Text);
+            this.endDate = DateTime.Parse(EndDate.Text);
+            SearchIPTextBox.Clear();
+            attackTypeComboBox.SelectedIndex = -1;
+            StartDate.Text = "";
+            EndDate.Text = "";
+        }
+        
     }
 }
