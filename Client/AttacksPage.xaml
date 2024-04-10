@@ -18,7 +18,7 @@
             <TextBlock Text="Pronet." FontSize="60px" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center"/>
             <TextBlock Text="Attacks" FontSize="20px" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
             <!--#endregion-->
-            
+
             <!--#region queries-->
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -30,7 +30,7 @@
                     <Border Height="50" Width="300" CornerRadius="25" Background="#212120">
                         <Grid>
                             <!-- The text typed -->
-                            <TextBox Width="250" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="SearchIPTextBox" Margin="5" Foreground="White" FontSize="20px"/>
+                            <TextBox Width="280" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="SearchIPTextBox" Margin="5" Foreground="White" FontSize="20px"/>
                             <!--Hint texy-->
                             <TextBlock IsHitTestVisible="False" Text="Search Attacker IP" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
                                 <!--Change the hint text with the typed one-->
@@ -48,12 +48,12 @@
                         </Grid>
                     </Border>
                     <!--#endregion-->
-                    
+
                     <!--#region Attack type-->
                     <Border Height="50" Width="300" CornerRadius="25" Background="#212120" Margin="0 10">
                         <Grid>
-                             <!--#region Combo box selection-->
-                            <ComboBox Name="attackTypeComboBox">
+                            <!--#region Combo box selection-->
+                            <ComboBox Name="attackTypeComboBox" Width="290">
                                 <ComboBoxItem Content="DDoS" />
                                 <ComboBoxItem Content="Drive by download" />
                                 <ComboBoxItem Content="Smurf" />
@@ -61,8 +61,8 @@
                                 <ComboBoxItem Content="XSS" />
                             </ComboBox>
                             <!--#endregion-->
-                            
-                             <!--#region hint text-->
+
+                            <!--#region hint text-->
                             <TextBlock IsHitTestVisible="False" Text="Attack Type" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
                                 <TextBlock.Style>
                                     <Style TargetType="{x:Type TextBlock}">
@@ -76,27 +76,31 @@
                                 </TextBlock.Style>
                             </TextBlock>
                             <!--#endregion-->
-                            
+
                         </Grid>
 
                     </Border>
                     <!--#endregion-->
-
+                    
+                    <!--#region dates-->
                     <StackPanel Orientation="Horizontal">
                         <Image Source="icons/Calender.png" Height="100" Width="100" HorizontalAlignment="Center"/>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Start Date:" Foreground="White" FontSize="20px" FontWeight="Light" HorizontalAlignment="Center"/>
                             <Border Height="50" Width="200" CornerRadius="25" Background="#212120" VerticalAlignment="Top">
-                                <DatePicker Width="150" Height="30" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
+                                <DatePicker Width="150" Height="40" Text="fffff" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
                             </Border>
                             <TextBlock Text="End Date:" Foreground="White" FontSize="20px" FontWeight="light" HorizontalAlignment="Center"/>
                             <Border Height="50" Width="200" CornerRadius="25" Background="#212120" Margin="05">
-                                <DatePicker Width="150" Height="30" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
+                                <DatePicker Width="150" Height="40" FontSize="20px" Style="{DynamicResource {x:Type DatePicker}}" />
                             </Border>
                         </StackPanel>
                     </StackPanel>
+                    <!--#endregion-->
+                    
                     <Button Content="Search:" Foreground="Gray" Background="Black" Width="190" BorderBrush="Transparent" BorderThickness="0" Margin="0 10"/>
                 </StackPanel>
+                <!--#region filtered attacks-->
                 <Grid Grid.Column="1" Margin="0 10">
                     <Rectangle Fill="#212120" Height="300px" RadiusX="10" RadiusY="10" Margin="21,0,21,0"/>
                     <StackPanel Orientation="Vertical">
@@ -109,8 +113,10 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
+                <!--#endregion-->
             </Grid>
             <!--#endregion-->
+            
         </StackPanel>
     </Grid>
 </Page>
