@@ -62,33 +62,51 @@ namespace Client
 
             this.categories = new List<Category>();
             this.columns = new List<Column>();
-
-            //Creating counting dictionary for attacks
-            Dictionary<string, int> attackCounter = new Dictionary<string, int>();
-            foreach(string key in ATTACKS_COLORS.Keys)
+            if (attacks.Count != 0)
             {
-                attackCounter.Add(key, 0);
+                //Creating counting dictionary for attacks
+                Dictionary<string, int> attackCounter = new Dictionary<string, int>();
+                foreach (string key in ATTACKS_COLORS.Keys)
+                {
+                    attackCounter.Add(key, 0);
+                }
+
+                //Getting amount of each attack
+                foreach (AttackLog attack in attacks)
+                {
+                    attackCounter[attack.AttackName] += 1;
+                }
+
+
+                //Going over the amounts
+                foreach (var (attackName, amountAttack) in attackCounter)
+                {
+                    int precentageAttack = (int)((float)amountAttack * 100 / attacks.Count);
+                    Brush colorAttack = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS[attackName]));
+                    string nameOfAttack = attackName;
+                    if (attackName.Equals("Drive By Download"))
+                    {
+                        nameOfAttack = "DBD";
+                    }
+                    this.categories.Add(new Category(precentageAttack, nameOfAttack, colorAttack));
+                    this.columns.Add(new Column(nameOfAttack, amountAttack, colorAttack));
+                }
+            }
+            else
+            {
+                foreach(string attackName in ATTACKS_COLORS.Keys)
+                {
+                    string nameOfAttack = attackName;
+                    if (attackName.Equals("Drive By Download"))
+                    {
+                        nameOfAttack = "DBD";
+                    }
+                    Brush colorAttack = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS[attackName]));
+                    this.categories.Add(new Category(0, nameOfAttack, colorAttack));
+                    this.columns.Add(new Column(nameOfAttack, 0, colorAttack));
+                }
             }
             
-            //Getting amount of each attack
-            foreach(AttackLog attack in attacks) 
-            {
-                attackCounter[attack.AttackName] += 1;
-            }
-
-            //Going over the amounts
-            foreach (var (attackName, amountAttack) in attackCounter) 
-            {
-                int precentageAttack = (int)((float)amountAttack * 100 / attacks.Count);
-                Brush colorAttack = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ATTACKS_COLORS[attackName]));
-                string nameOfAttack = attackName;
-                if(attackName.Equals("Drive By Download"))
-                {
-                    nameOfAttack = "DBD";
-                }
-                this.categories.Add(new Category(precentageAttack, nameOfAttack, colorAttack));
-                this.columns.Add(new Column(nameOfAttack, amountAttack, colorAttack));
-            }
         }
 
         /// <summary>
@@ -98,7 +116,7 @@ namespace Client
         /// <param name="categories">The categories with the data.</param>
         private void DrawPie(List<Category> categories, int pieWidth, int pieHeight)
         {
-            const int HALF_FULL_PRECENTAGE = 50;
+            const int HALF_FULL_PRECENTAGE = 50, FULL_CIRCLE_ANGLE = 360, HALF_FULL_CIRCLE_ANGLE = FULL_CIRCLE_ANGLE / 2;
             float centerX = pieWidth / 2, centerY = pieHeight / 2, radius = pieWidth / 2;
             pieCanvas.Width = pieWidth;
             pieCanvas.Height = pieHeight;
@@ -107,13 +125,17 @@ namespace Client
             foreach (Category category in categories)
             {
                 //Calculating lines
-                double line1X = (radius * Math.Cos(angle * Math.PI / 180)) + centerX;
-                double line1Y = (radius * Math.Sin(angle * Math.PI / 180)) + centerY;
+                double line1X = (radius * Math.Cos(angle * Math.PI / HALF_FULL_CIRCLE_ANGLE)) + centerX;
+                double line1Y = (radius * Math.Sin(angle * Math.PI / HALF_FULL_CIRCLE_ANGLE)) + centerY;
 
-                angle = category.GetPrecentage() * (float)360 / 100 + prevAngle;
+                angle = category.GetPrecentage() * (float)FULL_CIRCLE_ANGLE / 100 + prevAngle;
+                if(FULL_CIRCLE_ANGLE == angle)
+                {
+                    angle -= 1;
+                }
 
-                double arcX = (radius * Math.Cos(angle * Math.PI / 180)) + centerX;
-                double arcY = (radius * Math.Sin(angle * Math.PI / 180)) + centerY;
+                double arcX = (radius * Math.Cos(angle * Math.PI / HALF_FULL_CIRCLE_ANGLE)) + centerX;
+                double arcY = (radius * Math.Sin(angle * Math.PI / HALF_FULL_CIRCLE_ANGLE)) + centerY;
 
                 //Making lines segments
                 LineSegment line1Segment = new LineSegment(new Point(line1X, line1Y), false);

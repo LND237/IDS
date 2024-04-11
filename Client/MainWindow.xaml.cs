@@ -5,6 +5,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -21,23 +22,19 @@ namespace Client
     public partial class MainWindow : Window
     {
         public static readonly int LAST_DAY_AMOUNT_MINUTES = 1440;
-        private static List<AttackLog> attackLogs;
-        private static List<IP> ipsAttackers;
-        private static bool areThreadsActive = false;
+        public static List<AttackLog> attackLogs;
+        public static List<IP> ipsAttackers;
+        public static bool areThreadsActive = false;
         private static Object threadLock = new Object();
         public MainWindow()
         {
             InitializeComponent();
             //Activating threads just in the beginning
-            if (!areThreadsActive)
-            {
-                Thread threadData = new Thread(RefreshData);
-                threadData.Start();
-                Thread threadMessages = new Thread(GetMessages);
-                threadMessages.Start();
-                areThreadsActive = true;
-            }
-
+            Thread dataThread = new Thread(RefreshData);
+            dataThread.Start();
+            Thread threadMessages = new Thread(GetMessages);
+            threadMessages.Start();
+            areThreadsActive = true;    
         }
         private void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -65,7 +62,7 @@ namespace Client
         }
 
 
-        private void GetMessages()
+        public void GetMessages()
         {
             while (true)
             {
@@ -78,8 +75,9 @@ namespace Client
                         new ToastContentBuilder()
                            
                             .AddArgument("conversationId", 9813)
-                            .AddText("You were attacked from " + attack.GetIP() + "in " + attack.GetName())
-                            .AddText("Check this out!")
+                            .AddText("Pronet-You were attacked!!")
+                            .AddText("There was a "+ attack.GetName() + " from " + attack.GetIP())
+                            .AddText("You should check it on the app.")
                             .Show(); // Not seeing the Show() method? Make sure you have version 7.0, and if you're using .NET 6 (or later), then your TFM must be net6.0-windows10.0.17763.0 or greater
 
                         Thread.Sleep(10000);
@@ -95,10 +93,10 @@ namespace Client
 
         private void Home_Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            InitializeComponent();
+            Main.Content = new DashboardPage();
         }
 
-        private void InitAttackers()
+        public static void InitAttackers()
         {
             const int MAX_AMOUNT_IPS = 5;
             MongoDBAttackLogger database = MainWindow.GetDatabase();
@@ -118,20 +116,39 @@ namespace Client
             return database;
         }
 
-        private void RefreshData()
+        public void RefreshData()
         {
             const int GAP_SECONDS = 3;
             while (true)
             {
-                MainWindow.attackLogs = GetDatabase().GetAttacksInLastNMinutes(LAST_DAY_AMOUNT_MINUTES);
-                InitAttackers();
-                lock (threadLock)
+                try
                 {
-                    this.detailsItemsTopAttacks.ItemsSource = attackLogs;
-                    this.detailsItemsAttackers.ItemsSource = ipsAttackers;
-                }
+                    // Simulate fetching data from database or any other source
+                    MainWindow.attackLogs = GetDatabase().GetAttacksInLastNMinutes(LAST_DAY_AMOUNT_MINUTES);
+                    InitAttackers();
 
-                Thread.Sleep(GAP_SECONDS * 100);
+                    // Update UI on the UI thread
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        // Lock to ensure thread safety when updating shared data
+                        lock (threadLock)
+                        {
+                            this.detailsItemsTopAttacks.ItemsSource = new List<AttackLog>(attackLogs);
+                            this.detailsItemsAttackers.ItemsSource = new List<IP>(ipsAttackers);
+
+                        }
+                    });
+                    if (DashboardPage.abortMainDataThread){
+                        break;
+                    }
+                    // Wait for a couple of seconds before fetching data again
+                    Task.Delay(TimeSpan.FromSeconds(GAP_SECONDS));
+                }
+                catch (Exception ex)
+                {
+                    // Handle exception appropriately
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);                   
+                }
             }
         }
     }

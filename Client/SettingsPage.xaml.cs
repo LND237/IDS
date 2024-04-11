@@ -22,7 +22,6 @@ namespace Client
     {
         private static readonly int PORT_NUM = 50001;
         public static  bool NotificationEnabled { get; set; }
-        public static bool DarkMode = true;
         public static Communicator communicator = new Communicator(PORT_NUM);
         public SettingsPage()
         {
@@ -43,14 +42,12 @@ namespace Client
 
         private void Toggle1_Checked(object sender, RoutedEventArgs e)
         {
-            DarkMode = true;
             AppTheme.ChangeTheme(new Uri("Themes/Light.xaml", UriKind.Relative));
 
         }
 
         private void Toggle1_Unchecked(object sender, RoutedEventArgs e)
         {
-            DarkMode = false;
             AppTheme.ChangeTheme(new Uri("Themes/Dark.xaml", UriKind.Relative));
         }
     }
