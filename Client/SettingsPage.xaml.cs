@@ -20,9 +20,10 @@ namespace Client
     /// </summary>
     public partial class SettingsPage : Page
     {
+        private static readonly int PORT_NUM = 50001;
         public static  bool NotificationEnabled { get; set; }
         public static bool DarkMode = true;
-        public static Communicator communicator = new Communicator(50001);
+        public static Communicator communicator = new Communicator(PORT_NUM);
         public SettingsPage()
         {
             InitializeComponent();

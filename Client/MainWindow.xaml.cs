@@ -21,37 +21,23 @@ namespace Client
     public partial class MainWindow : Window
     {
         public static readonly int LAST_DAY_AMOUNT_MINUTES = 1440;
-        private List<AttackLog> attackLogs;
-        private List<IP> ipsAttackers;
+        private static List<AttackLog> attackLogs;
+        private static List<IP> ipsAttackers;
+        private static bool areThreadsActive = false;
+        private static Object threadLock = new Object();
         public MainWindow()
         {
             InitializeComponent();
-            this.attackLogs = GetDatabase().GetAttacksInLastNMinutes(LAST_DAY_AMOUNT_MINUTES * 30);
-            InitAttackers();
-            this.detailsItemsTopAttacks.ItemsSource = attackLogs;
-            this.detailsItemsAttackers.ItemsSource = ipsAttackers;
-            //Example of using communicator
-            //const int PORT_NUM = 50001, MAX_AMOUNT_PACKET = 1;
-            //int amount_packets = 0;
-            //Communicator communicator = new Communicator(PORT_NUM);
-            //communicator.StartListening();
-            //while (amount_packets < MAX_AMOUNT_PACKET)
-            //{
-            //    try
-            //    {
-            //        AttackData data = communicator.GetMessageServer();
-            //        amount_packets++;
-            //    }
-            //    catch (Exception excp)
-            //    {
-            //        string text = excp.Message;
-            //    }
-            //}
-            //communicator.StopListening();
-            //IP ip = LocalAddress.GetLocalIP();
-            //MAC mac = LocalAddress.GetLocalMAC();
-            Thread thread = new Thread(GetMessages);
-            thread.Start();
+            //Activating threads just in the beginning
+            if (!areThreadsActive)
+            {
+                Thread threadData = new Thread(RefreshData);
+                threadData.Start();
+                Thread threadMessages = new Thread(GetMessages);
+                threadMessages.Start();
+                areThreadsActive = true;
+            }
+
         }
         private void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -87,14 +73,13 @@ namespace Client
                 {
                     try
                     {
-
-                        //AttackData attack = SettingsPage.communicator.GetMessageServer();
+                        AttackData attack = SettingsPage.communicator.GetMessageServer();
                         // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
                         new ToastContentBuilder()
                            
                             .AddArgument("conversationId", 9813)
-                            .AddText("Andrew sent you a picture")
-                            .AddText("Check this out, The Enchantments in Washington!")
+                            .AddText("You were attacked from " + attack.GetIP() + "in " + attack.GetName())
+                            .AddText("Check this out!")
                             .Show(); // Not seeing the Show() method? Make sure you have version 7.0, and if you're using .NET 6 (or later), then your TFM must be net6.0-windows10.0.17763.0 or greater
 
                         Thread.Sleep(10000);
@@ -122,7 +107,7 @@ namespace Client
             {
                 ipsAttackers = ipsAttackers.Slice(0, MAX_AMOUNT_IPS);
             }
-            this.ipsAttackers = ipsAttackers;
+            MainWindow.ipsAttackers = ipsAttackers;
         }
 
         public static MongoDBAttackLogger GetDatabase()
@@ -131,6 +116,23 @@ namespace Client
             string username = EnvFile.GetVariable("USERNAME_DB"), password = EnvFile.GetVariable("PASSWORD_DB");
             MongoDBAttackLogger database = new MongoDBAttackLogger(username, password, DATABASE_NAME, LocalAddress.GetLocalMAC());
             return database;
+        }
+
+        private void RefreshData()
+        {
+            const int GAP_SECONDS = 3;
+            while (true)
+            {
+                MainWindow.attackLogs = GetDatabase().GetAttacksInLastNMinutes(LAST_DAY_AMOUNT_MINUTES);
+                InitAttackers();
+                lock (threadLock)
+                {
+                    this.detailsItemsTopAttacks.ItemsSource = attackLogs;
+                    this.detailsItemsAttackers.ItemsSource = ipsAttackers;
+                }
+
+                Thread.Sleep(GAP_SECONDS * 100);
+            }
         }
     }
 }
