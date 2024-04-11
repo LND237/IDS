@@ -71,15 +71,16 @@ namespace Client
                     try
                     {
                         AttackData attack = SettingsPage.communicator.GetMessageServer();
-                        // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
-                        new ToastContentBuilder()
-                           
-                            .AddArgument("conversationId", 9813)
-                            .AddText("Pronet-You were attacked!!")
-                            .AddText("There was a "+ attack.GetName() + " from " + attack.GetIP())
-                            .AddText("You should check it on the app.")
-                            .Show(); // Not seeing the Show() method? Make sure you have version 7.0, and if you're using .NET 6 (or later), then your TFM must be net6.0-windows10.0.17763.0 or greater
 
+                        if (SettingsPage.NotificationEnabled)
+                        {
+                            new ToastContentBuilder()
+                                .AddArgument("conversationId", 9813)
+                            .AddText("Pronet-You were attacked!!")
+                            .AddText("There was a " + attack.GetName() + " from " + attack.GetIP())
+                            .AddText("You should check it on the app.")
+                            .Show();
+                        }
                         Thread.Sleep(10000);
                     }
                     catch
