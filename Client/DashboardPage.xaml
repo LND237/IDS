@@ -1,0 +1,108 @@
+﻿<Page x:Class="Client.DashboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Client"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Background="{DynamicResource GrayArea}"
+      Title="DashboardPage">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+        <!--Main Grid-->
+        <StackPanel Orientation="Vertical" Grid.Column="1">
+            <!--#region Pronet title-->
+            <TextBlock Text="Pronet." FontSize="60px" Foreground="{DynamicResource Text}" FontWeight="ExtraBold" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+            <TextBlock Text="Dashboard" FontSize="20px" Foreground="{DynamicResource Text}" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <!--#endregion-->
+
+            <!--#region Attacks Grid-->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8*"/>
+                </Grid.ColumnDefinitions>
+                <!--#region top threat summary-->
+                <Grid Grid.Column="0" Background="#212120" Height="300px" VerticalAlignment="Top">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="10*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="Top threat summary attacks" FontWeight="ExtraBlack" Foreground="White" FontSize="20px" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5,0,0,0">
+                        <TextBlock Text="Type" Foreground="White" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" Margin="5,0,0,0"/>
+                        <TextBlock Text="Attacker IP" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" Margin="15,0,0,0"/>
+                        <TextBlock Text="Date" Foreground="white" FontSize="20px" FontWeight="Bold" TextDecorations="Underline" HorizontalAlignment="Right" Margin="15,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Orientation="Vertical">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Top" Margin="0, 20" Orientation="Vertical">
+                                <Canvas x:Name="TopAttacksCanvas" Margin="0,0,0,0"/>
+                                <ItemsControl x:Name="detailsItemsTopAttacks">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:AttackLog}">
+                                            <StackPanel Orientation="Horizontal" Margin="5" VerticalAlignment="Bottom">
+                                                <TextBlock Text="{Binding AttackName}" Foreground="White" FontSize="20px" Margin="5,0,0,0"/>
+                                                <TextBlock Text="{Binding AttackerIp}" Foreground="White" FontSize="20px" Margin="15,0,0,0"/>
+                                                <TextBlock Text="{Binding Time}" Foreground="White" FontSize="20px" HorizontalAlignment="Right" Margin="15,0,0,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+                <!--#endregion-->
+                <!--#region Attacks-->
+                <Grid Grid.Column="2" Background="#212120" Height="300px" VerticalAlignment="Top" Margin="0,0,10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="6*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Vertical">
+                        <TextBlock Text="Attackers" FontWeight="ExtraBlack" Foreground="White" FontSize="20px" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Vertical">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Top" Margin="0, 20" Orientation="Vertical">
+                                <Canvas x:Name="AttackersCanvas" Margin="0,0,0,0"/>
+                                <ItemsControl x:Name="detailsItemsAttackers">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:IP}">
+                                            <StackPanel Orientation="Horizontal" Margin="5" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding ip}" Foreground="White" FontSize="20px" Margin="5,0,0,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+                <!--#endregion-->
+            </Grid>
+            <!--#endregion-->
+        </StackPanel>
+        <!--Pages frame-->
+        <Frame x:Name="Main" Grid.Column="1" NavigationUIVisibility="Hidden"/>
+    </Grid>
+</Page>

@@ -1,0 +1,32 @@
+[package]
+name = "untitled"
+version = "2.7.1"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rustls = { version = "0.22.2", features = [] }
+tokio = { version = "1.33.0", features = ["full"] }
+
+serde = "1.0.188"
+futures = "0.3.28"
+pnet = "0.34.0"
+urlencoding = "2.1.3"
+trust-dns-client = "0.23.2"
+dns-parser = "0.8.0"
+trust-dns-resolver = "0.21.2"
+chrono = "0.4.31"
+ipaddress = "0.1.3"
+serde_json = "1.0.111"
+httparse = "1.8.0"
+dns-lookup = "2.0.4"
+reqwest = { version = "0.11.23", features = ["blocking", "json"] }
+local-ip-address = "0.6.1"
+virustotal3 = "3.0.2"
+async-std = "1.12.0"
+dotenv = "0.15.0"
+macaddr = "1.0.1"
+mac_address = "1.1.5"
+[dependencies.mongodb]
+features = ["tokio-runtime"]
